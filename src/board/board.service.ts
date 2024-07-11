@@ -10,6 +10,7 @@ export class BoardService {
         @InjectRepository(Board)
         private readonly boardRepository: Repository<Board>
     ){}
+
     async create(createBoardDto:CreateBoardDto){
         const {name, background_color} = createBoardDto;
         const board = await this.boardRepository.save({
@@ -18,5 +19,14 @@ export class BoardService {
             // 추후 유저 생성되면 생성한 유저가 owner_id에 들어가게하기
         })
         return board
+    }
+
+    async findAll(){
+        const boards = await this.boardRepository.find({
+            order:{
+                id:'DESC'
+            }
+        })
+        return boards
     }
 }
