@@ -35,7 +35,7 @@ export class User {
   updatedAt: Date;
 
   @DeleteDateColumn()
-  deletedAt: Date;
+  deletedAt?: Date;
 
   @OneToMany(() => BoardMembers, (boardMembers) => boardMembers.user)
   boardMembers: BoardMembers[];
