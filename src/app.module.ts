@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { configModuleValidationSchema } from './configs/env-validation.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmModuleOptions } from './configs/database.config';
+import { CardsModule } from './cards/cards.module';
 import { ListsModule } from './lists/lists.module';
 import { UserModule } from './user/user.module';
 import { BoardModule } from './board/board.module';
@@ -16,6 +17,7 @@ import { BoardModule } from './board/board.module';
       validationSchema: configModuleValidationSchema,
     }),
     TypeOrmModule.forRootAsync(typeOrmModuleOptions),
+    CardsModule,
     ListsModule,
     UserModule,
     BoardModule,
