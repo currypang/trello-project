@@ -12,7 +12,7 @@ import {
 
 @Entity('users')
 export class User {
-  @PrimaryGeneratedColumn({ unsigned: true })
+  @PrimaryGeneratedColumn()
   id: number;
 
   @IsNotEmpty({ message: '닉네임을 입력해 주세요.' })

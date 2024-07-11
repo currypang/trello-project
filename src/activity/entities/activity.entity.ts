@@ -1,29 +1,28 @@
-import { Column, Entity, PrimaryGeneratedColumn,CreateDateColumn, UpdateDateColumn,DeleteDateColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
 
 @Entity('Activity')
 export class Activity {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column()
-    userId: number;
+  @Column()
+  userId: number;
 
-    @Column()
-    cardId: String;
+  @Column()
+  cardId: string;
 
-    @Column({ type : 'text'})
-    content: String;
+  @Column({ type: 'text' })
+  content: string;
 
-    @CreateDateColumn()
-    createdAt: Date;
+  @CreateDateColumn()
+  createdAt: Date;
 
-    @UpdateDateColumn()
-    updatedAt: Date;
+  @UpdateDateColumn()
+  updatedAt: Date;
 
-    @DeleteDateColumn()
-    deletedAt: Date;
+  @DeleteDateColumn()
+  deletedAt: Date;
 
-    @Column({type: 'boolean'})
-    isLog: boolean;
-
+  @Column({ type: 'boolean' })
+  isLog: boolean;
 }
