@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { BoardMembers } from './board-member.entity';
+import { List } from 'src/lists/entities/list.entity';
 
 @Entity('boards')
 export class Board {
@@ -37,4 +38,7 @@ export class Board {
 
   @OneToMany(() => BoardMembers, (boardMembers) => boardMembers.board)
   members: BoardMembers[];
+
+  @OneToMany((type) => List, (list) => list.board, { cascade: true })
+  lists: List[];
 }
