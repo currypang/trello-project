@@ -1,10 +1,11 @@
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
-
+import { BoardMembers } from 'src/board/entities/board-member.entity';
 import {
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -35,4 +36,7 @@ export class User {
 
   @DeleteDateColumn()
   deletedAt: Date;
+
+  @OneToMany(() => BoardMembers, (boardMembers) => boardMembers.user)
+  boardMembers: BoardMembers[];
 }
