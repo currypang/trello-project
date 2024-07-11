@@ -5,7 +5,7 @@ import { Board } from './board.entity';
 
 @Entity('board_members')
 export class BoardMembers {
-  @PrimaryGeneratedColumn({ unsigned: true })
+  @PrimaryGeneratedColumn()
   id: number;
 
   @IsNumber()

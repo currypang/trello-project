@@ -1,40 +1,37 @@
-import { Column, Entity, PrimaryGeneratedColumn,CreateDateColumn, UpdateDateColumn,DeleteDateColumn } from "typeorm";
-
+import { Column, Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
 
 @Entity('card')
 export class Card {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column()
-    listId: number;
+  @Column()
+  listId: number;
 
-    @Column()
-    name: String;
+  @Column()
+  name: string;
 
-    @Column({ type : 'text'})
-    description: String;
+  @Column({ type: 'text' })
+  description: string;
 
-    @Column()
-    color: String;
+  @Column()
+  color: string;
 
-    @Column({ type: 'double'})
-    posirion: number;
+  @Column({ type: 'double' })
+  position: number;
 
-    @Column({ type : 'date'})
-    startDate: Date;
+  @Column({ type: 'date' })
+  startDate: Date;
 
-    @Column({ type : 'date'})
-    dueDate: Date;
+  @Column({ type: 'date' })
+  dueDate: Date;
 
-    @CreateDateColumn()
-    createdAt: Date;
+  @CreateDateColumn()
+  createdAt: Date;
 
-    @UpdateDateColumn()
-    updatedAt: Date;
+  @UpdateDateColumn()
+  updatedAt: Date;
 
-    @DeleteDateColumn()
-    deletedAt: Date;
-
-
+  @DeleteDateColumn()
+  deletedAt: Date;
 }
