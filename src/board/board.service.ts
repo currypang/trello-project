@@ -29,4 +29,12 @@ export class BoardService {
         })
         return boards
     }
+
+    async findOne(id:number){
+        const board = await this.boardRepository.findOne({
+            where: {id},
+            //relations:{} 추후 카드와 리스트가져오기위해 주석처리함
+        })
+        return board
+    }
 }
