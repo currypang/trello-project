@@ -12,7 +12,6 @@ import { BoardMembers } from './board-member.entity';
 import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 import { List } from 'src/lists/entities/list.entity';
 
-
 @Entity('boards')
 export class Board {
   @PrimaryGeneratedColumn()
@@ -49,7 +48,7 @@ export class Board {
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @OneToMany(() => BoardMembers, (boardMembers) => boardMembers.board, { cascade : true })
+  @OneToMany(() => BoardMembers, (boardMembers) => boardMembers.board)
   members: BoardMembers[];
 
   @OneToMany((type) => List, (list) => list.board, { cascade: true })
