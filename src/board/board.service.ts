@@ -60,4 +60,18 @@ export class BoardService {
         const  data = await this.boardRepository.save(newboard)
         return data
     }
+    
+    async delete( id: number){
+        const board = await this.boardRepository.findOne({
+            where: {id}
+        })
+        if(!board){
+            throw new NotFoundException(MESSAGES_CONSTANT.BOARD.DELETE_BOARD.NOT_FOUND)
+        }
+
+        if(board){
+             return this.boardRepository.softDelete({id})
+            
+        }
+    }
 }

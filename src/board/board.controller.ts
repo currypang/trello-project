@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpStatus, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 import { BoardService } from './board.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { ApiTags } from '@nestjs/swagger';
@@ -70,6 +70,21 @@ export class BoardController {
           statusCode:HttpStatus.OK,
           message:MESSAGES_CONSTANT.BOARD.UPDATE_BOARD.SUCCEED,
           data
+        }
+    }
+
+    /**
+     * 보드 삭제
+     * @param id 
+     * @returns 
+     */
+    @Delete(':id')
+    async delete(@Param('id') id: number){
+        const data = await this.boardService.delete(id)
+        return {
+            statusCode: HttpStatus.OK,
+            message: MESSAGES_CONSTANT.BOARD.DELETE_BOARD.SUCCEED,
+            data
         }
     }
 }
