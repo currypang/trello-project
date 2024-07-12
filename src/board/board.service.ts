@@ -4,6 +4,7 @@ import { Board } from './entities/board.entity';
 import { Repository } from 'typeorm';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
+import { MESSAGES_CONSTANT } from 'src/activity/constants/messages.constants';
 
 @Injectable()
 export class BoardService {
@@ -37,7 +38,7 @@ export class BoardService {
             //relations:{} 추후 카드와 리스트가져오기위해 주석처리함
         })
         if(!board){
-            throw new NotFoundException('존재하지 않은 보드입니다.')
+            throw new NotFoundException(MESSAGES_CONSTANT.BOARD.FIND_DETAIL_BOARD.NOT_FOUND)
         }
         return board
     }
@@ -47,7 +48,7 @@ export class BoardService {
             where:{id}
         })
         if(!board){
-            throw new NotFoundException('존재하지 않은 보드입니다')
+            throw new NotFoundException(MESSAGES_CONSTANT.BOARD.UPDATE_BOARD.NOT_FOUND)
         }
         
         const newboard = {

@@ -3,6 +3,7 @@ import { BoardService } from './board.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { UpdateBoardDto } from './dto/update-board.dto';
+import { MESSAGES_CONSTANT } from 'src/activity/constants/messages.constants';
 
 @ApiTags('보드')
 @Controller('board')
@@ -19,7 +20,7 @@ export class BoardController {
         const data = await this.boardService.create(createBoardDto)
         return{
             statusCode:HttpStatus.CREATED,
-            message:"보드 생성에 성공하였습니다",
+            message:MESSAGES_CONSTANT.BOARD.CREATE_BOARD.SUCCEED,
             data
         }
     }
@@ -34,7 +35,7 @@ export class BoardController {
 
         return {
             statusCode:HttpStatus.OK,
-            message:"보드 목록 조회에 성공했습니다",
+            message:MESSAGES_CONSTANT.BOARD.FIND_ALL_BOARD.SUCCEED,
             data,
         }
     }
@@ -49,7 +50,7 @@ export class BoardController {
         const data = await this.boardService.findOne(id)
         return{
           statusCode:HttpStatus.OK,
-          message:"보드 상세 조회에 성공했습니다",
+          message: MESSAGES_CONSTANT.BOARD.FIND_DETAIL_BOARD.SUCCEED,
           data
         }
     }   
@@ -67,7 +68,7 @@ export class BoardController {
         const data = await this.boardService.update(id,updateBoardDto)
         return{
           statusCode:HttpStatus.OK,
-          message:"보드 수정에 성공했습니다",
+          message:MESSAGES_CONSTANT.BOARD.UPDATE_BOARD.SUCCEED,
           data
         }
     }
