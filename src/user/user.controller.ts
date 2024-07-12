@@ -31,10 +31,10 @@ export class UserController {
   @Patch('/me')
   async updatePassword(@Request() req, @Body() updateUserPasswordDto: UpdateUserPasswordDto) {
     const userId = req.user.id;
-    await this.authService.updateUserPassword(userId, updateUserPasswordDto);
+    const result = await this.authService.updateUserPassword(userId, updateUserPasswordDto);
     return {
       statusCode: HttpStatus.OK,
-      message: '비밀번호가 성공적으로 변경되었습니다.',
+      message: result.message,
     };
   }
 }

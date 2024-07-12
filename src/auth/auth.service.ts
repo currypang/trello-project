@@ -85,5 +85,7 @@ export class AuthService {
 
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
     await this.userRepository.update(userId, { password: hashedNewPassword });
+
+    return { message: '비밀번호가 성공적으로 변경되었습니다.' };
   }
 }
