@@ -25,7 +25,7 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @IsNotEmpty({ message: '이메일을 입력해 주세요.' })
+  @IsNotEmpty({ message: '비밀번호를 입력해 주세요.' })
   @IsStrongPassword(
     { minLength: 6 },
     {
