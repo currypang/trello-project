@@ -54,25 +54,49 @@ export const MESSAGES_CONSTANT = {
     },
     FIND_DETAIL_BOARD: {
       SUCCEED: '보드 상세 조회에 성공하였습니다',
-      NOT_FOUND: '존재하지 않은 보드입니다.',
+      NOT_FOUND: '존재하지 않는 보드입니다.',
     },
     UPDATE_BOARD: {
       SUCCEED: '보드 수정에 성공했습니다',
-      NOT_FOUND: '존재하지 않은 보드입니다.',
+      NOT_FOUND: '존재하지 않는 보드입니다.',
     },
     DELETE_BOARD: {
       SUCCEED: '보드 삭제에 성공했습니다',
-      NOT_FOUND: '존재하지 않은 보드입니다.',
+      NOT_FOUND: '존재하지 않는 보드입니다.',
     },
   },
+
+  CARD: {
+    CREATE_CARD: {
+      NOT_FOUND: '존재하지 않는 보드입니다.',
+    },
+    UPDATE_CARD: {
+      INVALID_TAPE: 'Invalid updateCardDto',
+    },
+    DELETE_CARD: {
+      NOT_FOUND: '존재하지 않는 카드입니다.',
+    },
+  },
+
   LIST: {
     COMMON: {
       NAME: {
         REQUIRED: '리스트 이름을 입력해 주세요.',
       },
       POSITION: {
-        REQUIRED: '위치 ID를 입력해 주세요.',
+        REQUIRED: '위치 번호를 입력해 주세요.',
       },
+    },
+    CREATE_LIST: {
+      SUCCEED: '리스트 생성에 성공했습니다.',
+      NOT_FOUND: '존재하지 않는 보드입니다.',
+    },
+    UPDATE_LIST: {
+      SUCCEED: '리스트 수정에 성공했습니다.',
+    },
+    DELETE_LIST: {
+      SUCCEED: '리스트 삭제에 성공했습니다.',
+      NOT_FOUND: '리스트를 찾을 수 없습니다.',
     },
   },
 
@@ -87,6 +111,8 @@ export const MESSAGES_CONSTANT = {
       },
       PASSWORD: {
         REQUIRED: '비밀번호를 입력해 주세요.',
+        CURRENT_REQUIRED: '현재 비밀번호를 입력해 주세요.',
+        NEW_REQUIRED: '새로운 비밀번호를 입력해 주세요.',
         INVALID_TYPE:
           '비밀번호는 영문 알파벳 대,소문자, 숫자, 특수문자(!@#$%^&*)를 포함해서 6자리 이상으로 입력해야 합니다.',
       },
@@ -96,6 +122,12 @@ export const MESSAGES_CONSTANT = {
     },
     SERVICE: {
       NOT_FOUND_USER: '사용자를 찾을 수 없습니다.',
+    },
+    SEND_EMAIL: {
+      SUCCEED: '이메일로 인증링크를 보냈습니다.',
+    },
+    VERIFY_EMAIL: {
+      SUCCEED: '메일 인증이 완료되었습니다.',
     },
   },
 };

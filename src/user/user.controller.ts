@@ -72,7 +72,7 @@ export class UserController {
     this.emailService.sendMemberJoinVerification(email, userId);
     return {
       statusCode: HttpStatus.OK,
-      message: '이메일로 인증링크를 보냈습니다.',
+      message: MESSAGES_CONSTANT.USER.SEND_EMAIL.SUCCEED,
     };
   }
   // 이메일 인증 링크 확인
@@ -81,7 +81,7 @@ export class UserController {
     this.emailService.verifyEmail(query);
     return {
       statusCode: HttpStatus.OK,
-      message: '메일 인증이 완료되었습니다.',
+      message: MESSAGES_CONSTANT.USER.VERIFY_EMAIL.SUCCEED,
     };
   }
 }
