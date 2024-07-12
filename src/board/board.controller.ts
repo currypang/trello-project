@@ -1,7 +1,8 @@
-import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 import { BoardService } from './board.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { UpdateBoardDto } from './dto/update-board.dto';
 
 @ApiTags('보드')
 @Controller('board')
@@ -52,4 +53,22 @@ export class BoardController {
           data
         }
     }   
+
+    /**
+     * 보드 수정
+     * @param id 
+     * @param updateBoardDto 
+     * @returns 
+     */
+    @Patch(':id')
+    async update(@Param('id') id:number,
+                 @Body() updateBoardDto:UpdateBoardDto
+        ){
+        const data = await this.boardService.update(id,updateBoardDto)
+        return{
+          statusCode:HttpStatus.OK,
+          message:"보드 수정에 성공했습니다",
+          data
+        }
+    }
 }
