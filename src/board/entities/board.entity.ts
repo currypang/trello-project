@@ -18,7 +18,7 @@ export class Board {
   id: number;
 
   @IsNumber()
-  @Column()
+  @Column({ unsigned: true })
   ownerId: number;
 
   /**
@@ -48,7 +48,7 @@ export class Board {
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @OneToMany(() => BoardMembers, (boardMembers) => boardMembers.board, { cascade : true })
+  @OneToMany(() => BoardMembers, (boardMembers) => boardMembers.board)
   members: BoardMembers[];
 
   @OneToMany(() => List, (list) => list.board, { cascade: true })

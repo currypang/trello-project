@@ -11,11 +11,12 @@ import {
   DeleteDateColumn,
   ManyToOne,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 
 @Entity('card')
 export class Card {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
 
   @Column({ unsigned: true })
@@ -41,7 +42,7 @@ export class Card {
   isExpired: boolean;
 
   @IsDate()
-  @Column({ type: 'date',  nullable: true})
+  @Column({ type: 'date', nullable: true })
   startDate: Date;
 
   @IsDate()
@@ -57,12 +58,13 @@ export class Card {
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @OneToMany(() => CardAssigness, (cardAssigness) => cardAssigness.userId, { cascade : true })
+  @OneToMany(() => CardAssigness, (cardAssigness) => cardAssigness.card, { cascade: true })
   cardAssigness: CardAssigness[];
 
-  @OneToMany(() => Activity, (activity) => activity.userId, { cascade : true })
+  @OneToMany(() => Activity, (activity) => activity.card, { cascade: true })
   activity: Activity[];
 
   @ManyToOne(() => List, (list) => list.cards, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'list_id' })
   list: List;
 }
