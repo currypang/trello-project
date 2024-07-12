@@ -41,28 +41,12 @@ export class ListsController {
   }
   /**
    * 리스트 수정
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-   * @param id
-   * @returns
-   */
-  @Get()
-  findAll() {
-    return this.listsService.findAll();
-=======
    * @param listId
    * @param updateListDto
    * @returns
    */
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
-=======
-   * @param listId
-   * @returns
-   */
-  @ApiBearerAuth()
-  // @UseGuards(JwtAuthGuard)
->>>>>>> 4a7ad774819fd7d948164a0701b4c6caa85ec399
   @Patch(':listId')
   async update(@Param('listId', ParseIntPipe) listId: number, @Body() updateListDto: UpdateListDto) {
     const data = await this.listsService.update(listId, updateListDto);
@@ -72,10 +56,6 @@ export class ListsController {
       message: '리스트 수정에 성공했습니다.',
       data,
     };
-<<<<<<< HEAD
->>>>>>> Stashed changes
-=======
->>>>>>> 4a7ad774819fd7d948164a0701b4c6caa85ec399
   }
 
   // @Delete(':id')
