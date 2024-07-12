@@ -1,7 +1,14 @@
-import { Column, Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, ManyToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+  ManyToOne,
+} from 'typeorm';
 import { Card } from '../../cards/entities/card.entity';
-import { BoardMembers } from '../../board/entities/board-member.entity'
-
+import { BoardMembers } from '../../board/entities/board-member.entity';
 
 @Entity('Activity')
 export class Activity {
@@ -29,9 +36,9 @@ export class Activity {
   @Column({ type: 'boolean' })
   isLog: boolean;
 
-  @ManyToOne(() => Card, card => card.activity, { onDelete: 'CASCADE' })
-  card : Card;
+  @ManyToOne(() => Card, (card) => card.activity, { onDelete: 'CASCADE' })
+  card: Card;
 
-  @ManyToOne(() => BoardMembers, boardMembers => boardMembers.activity, { onDelete: 'CASCADE' })
-  members : BoardMembers;
+  @ManyToOne(() => BoardMembers, (boardMembers) => boardMembers.activity, { onDelete: 'CASCADE' })
+  members: BoardMembers;
 }

@@ -41,7 +41,7 @@ export class Card {
   isExpired: boolean;
 
   @IsDate()
-  @Column({ type: 'date',  nullable: true})
+  @Column({ type: 'date', nullable: true })
   startDate: Date;
 
   @IsDate()
@@ -57,10 +57,10 @@ export class Card {
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @OneToMany(() => CardAssigness, (cardAssigness) => cardAssigness.userId, { cascade : true })
+  @OneToMany(() => CardAssigness, (cardAssigness) => cardAssigness.card, { cascade: true })
   cardAssigness: CardAssigness[];
 
-  @OneToMany(() => Activity, (activity) => activity.userId, { cascade : true })
+  @OneToMany(() => Activity, (activity) => activity.userId, { cascade: true })
   activity: Activity[];
 
   @ManyToOne((type) => List, (list) => list.cards, { onDelete: 'CASCADE' })
