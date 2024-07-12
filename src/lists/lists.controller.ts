@@ -42,10 +42,11 @@ export class ListsController {
   /**
    * 리스트 수정
    * @param listId
+   * @param updateListDto
    * @returns
    */
   @ApiBearerAuth()
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(AuthGuard('jwt'))
   @Patch(':listId')
   async update(@Param('listId', ParseIntPipe) listId: number, @Body() updateListDto: UpdateListDto) {
     const data = await this.listsService.update(listId, updateListDto);

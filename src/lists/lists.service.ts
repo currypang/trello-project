@@ -48,6 +48,8 @@ export class ListsService {
       });
       await transactionalEntityManager.save(List, list);
 
+      delete list.deletedAt;
+
       return list;
     });
   }
