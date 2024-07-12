@@ -9,8 +9,9 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { BoardMembers } from './board-member.entity';
+import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 import { List } from 'src/lists/entities/list.entity';
-import { MESSAGES_CONSTANT } from 'src/activity/constants/messages.constants';
+
 
 @Entity('boards')
 export class Board {

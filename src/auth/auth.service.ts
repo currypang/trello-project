@@ -9,6 +9,8 @@ import { SignInDto } from './dtos/sign-in.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UpdateUserPasswordDto } from 'src/user/dtos/update-user-password.dto';
+import { DeleteUserDto } from 'src/user/dtos/delete-user.dto';
+import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 
 @Injectable()
 export class AuthService {
@@ -18,18 +20,28 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService
   ) {}
+
+  private async hashingPassword(password: string): Promise<string> {
+    return bcrypt.hash(password, 10);
+  }
+  private async comparePassword(inputPassword: string, password: string): Promise<void> {
+    const isCurrentPasswordValid = bcrypt.compareSync(inputPassword, password);
+    if (!isCurrentPasswordValid) {
+      throw new UnauthorizedException(MESSAGES_CONSTANT.AUTH.SIGN_UP.NOT_MATCHED_PASSWORD);
+    }
+  }
   async signUp({ email, password, confirmPassword, username }: SignUpDto) {
     const isMatched = password === confirmPassword;
     if (!isMatched) {
-      throw new BadRequestException('비밀번호가 일치 하지않습니다.');
+      throw new BadRequestException(MESSAGES_CONSTANT.AUTH.SIGN_UP.NOT_MATCHED_PASSWORD);
     }
-
+    // 유저 복구기능은 현재 없습니다.
     const existUser = await this.userRepository.findOneBy({ email });
     if (!_.isNil(existUser)) {
-      throw new BadRequestException('이미 가입 된 이메일 입니다.');
+      throw new BadRequestException(MESSAGES_CONSTANT.AUTH.SIGN_UP.EXISTED_EMAIL);
     }
 
-    const hashedPassword = bcrypt.hashSync(password, 10);
+    const hashedPassword = await this.hashingPassword(password);
 
     const user = this.userRepository.create({
       email,
@@ -42,15 +54,13 @@ export class AuthService {
 
   async validateUser({ email, password }: SignInDto) {
     const user = await this.userRepository.findOne({
-      where: { email },
+      where: { email, deletedAt: null },
       select: { id: true, password: true, email: true },
     });
-
-    const isPasswordMatched = bcrypt.compareSync(password, user?.password ?? '');
-
-    if (!user || !isPasswordMatched) {
+    if (!user) {
       return null;
     }
+    await this.comparePassword(password, user.password);
 
     return { id: user.id, email: user.email };
   }
@@ -67,25 +77,44 @@ export class AuthService {
   async updateUserPassword(userId: number, updateUserPasswordDto: UpdateUserPasswordDto) {
     const { currentPassword, newPassword, confirmNewPassword } = updateUserPasswordDto;
 
-    const user = await this.userRepository.findOne({ where: { id: userId }, select: { password: true } });
+    const user = await this.userRepository.findOne({
+      where: { id: userId, deletedAt: null },
+      select: { password: true },
+    });
 
     if (_.isNil(user)) {
-      throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
+      throw new UnauthorizedException(MESSAGES_CONSTANT.AUTH.STRATEGY.UNAUTHORIZED);
     }
 
-    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
-    if (!isCurrentPasswordValid) {
-      throw new UnauthorizedException('현재 비밀번호가 일치하지 않습니다.');
-    }
+    await this.comparePassword(currentPassword, user.password);
 
     const isMatched = newPassword === confirmNewPassword;
     if (!isMatched) {
-      throw new BadRequestException('새 비밀번호가 일치하지 않습니다.');
+      throw new BadRequestException(MESSAGES_CONSTANT.AUTH.UPDATE_USER_PASSWORD.NOT_MATCHED_NEW_PASSWORD);
     }
 
-    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    const hashedNewPassword = await this.hashingPassword(newPassword);
     await this.userRepository.update(userId, { password: hashedNewPassword });
 
-    return { message: '비밀번호가 성공적으로 변경되었습니다.' };
+    return { message: MESSAGES_CONSTANT.AUTH.UPDATE_USER_PASSWORD.SUCCEED };
+  }
+
+  async deleteUser(userId: number, deleteUserDto: DeleteUserDto) {
+    const { password } = deleteUserDto;
+
+    const user = await this.userRepository.findOne({
+      where: { id: userId, deletedAt: null },
+      select: { password: true, id: true },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException(MESSAGES_CONSTANT.AUTH.STRATEGY.UNAUTHORIZED);
+    }
+
+    await this.comparePassword(password, user.password);
+
+    await this.userRepository.softRemove(user);
+
+    return { message: MESSAGES_CONSTANT.AUTH.DELETE_USER.SUCCEED };
   }
 }
