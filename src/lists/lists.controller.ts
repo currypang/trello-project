@@ -1,9 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpStatus,
+  UseGuards,
+  ParseIntPipe,
+  Request,
+  Req,
+} from '@nestjs/common';
 import { ListsService } from './lists.service';
 import { CreateListDto } from './dto/create-list.dto';
 import { UpdateListDto } from './dto/update-list.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @ApiTags('리스트')
 @Controller('lists')
@@ -28,26 +41,24 @@ export class ListsController {
   }
   /**
    * 리스트 수정
-   * @param id
+   * @param listId
    * @returns
    */
-  @Get()
-  findAll() {
-    return this.listsService.findAll();
+  @ApiBearerAuth()
+  // @UseGuards(JwtAuthGuard)
+  @Patch(':listId')
+  async update(@Param('listId', ParseIntPipe) listId: number, @Body() updateListDto: UpdateListDto) {
+    const data = await this.listsService.update(listId, updateListDto);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: '리스트 수정에 성공했습니다.',
+      data,
+    };
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.listsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateListDto: UpdateListDto) {
-    return this.listsService.update(+id, updateListDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.listsService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.listsService.remove(+id);
+  // }
 }
