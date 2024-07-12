@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { Card } from '../../cards/entities/card.entity';
 import { BoardMembers } from '../../board/entities/board-member.entity';
@@ -37,8 +38,10 @@ export class Activity {
   isLog: boolean;
 
   @ManyToOne(() => Card, (card) => card.activity, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'cardId' })
   card: Card;
 
   @ManyToOne(() => BoardMembers, (boardMembers) => boardMembers.activity, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'userId' })
   members: BoardMembers;
 }
