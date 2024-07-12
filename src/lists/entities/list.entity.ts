@@ -39,7 +39,7 @@ export class List {
 
   @IsNumber()
   @IsNotEmpty({ message: '위치 번호를 입력해 주세요.' })
-  @Column({ unsigned: true })
+  @Column()
   position: number;
 
   @CreateDateColumn()

@@ -35,6 +35,7 @@ export class UserController {
       data: user,
     };
   }
+
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Patch('/me')

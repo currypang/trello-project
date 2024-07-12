@@ -1,6 +1,6 @@
 import { IsNumber } from 'class-validator';
 import { User } from 'src/user/entities/user.entity';
-import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
 import { Board } from './board.entity';
 import { CardAssigness } from '../../cards/entities/card-assigness.entity';
 import { Activity } from '../../activity/entities/activity.entity';
@@ -27,8 +27,8 @@ export class BoardMembers {
   board: Board;
 
   @OneToMany(() => CardAssigness, (cardAssigness) => cardAssigness.members)
-  cardAssigness: CardAssigness;
+  cardAssigness: CardAssigness[];
 
   @OneToMany(() => Activity, (activity) => activity.members)
-  activity: Activity;
+  activity: Activity[];
 }
