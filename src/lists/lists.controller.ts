@@ -1,17 +1,9 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  HttpStatus,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, UseGuards } from '@nestjs/common';
 import { ListsService } from './lists.service';
 import { CreateListDto } from './dto/create-list.dto';
 import { UpdateListDto } from './dto/update-list.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('리스트')
 @Controller('lists')
@@ -22,6 +14,8 @@ export class ListsController {
    * @param createListDto
    * @returns
    */
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
   @Post()
   async create(@Body() createListDto: CreateListDto) {
     const data = await this.listsService.create(createListDto);
