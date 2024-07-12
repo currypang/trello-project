@@ -7,6 +7,8 @@ import { Card } from '../cards/entities/card.entity'
 
 @Module({
   imports: [TypeOrmModule.forFeature([List, Card])],
+import { Board } from 'src/board/entities/board.entity';
+        
   controllers: [ListsController],
   providers: [ListsService],
 })

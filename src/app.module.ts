@@ -10,6 +10,7 @@ import { ListsModule } from './lists/lists.module';
 import { UserModule } from './user/user.module';
 import { BoardModule } from './board/board.module';
 import { ActivityModule } from './activity/activity.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ActivityModule } from './activity/activity.module';
     UserModule,
     BoardModule,
     ActivityModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

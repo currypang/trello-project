@@ -1,8 +1,16 @@
-import { Column, Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, OneToMany, ManyToOne } from 'typeorm';
 import { IsNotEmpty, IsString, IsDate } from 'class-validator';
 import { CardAssigness } from './card-assigness.entity';
 import { Activity } from '../../activity/entities/activity.entity';
-import { List } from '../../lists/entities/list.entity';
+import { List } from 'src/lists/entities/list.entity';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+  ManyToOne,
+} from 'typeorm';
 
 @Entity('card')
 export class Card {
@@ -54,6 +62,6 @@ export class Card {
   @OneToMany(() => Activity, (activity) => activity.userId, { cascade : true })
   activity: Activity[];
 
-  @ManyToOne(() => List, list => list.id, { onDelete: 'CASCADE' })
-  list : List;
+  @ManyToOne((type) => List, (list) => list.cards, { onDelete: 'CASCADE' })
+  lists: List;
 }
