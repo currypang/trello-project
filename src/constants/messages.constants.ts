@@ -43,6 +43,10 @@ export const MESSAGES_CONSTANT = {
       SUCCEED: '보드 수정에 성공했습니다',
       NOT_FOUND: '존재하지 않은 보드입니다.',
     },
+    DELETE_BOARD: {
+      SUCCEED: '보드 삭제에 성공했습니다',
+      NOT_FOUND: '존재하지 않은 보드입니다.'
+    }
   },
   LIST: {
     COMMON: {
