@@ -17,7 +17,7 @@ export class UserService {
     if (_.isNil(user)) {
       throw new NotFoundException('사용자를 찾을 수 없습니다.');
     }
-    delete user.deletedAt;
+
     return user;
   }
 }

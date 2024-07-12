@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -8,6 +8,7 @@ import _ from 'lodash';
 import { SignInDto } from './dtos/sign-in.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { UpdateUserPasswordDto } from 'src/user/dtos/update-user-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -62,5 +63,27 @@ export class AuthService {
     });
 
     return { accessToken, refreshToken };
+  }
+  async updateUserPassword(userId: number, updateUserPasswordDto: UpdateUserPasswordDto) {
+    const { currentPassword, newPassword, confirmNewPassword } = updateUserPasswordDto;
+
+    const user = await this.userRepository.findOne({ where: { id: userId }, select: { password: true } });
+
+    if (_.isNil(user)) {
+      throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
+    }
+
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isCurrentPasswordValid) {
+      throw new UnauthorizedException('현재 비밀번호가 일치하지 않습니다.');
+    }
+
+    const isMatched = newPassword === confirmNewPassword;
+    if (!isMatched) {
+      throw new BadRequestException('새 비밀번호가 일치하지 않습니다.');
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    await this.userRepository.update(userId, { password: hashedNewPassword });
   }
 }
