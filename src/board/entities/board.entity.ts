@@ -12,7 +12,6 @@ import { BoardMembers } from './board-member.entity';
 import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 import { List } from 'src/lists/entities/list.entity';
 
-
 @Entity('boards')
 export class Board {
   @PrimaryGeneratedColumn()
