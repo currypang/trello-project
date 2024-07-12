@@ -9,7 +9,7 @@ export class CardsController {
 
   @Post()
   create(@Body() createCardDto: CreateCardDto, userId: number) {
-    return this.cardsService.create(createCardDto);
+    return this.cardsService.create(createCardDto, userId);
   }
 
   @Get()

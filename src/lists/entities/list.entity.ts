@@ -1,4 +1,3 @@
-import { IsNotEmpty, IsNumber } from 'class-validator';
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { Board } from 'src/board/entities/board.entity';
 import { Card } from 'src/cards/entities/card.entity';

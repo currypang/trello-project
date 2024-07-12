@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Repository } from 'typeorm';
+import { DeepPartial, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
@@ -18,7 +18,7 @@ export class CardsService {
     @InjectRepository(List) private listRepository: Repository<List>,
   ) {}
 
-  async create(createCardDto: CreateCardDto) {
+  async create(createCardDto: CreateCardDto, userId: number) {
     const { name, listId } = createCardDto;
 
     // 보드가 존재하는지 확인
@@ -46,9 +46,11 @@ export class CardsService {
         name,
         listId,
         position: newPosition,
-        cardAssigness : {
-          userId : userId;
-        }
+        cardAssigness : [
+          {
+          userId : userId,
+        } 
+      ] as DeepPartial<CardAssigness>[]
       });
       await transactionalEntityManager.save(Card, card);
 
