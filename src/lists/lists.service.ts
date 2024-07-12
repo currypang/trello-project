@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateListDto } from './dto/create-list.dto';
 import { UpdateListDto } from './dto/update-list.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -68,7 +68,15 @@ export class ListsService {
     return list;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} list`;
+  async remove(id: number) {
+    const listToDelete = await this.listRepository.findOneBy({ id });
+
+    if (!listToDelete) {
+      throw new NotFoundException('리스트를 찾을 수 없습니다.');
+    }
+    listToDelete.deletedAt = new Date();
+
+    const list = await this.listRepository.save(listToDelete);
+    return list;
   }
 }

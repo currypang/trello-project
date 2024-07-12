@@ -14,7 +14,7 @@ export class Card {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unsigned: true })
   listId: number;
 
   @Column()
@@ -44,6 +44,6 @@ export class Card {
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @ManyToOne((type) => List, (list) => list.cards, { onDelete: 'CASCADE' })
-  lists: List;
+  @ManyToOne(() => List, (list) => list.cards, { onDelete: 'CASCADE' })
+  list: List;
 }

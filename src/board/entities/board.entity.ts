@@ -12,10 +12,9 @@ import { BoardMembers } from './board-member.entity';
 import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 import { List } from 'src/lists/entities/list.entity';
 
-
 @Entity('boards')
 export class Board {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
 
   @IsNumber()
@@ -52,6 +51,6 @@ export class Board {
   @OneToMany(() => BoardMembers, (boardMembers) => boardMembers.board)
   members: BoardMembers[];
 
-  @OneToMany((type) => List, (list) => list.board, { cascade: true })
+  @OneToMany(() => List, (list) => list.board, { cascade: true })
   lists: List[];
 }
