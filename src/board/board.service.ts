@@ -6,21 +6,30 @@ import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
 import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 import { BOARD_CONSTANT } from 'src/constants/board.constants';
+import { BoardMembers } from './entities/board-member.entity';
 
 @Injectable()
 export class BoardService {
     constructor(
         @InjectRepository(Board)
-        private readonly boardRepository: Repository<Board>
+        private readonly boardRepository: Repository<Board>,
+        @InjectRepository(BoardMembers) 
+        private readonly boardMemberRepository: Repository<BoardMembers>
     ){}
 
-    async create(createBoardDto:CreateBoardDto){
+    async create(userId:number,createBoardDto:CreateBoardDto){
         const {name, background_color} = createBoardDto;
         const board = await this.boardRepository.save({
             name:name,
             background_color:background_color,
+            ownerId: userId
             // 추후 유저 생성되면 생성한 유저가 owner_id에 들어가게하기
         })
+        await this.boardMemberRepository.save({
+            userId,
+            boardId:board.id
+        })
+        
         return board
     }
 
