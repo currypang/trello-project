@@ -80,17 +80,32 @@ export class ListsService {
     return list;
   }
   //리스트 순서 변경
-  async updateOrder(id: number, updateListDto: UpdateListDto) {
-    const listToUpdate = await this.listRepository.findOneBy({ id });
-
-    if (!listToUpdate) {
-      return;
+  async updateOrder(id: number) {
+    // updateListDto: UpdateListDto
+    //보드id를 받아서 순차적으로 리스트 만들기
+    const listToUpdateOrder = await this.listRepository.findOneBy({ id });
+    if (!listToUpdateOrder) {
+      throw new NotFoundException('리스트를 찾을 수 없습니다.');
     }
+    //리스트에 있는 보드id를 받아서 보스안에 있는 리스트 추출
+    const allListsInBoard = await this.boardRepository.findOne({
+      where: { id: listToUpdateOrder.boardId },
+      relations: ['lists'],
+    });
 
-    Object.assign(listToUpdate, updateListDto);
+    const listsArray = allListsInBoard.lists;
+    // console.log('listsArray', listsArray);
 
-    const list = await this.listRepository.save(listToUpdate);
+    const index = 0;
+    const add = listsArray[index];
+    console.log('add', add);
 
-    return list;
+    // 보드
+    return add; // 이러면 인덱스가 나옴
+    // Object.assign(listToUpdate, updateListDto);
+
+    // const list = await this.listRepository.save(listToUpdate);
+
+    // return list;
   }
 }

@@ -61,20 +61,21 @@ export class ListsController {
     };
   }
   /**
-   * 리스트 수정
+   * 리스트 순서 변경
    * @param listId
-   * @param updateListDto
+   * @param UpdateListDto
    * @returns
    */
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Patch(':listId/order')
-  async updateOrder(@Param('listId', ParseIntPipe) listId: number, @Body() updateListDto: UpdateListDto) {
-    const data = await this.listsService.updateOrder(listId, updateListDto);
-
+  // updateListDto: UpdateListDto
+  async updateOrder(@Param('listId', ParseIntPipe) listId: number) {
+    const data = await this.listsService.updateOrder(listId);
+    // updateListDto
     return {
       statusCode: HttpStatus.OK,
-      message: '리스트 수정에 성공했습니다.',
+      message: '리스트 순서 변경에 성공했습니다.',
       data,
     };
   }
