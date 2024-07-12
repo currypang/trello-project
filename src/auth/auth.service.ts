@@ -117,4 +117,31 @@ export class AuthService {
 
     return { message: MESSAGES_CONSTANT.AUTH.DELETE_USER.SUCCEED };
   }
+
+  async refreshTokens(refreshToken: string) {
+    try {
+      const payload = this.jwtService.verify(refreshToken.split(' ')[1], {
+        secret: this.configService.get<string>('REFRESH_TOKEN_SECRET'),
+      });
+
+      const user = await this.userRepository.findOne({
+        where: { id: payload.id, deletedAt: null },
+      });
+
+      if (_.isNil(user)) {
+        throw new UnauthorizedException(MESSAGES_CONSTANT.AUTH.STRATEGY.UNAUTHORIZED);
+      }
+
+      const newPayload = { id: user.id, email: user.email };
+      const newAccessToken = this.jwtService.sign(newPayload);
+      const newRefreshToken = this.jwtService.sign(newPayload, {
+        secret: this.configService.get<string>('REFRESH_TOKEN_SECRET'),
+        expiresIn: this.configService.get<string>('REFRESH_TOKEN_EXPIRES'),
+      });
+
+      return { accessToken: newAccessToken, refreshToken: newRefreshToken };
+    } catch (e) {
+      throw new UnauthorizedException(MESSAGES_CONSTANT.AUTH.COMMON.INVALID_TOKEN);
+    }
+  }
 }
