@@ -7,6 +7,11 @@ import { AuthService } from 'src/auth/auth.service';
 import { DeleteUserDto } from './dtos/delete-user.dto';
 import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 import { EmailService } from 'src/email/email.service';
+import { SendEmailDto } from './dtos/send-email.dto';
+import { VerifyEmailQueryDto } from './dtos/verify-email.query.dto';
+// import { RolesGuard } from 'src/auth/guards/roles.guard';
+// import { Roles } from 'src/auth/decorators/roles.decorator';
+// import { Role } from './types/roles.type';
 
 @ApiTags('유저')
 @Controller('users')
@@ -56,10 +61,14 @@ export class UserController {
   }
 
   // 이메일 인증
+  // @UseGuards(RolesGuard) // 테스트 시 JwtAuthGuard 주석처리
+  // @Roles(Role.VerifiedUser)
+  @ApiBearerAuth()
   @Post('/email')
   @UseGuards(JwtAuthGuard)
-  async sendEmail(@Request() req, @Body() { email }) {
+  async sendEmail(@Request() req, @Body() sendEmailDto: SendEmailDto) {
     const userId = req.user.id;
+    const email = sendEmailDto.email;
     this.emailService.sendMemberJoinVerification(email, userId);
     return {
       statusCode: HttpStatus.OK,
@@ -68,7 +77,7 @@ export class UserController {
   }
   // 이메일 인증 링크 확인
   @Post('/email/email-verify')
-  async verifyEmail(@Query() query) {
+  async verifyEmail(@Query() query: VerifyEmailQueryDto) {
     this.emailService.verifyEmail(query);
     return {
       statusCode: HttpStatus.OK,
