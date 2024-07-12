@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Board } from './entities/board.entity';
 import { Repository } from 'typeorm';
 import { CreateBoardDto } from './dto/create-board.dto';
+import { UpdateBoardDto } from './dto/update-board.dto';
 
 @Injectable()
 export class BoardService {
@@ -39,5 +40,23 @@ export class BoardService {
             throw new NotFoundException('존재하지 않은 보드입니다.')
         }
         return board
+    }
+
+    async update(id:number, updateBoardDto:UpdateBoardDto){
+        const board = await this.boardRepository.findOne({
+            where:{id}
+        })
+        if(!board){
+            throw new NotFoundException('존재하지 않은 보드입니다')
+        }
+        
+        const newboard = {
+            ...board,
+            ...updateBoardDto
+        }
+
+
+        const  data = await this.boardRepository.save(newboard)
+        return data
     }
 }
