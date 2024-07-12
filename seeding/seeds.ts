@@ -12,6 +12,12 @@ import { Activity } from 'src/activity/entities/activity.entity';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import BoardSeeder from './seeds/board.seeder';
 import boardFactory from './factories/board.factory';
+import { CardAssigness } from 'src/cards/entities/card-assigness.entity';
+import ListSeeder from './seeds/list.seeder';
+import listFactory from './factories/list.factory';
+import CardSeeder from './seeds/card.seeder';
+import cardFactory from './factories/card.factory';
+import cardAssaignessFactory from './factories/card-assaigness.factory';
 
 (async () => {
   const options: DataSourceOptions & SeederOptions = {
@@ -21,10 +27,11 @@ import boardFactory from './factories/board.factory';
     port: 3306,
     username: 'root',
     password: '0213porta',
-    database: 'trello',
-    entities: [User, Board, BoardMembers, List, Card, Activity],
-    seeds: [UserSeeder, BoardSeeder],
-    factories: [UserFactory, boardFactory],
+    database: 'luke',
+    synchronize: true,
+    entities: [User, Board, BoardMembers, List, Card, CardAssigness, Activity],
+    seeds: [UserSeeder, BoardSeeder, ListSeeder, CardSeeder],
+    factories: [UserFactory, boardFactory, listFactory, cardFactory, cardAssaignessFactory],
   };
 
   const dataSource = new DataSource(options);

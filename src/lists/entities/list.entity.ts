@@ -15,12 +15,12 @@ import {
 
 @Entity('lists')
 export class List {
-  @PrimaryGeneratedColumn({ unsigned: true })
+  @PrimaryGeneratedColumn()
   id: number;
 
   @IsNotEmpty()
   @IsNumber()
-  @Column({ unsigned: true })
+  @Column()
   boardId: number;
 
   /**스웨거 테스트
@@ -39,7 +39,7 @@ export class List {
 
   @IsNumber()
   @IsNotEmpty({ message: '위치 번호를 입력해 주세요.' })
-  @Column({ unsigned: true })
+  @Column()
   position: number;
 
   @CreateDateColumn()
@@ -52,7 +52,7 @@ export class List {
   deletedAt?: Date;
 
   @ManyToOne((type) => Board, (board) => board.lists, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'boardId' })
+  @JoinColumn({ name: 'board_id' })
   board: Board;
 
   @OneToMany((type) => Card, (card) => card.lists, { cascade: true })

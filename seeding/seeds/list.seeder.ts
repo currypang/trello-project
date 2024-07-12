@@ -7,10 +7,10 @@ export default class ListSeeder implements Seeder {
   public async run(dataSource: DataSource, factoryManager: SeederFactoryManager): Promise<void> {
     const boardRepository = dataSource.getRepository(Board);
     const boards = await boardRepository.find();
-
+    console.log(boards);
     const listFactory = factoryManager.get(List);
     for (const board of boards) {
-      const lists = await listFactory.saveMany(3);
+      const lists = await listFactory.saveMany(3, { board });
       for (const list of lists) {
         list.board = board;
         await dataSource.getRepository(List).save(list);
