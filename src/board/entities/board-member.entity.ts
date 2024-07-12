@@ -7,15 +7,15 @@ import { Activity } from '../../activity/entities/activity.entity';
 
 @Entity('board_members')
 export class BoardMembers {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
 
   @IsNumber()
-  @Column()
+  @Column({ unsigned: true })
   userId: number;
 
   @IsNumber()
-  @Column()
+  @Column({ unsigned: true })
   boardId: number;
 
   @ManyToOne(() => User, (user) => user.boardMembers)
@@ -30,5 +30,5 @@ export class BoardMembers {
   cardAssigness: CardAssigness[];
 
   @OneToMany(() => Activity, (activity) => activity.members)
-  activity: Activity;
+  activity: Activity[];
 }

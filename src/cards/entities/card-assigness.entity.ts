@@ -4,13 +4,13 @@ import { BoardMembers } from '../../board/entities/board-member.entity';
 
 @Entity('card_assigness')
 export class CardAssigness {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
 
-  @Column()
+  @Column({ unsigned: true })
   userId: number;
 
-  @Column()
+  @Column({ unsigned: true })
   cardId: number;
 
   @ManyToOne(() => Card, (card) => card.cardAssigness, { onDelete: 'CASCADE' })

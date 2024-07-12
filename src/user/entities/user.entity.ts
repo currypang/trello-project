@@ -10,11 +10,11 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { IsVerify } from '../types/is-verify.type';
+import { Role } from '../types/roles.type';
 
 @Entity('users')
 export class User {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
   /**
    * 유저네임
@@ -48,8 +48,8 @@ export class User {
   @Column({ select: false })
   password: string;
 
-  @Column({ type: 'enum', enum: IsVerify, default: IsVerify.IsNotVerify })
-  isVerify: IsVerify;
+  @Column({ type: 'enum', enum: Role, default: Role.UnverifiedUser })
+  role: Role;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -16,10 +16,10 @@ import {
 
 @Entity('card')
 export class Card {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
 
-  @Column()
+  @Column({ unsigned: true })
   listId: number;
 
   @IsString()
@@ -61,10 +61,10 @@ export class Card {
   @OneToMany(() => CardAssigness, (cardAssigness) => cardAssigness.card, { cascade: true })
   cardAssigness: CardAssigness[];
 
-  @OneToMany(() => Activity, (activity) => activity.userId, { cascade: true })
+  @OneToMany(() => Activity, (activity) => activity.card, { cascade: true })
   activity: Activity[];
 
-  @ManyToOne((type) => List, (list) => list.cards, { onDelete: 'CASCADE' })
+  @ManyToOne(() => List, (list) => list.cards, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'list_id' })
-  lists: List;
+  list: List;
 }

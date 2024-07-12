@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
 import { User } from 'src/user/entities/user.entity';
-import { IsVerify } from 'src/user/types/is-verify.type';
+import { Role } from 'src/user/types/roles.type';
 import { Repository } from 'typeorm';
 
 // 메일 옵션. 수신 메일, 메일 제목, html 형식의 메일 본문
@@ -61,9 +61,8 @@ export class EmailService {
   async verifyEmail(query) {
     const token = query.signupVerifyToken;
     const id = await this.jwtService.decode(token).id;
-    console.log(id);
     const verifiedUser = await this.userRepository.findOne({ where: { id } });
-    verifiedUser.isVerify = IsVerify.IsValid;
+    verifiedUser.role = Role.VerifiedUser;
     return await this.userRepository.save(verifiedUser);
   }
 }

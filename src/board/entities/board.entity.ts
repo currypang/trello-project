@@ -14,11 +14,11 @@ import { List } from 'src/lists/entities/list.entity';
 
 @Entity('boards')
 export class Board {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
 
   @IsNumber()
-  @Column()
+  @Column({ unsigned: true })
   ownerId: number;
 
   /**
@@ -48,9 +48,9 @@ export class Board {
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @OneToMany(() => BoardMembers, (boardMembers) => boardMembers.board, { cascade : true })
+  @OneToMany(() => BoardMembers, (boardMembers) => boardMembers.board)
   members: BoardMembers[];
 
-  @OneToMany((type) => List, (list) => list.board, { cascade: true })
+  @OneToMany(() => List, (list) => list.board, { cascade: true })
   lists: List[];
 }
