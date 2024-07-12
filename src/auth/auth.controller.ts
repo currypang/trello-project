@@ -1,10 +1,11 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Request } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Request, Headers } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dtos/sign-up.dto';
 import { SignInDto } from './dtos/sign-in.dto';
-import { AuthGuard } from '@nestjs/passport';
+
 import { ApiTags } from '@nestjs/swagger';
 import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
+import { LocalAuthGuard } from './guards/local-auth.guard';
 @ApiTags('인증')
 @Controller('auth')
 export class AuthController {
@@ -31,7 +32,7 @@ export class AuthController {
    * @returns
    */
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard('local'))
+  @UseGuards(LocalAuthGuard)
   @Post('/signin')
   signIn(@Request() req, @Body() signInDto: SignInDto) {
     const data = this.authService.signIn(req.user.id, req.user.email);
@@ -40,6 +41,23 @@ export class AuthController {
       statusCode: HttpStatus.OK,
       message: MESSAGES_CONSTANT.AUTH.SIGN_IN.SUCCEED,
       data,
+    };
+  }
+
+  /**
+   * 토큰 재발급
+   * @param req
+   * @param signInDto
+   * @returns
+   */
+  @HttpCode(HttpStatus.OK)
+  @Post('refresh')
+  async refresh(@Headers('authorization') refreshToken: string) {
+    const tokens = await this.authService.refreshTokens(refreshToken);
+    return {
+      statusCode: HttpStatus.OK,
+      message: MESSAGES_CONSTANT.AUTH.REFRESH_TOKEN.SUCCEED,
+      data: tokens,
     };
   }
 }

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { Board } from 'src/board/entities/board.entity';
 import { Card } from 'src/cards/entities/card.entity';
 import {
@@ -19,6 +19,7 @@ export class List {
   id: number;
 
   @IsNotEmpty()
+  @IsNumber()
   @Column({ unsigned: true })
   boardId: number;
 
@@ -27,6 +28,7 @@ export class List {
    * @example To do
    */
   @IsNotEmpty({ message: '리스트 이름을 입력해 주세요.' })
+  @IsString()
   @Column()
   name: string;
 

@@ -50,16 +50,19 @@ export class ListsService {
       return list;
     });
   }
-  findAll() {
-    return `This action returns all lists`;
-  }
 
-  findOne(id: number) {
-    return `This action returns a #${id} list`;
-  }
+  async update(id: number, updateListDto: UpdateListDto) {
+    const listToUpdate = await this.listRepository.findOneBy({ id });
 
-  update(id: number, updateListDto: UpdateListDto) {
-    return `This action updates a #${id} list`;
+    if (!listToUpdate) {
+      return;
+    }
+
+    Object.assign(listToUpdate, updateListDto);
+
+    const list = await this.listRepository.save(listToUpdate);
+
+    return list;
   }
 
   remove(id: number) {

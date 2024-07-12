@@ -1,6 +1,7 @@
 export const MESSAGES_CONSTANT = {
   AUTH: {
     COMMON: {
+      INVALID_TOKEN: '유효하지 않은 토큰 입니다.',
       CONFIRM_PASSWORD: {
         REQUIRED: '비밀번호 확인을 입력해 주세요.',
         INVALID_TYPE:
@@ -28,6 +29,10 @@ export const MESSAGES_CONSTANT = {
     },
     DELETE_USER: {
       SUCCEED: '사용자 계정이 성공적으로 삭제되었습니다.',
+    },
+    REFRESH_TOKEN: {
+      SUCCEED: '토큰이 성공적으로 발급 되었습니다.',
+      EXPIRED: '토큰이 만료 되었습니다.',
     },
   },
 
