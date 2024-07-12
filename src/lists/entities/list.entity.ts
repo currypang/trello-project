@@ -9,7 +9,6 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
   ManyToOne,
-  JoinColumn,
   OneToMany,
 } from 'typeorm';
 
@@ -51,10 +50,9 @@ export class List {
   @DeleteDateColumn({ select: false })
   deletedAt?: Date;
 
-  @ManyToOne((type) => Board, (board) => board.lists, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'boardId' })
+  @ManyToOne(() => Board, (board) => board.lists, { onDelete: 'CASCADE' })
   board: Board;
 
-  @OneToMany((type) => Card, (card) => card.lists, { cascade: true })
+  @OneToMany(() => Card, (card) => card.list, { cascade: true })
   cards: Card[];
 }

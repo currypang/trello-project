@@ -18,7 +18,7 @@ export class Card {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unsigned: true })
   listId: number;
 
   @IsString()
@@ -63,6 +63,6 @@ export class Card {
   @OneToMany(() => Activity, (activity) => activity.card, { cascade: true })
   activity: Activity[];
 
-  @ManyToOne((type) => List, (list) => list.cards, { onDelete: 'CASCADE' })
-  lists: List;
+  @ManyToOne(() => List, (list) => list.cards, { onDelete: 'CASCADE' })
+  list: List;
 }

@@ -15,7 +15,7 @@ export class BoardMembers {
   userId: number;
 
   @IsNumber()
-  @Column()
+  @Column({ unsigned: true })
   boardId: number;
 
   @ManyToOne(() => User, (user) => user.boardMembers)
