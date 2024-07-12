@@ -10,6 +10,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { IsVerify } from '../types/is-verify.type';
 
 @Entity('users')
 export class User {
@@ -46,6 +47,9 @@ export class User {
   )
   @Column({ select: false })
   password: string;
+
+  @Column({ type: 'enum', enum: IsVerify, default: IsVerify.IsNotVerify })
+  isVerify: IsVerify;
 
   @CreateDateColumn()
   createdAt: Date;
