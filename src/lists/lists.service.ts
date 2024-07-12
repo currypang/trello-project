@@ -47,7 +47,6 @@ export class ListsService {
         position: newPosition,
       });
       await transactionalEntityManager.save(List, list);
-
       return list;
     });
   }

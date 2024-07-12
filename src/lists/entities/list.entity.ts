@@ -46,7 +46,7 @@ export class List {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @DeleteDateColumn()
+  @DeleteDateColumn({ select: false })
   deletedAt?: Date;
 
   @ManyToOne((type) => Board, (board) => board.lists, { onDelete: 'CASCADE' })

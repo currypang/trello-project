@@ -28,12 +28,30 @@ export class ListsController {
   }
   /**
    * 리스트 수정
+<<<<<<< Updated upstream
    * @param id
    * @returns
    */
   @Get()
   findAll() {
     return this.listsService.findAll();
+=======
+   * @param listId
+   * @param updateListDto
+   * @returns
+   */
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @Patch(':listId')
+  async update(@Param('listId', ParseIntPipe) listId: number, @Body() updateListDto: UpdateListDto) {
+    const data = await this.listsService.update(listId, updateListDto);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: '리스트 수정에 성공했습니다.',
+      data,
+    };
+>>>>>>> Stashed changes
   }
 
   @Get(':id')
