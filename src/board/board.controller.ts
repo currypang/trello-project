@@ -1,17 +1,21 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query, Request, UseGuards } from '@nestjs/common';
 import { BoardService } from './board.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UpdateBoardDto } from './dto/update-board.dto';
 import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { InvitationService } from 'src/invitation/invitation.service';
+import { BoardMembers } from './entities/board-member.entity';
 
 @ApiTags('보드')
 @Controller('board')
 export class BoardController {
-    constructor(private readonly boardService:BoardService){}
+    constructor(private readonly boardService:BoardService,
+                private readonly inviteService:InvitationService,
+    ){}
 
-    /**
+    /** 
      * 보드 생성
      * @param createBoardDto 
      * @param req 
@@ -93,5 +97,22 @@ export class BoardController {
             message: MESSAGES_CONSTANT.BOARD.DELETE_BOARD.SUCCEED,
             data
         }
+    }
+    
+
+    @Post('/email')
+    @UseGuards(JwtAuthGuard)
+    async sendEmail(@Body() {email, boardId}){
+        this.inviteService.sendInvitieVertification(email, boardId)
+        return{
+            statusCode: HttpStatus.OK,
+            message: '이메일로 인증링크를 보냈습니다.',
+        }
+    }
+
+    @Post('/email/verify')
+    //@UseGuards(JwtAuthGuard)
+    async inviteMember(@Query("inviteVerifyToken") query:string){
+        return this.inviteService.verifyInvite(query)
     }
 }
