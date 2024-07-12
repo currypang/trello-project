@@ -18,7 +18,7 @@ export class Board {
   id: number;
 
   @IsNumber()
-  @Column()
+  @Column({ unsigned: true })
   ownerId: number;
 
   /**

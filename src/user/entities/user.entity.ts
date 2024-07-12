@@ -14,7 +14,7 @@ import { Role } from '../types/roles.type';
 
 @Entity('users')
 export class User {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
   /**
    * 유저네임

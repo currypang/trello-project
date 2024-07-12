@@ -13,13 +13,13 @@ import { BoardMembers } from '../../board/entities/board-member.entity';
 
 @Entity('Activity')
 export class Activity {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
 
-  @Column()
+  @Column({ unsigned: true })
   userId: number;
 
-  @Column()
+  @Column({ unsigned: true })
   cardId: string;
 
   @Column({ type: 'text' })
@@ -38,10 +38,10 @@ export class Activity {
   isLog: boolean;
 
   @ManyToOne(() => Card, (card) => card.activity, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'cardId' })
+  @JoinColumn({ name: 'card_id' })
   card: Card;
 
   @ManyToOne(() => BoardMembers, (boardMembers) => boardMembers.activity, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'userId' })
+  @JoinColumn({ name: 'user_id' })
   members: BoardMembers;
 }

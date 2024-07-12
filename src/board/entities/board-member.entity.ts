@@ -7,11 +7,11 @@ import { Activity } from '../../activity/entities/activity.entity';
 
 @Entity('board_members')
 export class BoardMembers {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
 
   @IsNumber()
-  @Column()
+  @Column({ unsigned: true })
   userId: number;
 
   @IsNumber()
@@ -19,11 +19,11 @@ export class BoardMembers {
   boardId: number;
 
   @ManyToOne(() => User, (user) => user.boardMembers)
-  @JoinColumn({ name: 'userId' })
+  @JoinColumn({ name: 'user_id' })
   user: User;
 
   @ManyToOne(() => Board, (board) => board.members)
-  @JoinColumn({ name: 'boardId' })
+  @JoinColumn({ name: 'board_id' })
   board: Board;
 
   @OneToMany(() => CardAssigness, (cardAssigness) => cardAssigness.members)

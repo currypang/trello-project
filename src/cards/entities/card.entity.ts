@@ -11,11 +11,12 @@ import {
   DeleteDateColumn,
   ManyToOne,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 
 @Entity('card')
 export class Card {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
 
   @Column({ unsigned: true })
@@ -64,5 +65,6 @@ export class Card {
   activity: Activity[];
 
   @ManyToOne(() => List, (list) => list.cards, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'list_id' })
   list: List;
 }

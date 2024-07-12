@@ -4,20 +4,20 @@ import { BoardMembers } from '../../board/entities/board-member.entity';
 
 @Entity('card_assigness')
 export class CardAssigness {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
 
-  @Column()
+  @Column({ unsigned: true })
   userId: number;
 
-  @Column()
+  @Column({ unsigned: true })
   cardId: number;
 
   @ManyToOne(() => Card, (card) => card.cardAssigness, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'cardId' })
+  @JoinColumn({ name: 'card_id' })
   card: Card;
 
-  @ManyToOne(() => BoardMembers, (boardMembers) => boardMembers.activity, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'userId' })
+  @ManyToOne(() => BoardMembers, (boardMembers) => boardMembers.cardAssigness, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'user_id' })
   members: BoardMembers;
 }
