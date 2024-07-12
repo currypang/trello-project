@@ -15,17 +15,28 @@ import {
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
-
+  /**
+   * 유저네임
+   * @example "luckybicky"
+   */
   @IsNotEmpty({ message: MESSAGES_CONSTANT.AUTH.SIGN_UP.REQUIRED_NAME })
   @IsString()
   @Column()
   username: string;
 
+  /**
+   * 이메일
+   * @example "example@example.com"
+   */
   @IsNotEmpty({ message: MESSAGES_CONSTANT.AUTH.SIGN_UP.REQUIRED_EMAIL })
   @IsEmail({}, { message: MESSAGES_CONSTANT.AUTH.SIGN_UP.INVALID_EMAIL })
   @Column({ unique: true })
   email: string;
 
+  /**
+   * 비밀번호
+   * @example "KimchiMaster123!@#"
+   */
   @IsNotEmpty({ message: MESSAGES_CONSTANT.AUTH.SIGN_UP.REQUIRED_PASSWORD })
   @IsStrongPassword(
     { minLength: 6 },
