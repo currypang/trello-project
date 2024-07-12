@@ -5,9 +5,12 @@ import { CardsService } from './cards.service';
 import { CardsController } from './cards.controller';
 
 import { Card } from './entities/card.entity';
+import { CardAssigness } from './entities/card-assigness.entity';
+import { BoardMembers } from '../board/entities/board-member.entity'
+import { List } from '../lists/entities/list.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Card])],
+  imports: [TypeOrmModule.forFeature([Card, CardAssigness, BoardMembers, List])],
   controllers: [CardsController],
   providers: [CardsService],
 })

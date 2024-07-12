@@ -1,5 +1,6 @@
 import { IsNotEmpty, IsNumber } from 'class-validator';
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, OneToMany } from 'typeorm';
+import { Card } from '../../cards/entities/card.entity'
 
 @Entity('lists')
 export class List {
@@ -26,4 +27,7 @@ export class List {
 
   @DeleteDateColumn()
   deletedAt?: Date;
+
+  @OneToMany(() => Card, (card) => card.listId, { cascade : true })
+  card: Card[];
 }

@@ -46,6 +46,6 @@ export class Board {
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @OneToMany(() => BoardMembers, (boardMembers) => boardMembers.board)
+  @OneToMany(() => BoardMembers, (boardMembers) => boardMembers.board, { cascade : true })
   members: BoardMembers[];
 }
