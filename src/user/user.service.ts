@@ -13,7 +13,7 @@ export class UserService {
   ) {}
 
   async findUserById(id: number) {
-    const user = await this.userRepository.findOneBy({ id });
+    const user = await this.userRepository.findOneBy({ id, deletedAt: null });
 
     if (_.isNil(user)) {
       throw new NotFoundException(MESSAGES_CONSTANT.USER.SERVICE.NOT_FOUND_USER);

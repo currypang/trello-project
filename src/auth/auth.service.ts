@@ -35,7 +35,7 @@ export class AuthService {
     if (!isMatched) {
       throw new BadRequestException(MESSAGES_CONSTANT.AUTH.SIGN_UP.NOT_MATCHED_PASSWORD);
     }
-
+    // 유저 복구기능은 현재 없습니다.
     const existUser = await this.userRepository.findOneBy({ email });
     if (!_.isNil(existUser)) {
       throw new BadRequestException(MESSAGES_CONSTANT.AUTH.SIGN_UP.EXISTED_EMAIL);
@@ -54,7 +54,7 @@ export class AuthService {
 
   async validateUser({ email, password }: SignInDto) {
     const user = await this.userRepository.findOne({
-      where: { email },
+      where: { email, deletedAt: null },
       select: { id: true, password: true, email: true },
     });
     if (!user) {
@@ -77,7 +77,10 @@ export class AuthService {
   async updateUserPassword(userId: number, updateUserPasswordDto: UpdateUserPasswordDto) {
     const { currentPassword, newPassword, confirmNewPassword } = updateUserPasswordDto;
 
-    const user = await this.userRepository.findOne({ where: { id: userId }, select: { password: true } });
+    const user = await this.userRepository.findOne({
+      where: { id: userId, deletedAt: null },
+      select: { password: true },
+    });
 
     if (_.isNil(user)) {
       throw new UnauthorizedException(MESSAGES_CONSTANT.AUTH.STRATEGY.UNAUTHORIZED);
@@ -99,7 +102,10 @@ export class AuthService {
   async deleteUser(userId: number, deleteUserDto: DeleteUserDto) {
     const { password } = deleteUserDto;
 
-    const user = await this.userRepository.findOne({ where: { id: userId }, select: { password: true } });
+    const user = await this.userRepository.findOne({
+      where: { id: userId, deletedAt: null },
+      select: { password: true, id: true },
+    });
 
     if (!user) {
       throw new UnauthorizedException(MESSAGES_CONSTANT.AUTH.STRATEGY.UNAUTHORIZED);
@@ -107,7 +113,7 @@ export class AuthService {
 
     await this.comparePassword(password, user.password);
 
-    await this.userRepository.delete(userId);
+    await this.userRepository.softRemove(user);
 
     return { message: MESSAGES_CONSTANT.AUTH.DELETE_USER.SUCCEED };
   }
