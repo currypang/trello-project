@@ -1,4 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Card } from './card.entity';
+import { BoardMembers } from '../../board/entities/board-member.entity'
 
 @Entity('card_assigness')
 export class CardAssigness {
@@ -10,4 +12,11 @@ export class CardAssigness {
 
   @Column()
   cardId: number;
+
+  @ManyToOne(() => Card, card => card.activity, { onDelete: 'CASCADE' })
+  card : Card;
+
+  @ManyToOne(() => BoardMembers, boardMembers => boardMembers.activity, { onDelete: 'CASCADE' })
+  members : BoardMembers;
+
 }

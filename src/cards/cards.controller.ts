@@ -8,7 +8,7 @@ export class CardsController {
   constructor(private readonly cardsService: CardsService) {}
 
   @Post()
-  create(@Body() createCardDto: CreateCardDto) {
+  create(@Body() createCardDto: CreateCardDto, userId: number) {
     return this.cardsService.create(createCardDto);
   }
 
@@ -28,7 +28,7 @@ export class CardsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.cardsService.remove(+id);
+  delete(@Param('id') id: string) {
+    return this.cardsService.delete(+id);
   }
 }
