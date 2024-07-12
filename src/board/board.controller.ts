@@ -3,7 +3,7 @@ import { BoardService } from './board.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { UpdateBoardDto } from './dto/update-board.dto';
-import { MESSAGES_CONSTANT } from 'src/activity/constants/messages.constants';
+import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 
 @ApiTags('보드')
 @Controller('board')
