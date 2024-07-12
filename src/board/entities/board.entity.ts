@@ -10,6 +10,8 @@ import {
 } from 'typeorm';
 import { BoardMembers } from './board-member.entity';
 import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
+import { List } from 'src/lists/entities/list.entity';
+
 
 @Entity('boards')
 export class Board {
@@ -33,8 +35,8 @@ export class Board {
    * 색상
    * @example "#FF0000"
    */
-  @IsHexColor({message: MESSAGES_CONSTANT.BOARD.COMMON.BACKGROUND_COLOR.INVALID_TYPE})
-  @IsNotEmpty({message: MESSAGES_CONSTANT.BOARD.COMMON.BACKGROUND_COLOR.REQUIRED})
+  @IsHexColor({ message: MESSAGES_CONSTANT.BOARD.COMMON.BACKGROUND_COLOR.INVALID_TYPE })
+  @IsNotEmpty({ message: MESSAGES_CONSTANT.BOARD.COMMON.BACKGROUND_COLOR.REQUIRED })
   @Column()
   background_color: string;
 
@@ -49,4 +51,7 @@ export class Board {
 
   @OneToMany(() => BoardMembers, (boardMembers) => boardMembers.board)
   members: BoardMembers[];
+
+  @OneToMany((type) => List, (list) => list.board, { cascade: true })
+  lists: List[];
 }

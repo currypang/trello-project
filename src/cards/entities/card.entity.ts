@@ -1,4 +1,13 @@
-import { Column, Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
+import { List } from 'src/lists/entities/list.entity';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+  ManyToOne,
+} from 'typeorm';
 
 @Entity('card')
 export class Card {
@@ -34,4 +43,7 @@ export class Card {
 
   @DeleteDateColumn()
   deletedAt: Date;
+
+  @ManyToOne((type) => List, (list) => list.cards, { onDelete: 'CASCADE' })
+  lists: List;
 }
