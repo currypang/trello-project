@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Board } from './entities/board.entity';
 import { Repository } from 'typeorm';
@@ -28,5 +28,16 @@ export class BoardService {
             }
         })
         return boards
+    }
+
+    async findOne(id:number){
+        const board = await this.boardRepository.findOne({
+            where: {id},
+            //relations:{} 추후 카드와 리스트가져오기위해 주석처리함
+        })
+        if(!board){
+            throw new NotFoundException('존재하지 않은 보드입니다.')
+        }
+        return board
     }
 }

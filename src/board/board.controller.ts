@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post } from '@nestjs/common';
 import { BoardService } from './board.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { ApiTags } from '@nestjs/swagger';
@@ -37,4 +37,19 @@ export class BoardController {
             data,
         }
     }
+
+    /**
+     * 보드 상세조회
+     * @param id 
+     * @returns 
+     */
+    @Get(':id')
+    async findOne(@Param('id') id:number){
+        const data = await this.boardService.findOne(id)
+        return{
+          statusCode:HttpStatus.OK,
+          message:"보드 상세 조회에 성공했습니다",
+          data
+        }
+    }   
 }
