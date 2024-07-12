@@ -11,6 +11,10 @@ export const MESSAGES_CONSTANT = {
       SUCCEED: '회원가입에 성공했습니다.',
       NOT_MATCHED_PASSWORD: '비밀번호가 일치 하지않습니다.',
       EXISTED_EMAIL: '이미 가입 된 이메일 입니다.',
+      REQUIRED_NAME: '닉네임을 입력해주세요.',
+      REQUIRED_EMAIL: '닉네임을 입력해주세요.',
+      REQUIRED_PASSWORD: '비밀번호를 입력해 주세요.',
+      INVALID_EMAIL: '이메일 형식에 맞지 않습니다.',
     },
     SIGN_IN: {
       SUCCEED: '로그인에 성공했습니다.',
@@ -18,7 +22,15 @@ export const MESSAGES_CONSTANT = {
     STRATEGY: {
       UNAUTHORIZED: '일치하는 인증 정보가 없습니다.',
     },
+    UPDATE_USER_PASSWORD: {
+      NOT_MATCHED_NEW_PASSWORD: '새 비밀번호가 일치하지 않습니다.',
+      SUCCEED: '비밀번호가 성공적으로 변경되었습니다.',
+    },
+    DELETE_USER: {
+      SUCCEED: '사용자 계정이 성공적으로 삭제되었습니다.',
+    },
   },
+
   BOARD: {
     COMMON: {
       NAME: {
@@ -45,8 +57,8 @@ export const MESSAGES_CONSTANT = {
     },
     DELETE_BOARD: {
       SUCCEED: '보드 삭제에 성공했습니다',
-      NOT_FOUND: '존재하지 않은 보드입니다.'
-    }
+      NOT_FOUND: '존재하지 않은 보드입니다.',
+    },
   },
   LIST: {
     COMMON: {
@@ -73,6 +85,12 @@ export const MESSAGES_CONSTANT = {
         INVALID_TYPE:
           '비밀번호는 영문 알파벳 대,소문자, 숫자, 특수문자(!@#$%^&*)를 포함해서 6자리 이상으로 입력해야 합니다.',
       },
+    },
+    CONTROLLER: {
+      FIND_ME: '내 정보 조회에 성공했습니다.',
+    },
+    SERVICE: {
+      NOT_FOUND_USER: '사용자를 찾을 수 없습니다.',
     },
   },
 };
