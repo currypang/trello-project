@@ -9,6 +9,7 @@ import { SignInDto } from './dtos/sign-in.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UpdateUserPasswordDto } from 'src/user/dtos/update-user-password.dto';
+import { DeleteUserDto } from 'src/user/dtos/delete-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -18,6 +19,16 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
     private readonly jwtService: JwtService
   ) {}
+
+  private async hashingPassword(password: string): Promise<string> {
+    return bcrypt.hash(password, 10);
+  }
+  private async comparePassword(inputPassword: string, password: string): Promise<void> {
+    const isCurrentPasswordValid = bcrypt.compareSync(inputPassword, password);
+    if (!isCurrentPasswordValid) {
+      throw new UnauthorizedException('현재 비밀번호가 일치하지 않습니다.');
+    }
+  }
   async signUp({ email, password, confirmPassword, username }: SignUpDto) {
     const isMatched = password === confirmPassword;
     if (!isMatched) {
@@ -29,7 +40,7 @@ export class AuthService {
       throw new BadRequestException('이미 가입 된 이메일 입니다.');
     }
 
-    const hashedPassword = bcrypt.hashSync(password, 10);
+    const hashedPassword = await this.hashingPassword(password);
 
     const user = this.userRepository.create({
       email,
@@ -45,12 +56,10 @@ export class AuthService {
       where: { email },
       select: { id: true, password: true, email: true },
     });
-
-    const isPasswordMatched = bcrypt.compareSync(password, user?.password ?? '');
-
-    if (!user || !isPasswordMatched) {
+    if (!user) {
       return null;
     }
+    await this.comparePassword(password, user.password);
 
     return { id: user.id, email: user.email };
   }
@@ -73,19 +82,32 @@ export class AuthService {
       throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
     }
 
-    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
-    if (!isCurrentPasswordValid) {
-      throw new UnauthorizedException('현재 비밀번호가 일치하지 않습니다.');
-    }
+    await this.comparePassword(currentPassword, user.password);
 
     const isMatched = newPassword === confirmNewPassword;
     if (!isMatched) {
       throw new BadRequestException('새 비밀번호가 일치하지 않습니다.');
     }
 
-    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    const hashedNewPassword = await this.hashingPassword(newPassword);
     await this.userRepository.update(userId, { password: hashedNewPassword });
 
     return { message: '비밀번호가 성공적으로 변경되었습니다.' };
+  }
+
+  async deleteUser(userId: number, deleteUserDto: DeleteUserDto) {
+    const { password } = deleteUserDto;
+
+    const user = await this.userRepository.findOne({ where: { id: userId }, select: { password: true } });
+
+    if (!user) {
+      throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
+    }
+
+    await this.comparePassword(password, user.password);
+
+    await this.userRepository.delete(userId);
+
+    return { message: '사용자 계정이 성공적으로 삭제되었습니다.' };
   }
 }

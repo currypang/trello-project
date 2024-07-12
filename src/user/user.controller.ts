@@ -1,9 +1,10 @@
-import { Body, Controller, Get, HttpStatus, Patch, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Patch, Request, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UpdateUserPasswordDto } from './dtos/update-user-password.dto';
 import { AuthService } from 'src/auth/auth.service';
+import { DeleteUserDto } from './dtos/delete-user.dto';
 
 @ApiTags('유저')
 @Controller('users')
@@ -32,6 +33,19 @@ export class UserController {
   async updatePassword(@Request() req, @Body() updateUserPasswordDto: UpdateUserPasswordDto) {
     const userId = req.user.id;
     const result = await this.authService.updateUserPassword(userId, updateUserPasswordDto);
+    return {
+      statusCode: HttpStatus.OK,
+      message: result.message,
+    };
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @Delete('/me')
+  async deleteUser(@Request() req, @Body() deleteUserDto: DeleteUserDto) {
+    const userId = req.user.id;
+    const result = await this.authService.deleteUser(userId, deleteUserDto);
+
     return {
       statusCode: HttpStatus.OK,
       message: result.message,
