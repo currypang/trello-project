@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import _ from 'lodash';
+import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 
 @Injectable()
 export class UserService {
@@ -15,7 +16,7 @@ export class UserService {
     const user = await this.userRepository.findOneBy({ id });
 
     if (_.isNil(user)) {
-      throw new NotFoundException('사용자를 찾을 수 없습니다.');
+      throw new NotFoundException(MESSAGES_CONSTANT.USER.SERVICE.NOT_FOUND_USER);
     }
 
     return user;

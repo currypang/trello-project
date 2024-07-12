@@ -10,6 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UpdateUserPasswordDto } from 'src/user/dtos/update-user-password.dto';
 import { DeleteUserDto } from 'src/user/dtos/delete-user.dto';
+import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 
 @Injectable()
 export class AuthService {
@@ -26,18 +27,18 @@ export class AuthService {
   private async comparePassword(inputPassword: string, password: string): Promise<void> {
     const isCurrentPasswordValid = bcrypt.compareSync(inputPassword, password);
     if (!isCurrentPasswordValid) {
-      throw new UnauthorizedException('현재 비밀번호가 일치하지 않습니다.');
+      throw new UnauthorizedException(MESSAGES_CONSTANT.AUTH.SIGN_UP.NOT_MATCHED_PASSWORD);
     }
   }
   async signUp({ email, password, confirmPassword, username }: SignUpDto) {
     const isMatched = password === confirmPassword;
     if (!isMatched) {
-      throw new BadRequestException('비밀번호가 일치 하지않습니다.');
+      throw new BadRequestException(MESSAGES_CONSTANT.AUTH.SIGN_UP.NOT_MATCHED_PASSWORD);
     }
 
     const existUser = await this.userRepository.findOneBy({ email });
     if (!_.isNil(existUser)) {
-      throw new BadRequestException('이미 가입 된 이메일 입니다.');
+      throw new BadRequestException(MESSAGES_CONSTANT.AUTH.SIGN_UP.EXISTED_EMAIL);
     }
 
     const hashedPassword = await this.hashingPassword(password);
@@ -79,20 +80,20 @@ export class AuthService {
     const user = await this.userRepository.findOne({ where: { id: userId }, select: { password: true } });
 
     if (_.isNil(user)) {
-      throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
+      throw new UnauthorizedException(MESSAGES_CONSTANT.AUTH.STRATEGY.UNAUTHORIZED);
     }
 
     await this.comparePassword(currentPassword, user.password);
 
     const isMatched = newPassword === confirmNewPassword;
     if (!isMatched) {
-      throw new BadRequestException('새 비밀번호가 일치하지 않습니다.');
+      throw new BadRequestException(MESSAGES_CONSTANT.AUTH.UPDATE_USER_PASSWORD.NOT_MATCHED_NEW_PASSWORD);
     }
 
     const hashedNewPassword = await this.hashingPassword(newPassword);
     await this.userRepository.update(userId, { password: hashedNewPassword });
 
-    return { message: '비밀번호가 성공적으로 변경되었습니다.' };
+    return { message: MESSAGES_CONSTANT.AUTH.UPDATE_USER_PASSWORD.SUCCEED };
   }
 
   async deleteUser(userId: number, deleteUserDto: DeleteUserDto) {
@@ -101,13 +102,13 @@ export class AuthService {
     const user = await this.userRepository.findOne({ where: { id: userId }, select: { password: true } });
 
     if (!user) {
-      throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
+      throw new UnauthorizedException(MESSAGES_CONSTANT.AUTH.STRATEGY.UNAUTHORIZED);
     }
 
     await this.comparePassword(password, user.password);
 
     await this.userRepository.delete(userId);
 
-    return { message: '사용자 계정이 성공적으로 삭제되었습니다.' };
+    return { message: MESSAGES_CONSTANT.AUTH.DELETE_USER.SUCCEED };
   }
 }

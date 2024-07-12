@@ -4,6 +4,7 @@ import { SignUpDto } from './dtos/sign-up.dto';
 import { SignInDto } from './dtos/sign-in.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
+import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 @ApiTags('인증')
 @Controller('auth')
 export class AuthController {
@@ -19,7 +20,7 @@ export class AuthController {
     const data = await this.authService.signUp(signUpDto);
     return {
       statusCode: HttpStatus.CREATED,
-      message: '회원가입에 성공했습니다.',
+      message: MESSAGES_CONSTANT.AUTH.SIGN_UP.SUCCEED,
       data,
     };
   }
@@ -37,7 +38,7 @@ export class AuthController {
 
     return {
       statusCode: HttpStatus.OK,
-      message: '로그인에 성공했습니다.',
+      message: MESSAGES_CONSTANT.AUTH.SIGN_IN.SUCCEED,
       data,
     };
   }

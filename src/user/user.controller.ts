@@ -5,6 +5,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UpdateUserPasswordDto } from './dtos/update-user-password.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { DeleteUserDto } from './dtos/delete-user.dto';
+import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 
 @ApiTags('유저')
 @Controller('users')
@@ -23,7 +24,7 @@ export class UserController {
 
     return {
       statusCode: HttpStatus.OK,
-      message: '내 정보 조회에 성공했습니다.',
+      message: MESSAGES_CONSTANT.USER.CONTROLLER.FIND_ME,
       data: user,
     };
   }
