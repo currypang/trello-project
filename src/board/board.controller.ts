@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Request, UseGuards } from '@nestjs/common';
 import { BoardService } from './board.service';
 import { CreateBoardDto } from './dto/create-board.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UpdateBoardDto } from './dto/update-board.dto';
 import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @ApiTags('보드')
 @Controller('board')
@@ -13,11 +14,17 @@ export class BoardController {
     /**
      * 보드 생성
      * @param createBoardDto 
+     * @param req 
      * @returns 
      */
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
     @Post()
-    async create(@Body() createBoardDto: CreateBoardDto){
-        const data = await this.boardService.create(createBoardDto)
+    async create(@Body() createBoardDto: CreateBoardDto,
+                @Request() req
+                ){
+        const data = await this.boardService.create(req.user.id,createBoardDto)
+        console.log(req.user)
         return{
             statusCode:HttpStatus.CREATED,
             message:MESSAGES_CONSTANT.BOARD.CREATE_BOARD.SUCCEED,

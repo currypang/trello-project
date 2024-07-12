@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpStatus, Patch, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Patch, Post, Query, Request, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -6,12 +6,14 @@ import { UpdateUserPasswordDto } from './dtos/update-user-password.dto';
 import { AuthService } from 'src/auth/auth.service';
 import { DeleteUserDto } from './dtos/delete-user.dto';
 import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
+import { EmailService } from 'src/email/email.service';
 
 @ApiTags('유저')
 @Controller('users')
 export class UserController {
   constructor(
     private readonly userService: UserService,
+    private readonly emailService: EmailService,
     private readonly authService: AuthService
   ) {}
 
@@ -50,6 +52,27 @@ export class UserController {
     return {
       statusCode: HttpStatus.OK,
       message: result.message,
+    };
+  }
+
+  // 이메일 인증
+  @Post('/email')
+  @UseGuards(JwtAuthGuard)
+  async sendEmail(@Request() req, @Body() { email }) {
+    const userId = req.user.id;
+    this.emailService.sendMemberJoinVerification(email, userId);
+    return {
+      statusCode: HttpStatus.OK,
+      message: '이메일로 인증링크를 보냈습니다.',
+    };
+  }
+  // 이메일 인증 링크 확인
+  @Post('/email/email-verify')
+  async verifyEmail(@Query() query) {
+    this.emailService.verifyEmail(query);
+    return {
+      statusCode: HttpStatus.OK,
+      message: '메일 인증이 완료되었습니다.',
     };
   }
 }
