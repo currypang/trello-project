@@ -12,6 +12,7 @@ import { BoardModule } from './board/board.module';
 import { ActivityModule } from './activity/activity.module';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
+import { InvitationModule } from './invitation/invitation.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { EmailModule } from './email/email.module';
     ActivityModule,
     AuthModule,
     EmailModule,
+    InvitationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
