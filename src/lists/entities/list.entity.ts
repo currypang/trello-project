@@ -15,12 +15,12 @@ import {
 
 @Entity('lists')
 export class List {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
 
   @IsNotEmpty()
   @IsNumber()
-  @Column()
+  @Column({ unsigned: true })
   boardId: number;
 
   /**스웨거 테스트

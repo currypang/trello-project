@@ -18,17 +18,20 @@ import listFactory from './factories/list.factory';
 import CardSeeder from './seeds/card.seeder';
 import cardFactory from './factories/card.factory';
 import cardAssaignessFactory from './factories/card-assaigness.factory';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 (async () => {
   const options: DataSourceOptions & SeederOptions = {
     namingStrategy: new SnakeNamingStrategy(),
     type: 'mysql',
-    host: 'express-database.cxk8yoee01tj.ap-northeast-2.rds.amazonaws.com',
-    port: 3306,
-    username: 'root',
-    password: '0213porta',
-    database: 'luke',
-    synchronize: true,
+    host: process.env.DB_HOST,
+    port: parseInt(process.env.DB_PORT, 10),
+    username: process.env.DB_USERNAME,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    synchronize: JSON.parse(process.env.DB_SYNC),
     entities: [User, Board, BoardMembers, List, Card, CardAssigness, Activity],
     seeds: [UserSeeder, BoardSeeder, ListSeeder, CardSeeder],
     factories: [UserFactory, boardFactory, listFactory, cardFactory, cardAssaignessFactory],
