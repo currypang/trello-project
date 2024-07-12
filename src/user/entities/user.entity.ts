@@ -36,6 +36,9 @@ export class User {
   @Column({ select: false })
   password: string;
 
+  @Column({ default: false })
+  isVerify: boolean;
+
   @CreateDateColumn()
   createdAt: Date;
 
