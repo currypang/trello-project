@@ -60,4 +60,22 @@ export class ListsController {
       data,
     };
   }
+  /**
+   * 리스트 수정
+   * @param listId
+   * @param updateListDto
+   * @returns
+   */
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @Patch(':listId/order')
+  async updateOrder(@Param('listId', ParseIntPipe) listId: number, @Body() updateListDto: UpdateListDto) {
+    const data = await this.listsService.updateOrder(listId, updateListDto);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: '리스트 수정에 성공했습니다.',
+      data,
+    };
+  }
 }
