@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, IsStrongPassword } from 'class-validator';
 import { BoardMembers } from 'src/board/entities/board-member.entity';
 import {
   Column,
@@ -25,6 +25,13 @@ export class User {
   @Column({ unique: true })
   email: string;
 
+  @IsNotEmpty({ message: '이메일을 입력해 주세요.' })
+  @IsStrongPassword(
+    { minLength: 6 },
+    {
+      message: '비밀번호는 영문 알파벳 대,소문자, 숫자, 특수문자(!@#$%^&*)를 포함해서 6자리 이상으로 입력해야 합니다.',
+    }
+  )
   @Column({ select: false })
   password: string;
 
