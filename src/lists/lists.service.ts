@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { List } from './entities/list.entity';
 import { Board } from '../board/entities/board.entity';
+import { UpdateListOrderDto } from './dto/update-list-order.dto';
 
 @Injectable()
 export class ListsService {
@@ -80,32 +81,32 @@ export class ListsService {
     return list;
   }
   //리스트 순서 변경
-  async updateOrder(id: number) {
-    // updateListDto: UpdateListDto
-    //보드id를 받아서 순차적으로 리스트 만들기
+  async updateOrder(id: number, updateListOrderDto: UpdateListOrderDto) {
+    const { position } = updateListOrderDto;
+    // 리스트 id를 받아 리스트 정보를 가져오기
     const listToUpdateOrder = await this.listRepository.findOneBy({ id });
     if (!listToUpdateOrder) {
       throw new NotFoundException('리스트를 찾을 수 없습니다.');
     }
-    //리스트에 있는 보드id를 받아서 보스안에 있는 리스트 추출
-    const allListsInBoard = await this.boardRepository.findOne({
-      where: { id: listToUpdateOrder.boardId },
-      relations: ['lists'],
-    });
 
-    const listsArray = allListsInBoard.lists;
-    // console.log('listsArray', listsArray);
+    // 리스트가 속한 보드의 모든 리스트들을 가져오기
+    const allListsInBoard = await (
+      await this.boardRepository.findOne({
+        where: { id: listToUpdateOrder.boardId },
+        relations: ['lists'],
+      })
+    ).lists;
+    //바꾸려는 위치의 리스트의 position값
+    const indexElement = allListsInBoard[position].position;
+    const currentIndexPosition = listToUpdateOrder.position;
+    // const add = listsArray[index];
+    console.log('indexElement', indexElement);
+    console.log('currentIndexPosition', currentIndexPosition);
 
-    const index = 0;
-    const add = listsArray[index];
-    console.log('add', add);
+    //해당 보드의 deletedAt이 값이 없는 애들의 갯수 파악
+    //가상의 인덱스 위치잡기 +
+    // const index = allListsInBoard[position], allListsInBoard[id];
 
-    // 보드
-    return add; // 이러면 인덱스가 나옴
-    // Object.assign(listToUpdate, updateListDto);
-
-    // const list = await this.listRepository.save(listToUpdate);
-
-    // return list;
+    return;
   }
 }

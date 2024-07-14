@@ -34,7 +34,7 @@ export class List {
 
   /**스웨거 테스트
    * 리스트 위치 번호
-   *@example 12000
+   *@example 2
    */
 
   @IsNumber()

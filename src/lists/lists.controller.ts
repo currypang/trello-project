@@ -4,6 +4,7 @@ import { CreateListDto } from './dto/create-list.dto';
 import { UpdateListDto } from './dto/update-list.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { UpdateListOrderDto } from './dto/update-list-order.dto';
 
 @ApiTags('리스트')
 @Controller('lists')
@@ -70,9 +71,8 @@ export class ListsController {
   @UseGuards(AuthGuard('jwt'))
   @Patch(':listId/order')
   // updateListDto: UpdateListDto
-  async updateOrder(@Param('listId', ParseIntPipe) listId: number) {
-    const data = await this.listsService.updateOrder(listId);
-    // updateListDto
+  async updateOrder(@Param('listId', ParseIntPipe) listId: number, @Body() updateListOrderDto: UpdateListOrderDto) {
+    const data = await this.listsService.updateOrder(listId, updateListOrderDto);
     return {
       statusCode: HttpStatus.OK,
       message: '리스트 순서 변경에 성공했습니다.',
