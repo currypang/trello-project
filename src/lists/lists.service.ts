@@ -6,7 +6,6 @@ import { Repository } from 'typeorm';
 import { List } from './entities/list.entity';
 import { Board } from '../board/entities/board.entity';
 import { UpdateListOrderDto } from './dto/update-list-order.dto';
-import { number } from 'joi';
 
 @Injectable()
 export class ListsService {
@@ -109,10 +108,10 @@ export class ListsService {
 
     //포지션 계산
     const newPosition = !previousTargetPosition
-      ? targetPosition + Math.random()
-      : targetPosition - previousTargetPosition === 2000
+      ? Math.trunc(targetPosition * Math.random())
+      : targetPosition - previousTargetPosition < 2000
         ? previousTargetPosition + (targetPosition - previousTargetPosition) * Math.random() //데시멀 사용
-        : previousTargetPosition + (targetPosition - previousTargetPosition) * Math.random();
+        : Math.trunc(previousTargetPosition + (targetPosition - previousTargetPosition) * Math.random());
 
     // 리스트의 position 업데이트
     listToUpdateOrder.position = newPosition;
