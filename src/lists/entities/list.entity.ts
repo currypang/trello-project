@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import Decimal from 'decimal.js';
 import { Board } from 'src/board/entities/board.entity';
 import { Card } from 'src/cards/entities/card.entity';
 import {

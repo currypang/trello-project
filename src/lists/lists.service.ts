@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { List } from './entities/list.entity';
 import { Board } from '../board/entities/board.entity';
 import { UpdateListOrderDto } from './dto/update-list-order.dto';
+import { number } from 'joi';
 
 @Injectable()
 export class ListsService {
@@ -89,24 +90,36 @@ export class ListsService {
       throw new NotFoundException('리스트를 찾을 수 없습니다.');
     }
 
-    // 리스트가 속한 보드의 모든 리스트들을 가져오기
-    const allListsInBoard = await (
-      await this.boardRepository.findOne({
-        where: { id: listToUpdateOrder.boardId },
-        relations: ['lists'],
-      })
-    ).lists;
+    // 리스트가 속한 보드의 정보를 가져오기
+    const board = await this.boardRepository.findOne({
+      where: { id: listToUpdateOrder.boardId },
+      relations: ['lists'],
+    });
+    if (!board) {
+      throw new NotFoundException('보드를 찾을 수 없습니다.');
+    }
+    // 보드의 모든 리스트들을 가져오기
+    const listsInBoard = board.lists;
+    listsInBoard.sort((a: List, b: List): number => a.position - b.position);
+
     //바꾸려는 위치의 리스트의 position값
-    const indexElement = allListsInBoard[position].position;
-    const currentIndexPosition = listToUpdateOrder.position;
-    // const add = listsArray[index];
-    console.log('indexElement', indexElement);
-    console.log('currentIndexPosition', currentIndexPosition);
+    const targetPosition = listsInBoard[position].position;
+    //바꾸는 위치 이전 포지션 값
+    const previousTargetPosition = listsInBoard[position - 1]?.position;
 
-    //해당 보드의 deletedAt이 값이 없는 애들의 갯수 파악
-    //가상의 인덱스 위치잡기 +
-    // const index = allListsInBoard[position], allListsInBoard[id];
+    //포지션 계산
+    const newPosition = !previousTargetPosition
+      ? targetPosition + Math.random()
+      : targetPosition - previousTargetPosition === 2000
+        ? previousTargetPosition + (targetPosition - previousTargetPosition) * Math.random() //데시멀 사용
+        : previousTargetPosition + (targetPosition - previousTargetPosition) * Math.random();
 
-    return;
+    // 리스트의 position 업데이트
+    listToUpdateOrder.position = newPosition;
+
+    Object.assign(listToUpdateOrder, { position: newPosition });
+
+    const updatedList = await this.listRepository.save(listToUpdateOrder);
+    return updatedList;
   }
 }
