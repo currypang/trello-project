@@ -1,12 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Board } from './entities/board.entity';
-import { FindOptionsOrderValue, Repository } from 'typeorm';
+import { DataSource, Like, Repository } from 'typeorm';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
 import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 import { BOARD_CONSTANT } from 'src/constants/board.constants';
 import { BoardMembers } from './entities/board-member.entity';
+import { FindAllBoardDto } from './dto/find-all-board.dto';
 
 @Injectable()
 export class BoardService {
@@ -14,38 +15,69 @@ export class BoardService {
         @InjectRepository(Board)
         private readonly boardRepository: Repository<Board>,
         @InjectRepository(BoardMembers) 
-        private readonly boardMemberRepository: Repository<BoardMembers>
+        private readonly boardMemberRepository: Repository<BoardMembers>,
+        private dataSource:DataSource
     ){}
 
     async create(userId:number,createBoardDto:CreateBoardDto){
         const {name, background_color} = createBoardDto;
-        const board = await this.boardRepository.save({
+        const queryRunner = this.dataSource.createQueryRunner()
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try{
+        const board = this.boardRepository.create({
             name:name,
             background_color:background_color,
             ownerId: userId
-            // 추후 유저 생성되면 생성한 유저가 owner_id에 들어가게하기
         })
-        await this.boardMemberRepository.save({
+        await queryRunner.manager.save(board)
+        const member = this.boardMemberRepository.create({
             userId,
             boardId:board.id
         })
-        
+        queryRunner.manager.save(member)
+        await queryRunner.commitTransaction();
         return board
+        } catch(error){
+            await queryRunner.rollbackTransaction();
+            throw new InternalServerErrorException('트랜잭션 실패')
+        } finally{
+            await queryRunner.release();
+        }
     }
 
-    async findAll(){
+    async findAll({keyword} : FindAllBoardDto,userId:number){
+        const existMember = await this.boardMemberRepository.find({
+            where:{userId: userId}
+        })
         const boards = await this.boardRepository.find({
+            where:{...(keyword && {name:Like(`%${keyword}%`)})},
             order:{
-                id: BOARD_CONSTANT.ORDER.DESC as FindOptionsOrderValue
+                id: BOARD_CONSTANT.ORDER.DESC 
+            },
+        })
+        const boardsId = existMember.map((member)=> {
+            if (member.userId === userId){
+                return member.boardId
             }
         })
-        return boards
+        const newBoards = boards.filter((board) => {
+            if(boardsId.includes(board.id)){
+                return board
+            }
+        })
+        if(newBoards.length === 0){
+            throw new NotFoundException('사용중인 보드가 없습니다.')
+        }
+        return newBoards
     }
 
-    async findOne(id:number){
+    async findOne(id:number, userId:number){
         const board = await this.boardRepository.findOne({
-            where: {id},
-            //relations:{} 추후 카드와 리스트가져오기위해 주석처리함
+            relations:{members: true},
+            where: {id, members:{
+                userId:userId
+            }},
         })
         if(!board){
             throw new NotFoundException(MESSAGES_CONSTANT.BOARD.FIND_DETAIL_BOARD.NOT_FOUND)
@@ -53,9 +85,15 @@ export class BoardService {
         return board
     }
 
-    async update(id:number, updateBoardDto:UpdateBoardDto){
+    async update(id:number,updateBoardDto:UpdateBoardDto,userId:number ){
+        
         const board = await this.boardRepository.findOne({
-            where:{id}
+            relations: {
+                members: true
+            },
+            where:{id, members:{
+                userId:userId
+            }}
         })
         if(!board){
             throw new NotFoundException(MESSAGES_CONSTANT.BOARD.UPDATE_BOARD.NOT_FOUND)
@@ -65,15 +103,13 @@ export class BoardService {
             ...board,
             ...updateBoardDto
         }
-
-
         const  data = await this.boardRepository.save(newboard)
         return data
     }
     
-    async delete( id: number){
+    async delete( id: number, userId:number){
         const board = await this.boardRepository.findOne({
-            where: {id}
+            where: {id, ownerId:userId}
         })
         if(!board){
             throw new NotFoundException(MESSAGES_CONSTANT.BOARD.DELETE_BOARD.NOT_FOUND)

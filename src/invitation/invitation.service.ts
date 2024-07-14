@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import Mail from 'nodemailer/lib/mailer';
@@ -7,6 +7,7 @@ import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { BoardMembers } from 'src/board/entities/board-member.entity';
 import { JwtService } from '@nestjs/jwt';
+import { Board } from 'src/board/entities/board.entity';
 
 
 interface EmailOptions {
@@ -26,7 +27,9 @@ export class InvitationService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(BoardMembers)
-    private readonly boardMemberRepository:Repository<BoardMembers>
+    private readonly boardMemberRepository:Repository<BoardMembers>,
+    @InjectRepository(Board)
+    private readonly boardRepository:Repository<Board>
   ){
     this.transporter = nodemailer.createTransport({
       host: this.configService.get('INVITE_HOST'),
@@ -41,7 +44,14 @@ export class InvitationService {
   
   
 
-  async sendInvitieVertification(emailAddress: string, boardId:number){
+  async sendInvitieVertification(emailAddress: string, boardId:number,userId:number){
+    const board = await this.boardRepository.find({
+          where: {id:boardId,ownerId:userId}
+    })
+      if(board.length === 0){
+        throw new NotFoundException('보드가 존재하지 않거나,초대권한이 없습니다.')
+      }
+
     const baseUrl = this.configService.get('INVITE_BASE_URL')
     const payload = {boardId:boardId, email:emailAddress }
     const token =await this.jwtService.signAsync(payload, {secret: this.configService.get('ACCESS_TOKEN_SECRET')})
@@ -59,7 +69,7 @@ export class InvitationService {
     return await this.transporter.sendMail(mailOptions)
   }
 
-   async verifyInvite(query){
+   async verifyInvite(query:string){
     const token = query
     const boardId = await this.jwtService.decode(token).boardId
     const userEmail = await this.jwtService.decode(token).email
