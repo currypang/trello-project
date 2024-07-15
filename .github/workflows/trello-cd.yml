@@ -37,7 +37,7 @@ jobs:
             cd /home/ubuntu/trello-project
 
             # main 브랜치로 이동
-            git switch main
+            git switch dev
 
             # 최신 소스 코드를 가져옴
             git pull
