@@ -1,9 +1,9 @@
-name: Sparta Nest.js CD Build
+name: trello Nest.js CD Build
 
 on:
   workflow_dispatch: # 수동 실행
   workflow_run: # 특정 workflow가 실행됐을 때
-    workflows: ['Sparta Nest.js CD Build'] # CI workflow
+    workflows: ['trello nestJS StartCI'] # CI workflow
     types: [completed] # 완료 되었을 때
     branches: [feat/workflow] # main 브랜치
 
