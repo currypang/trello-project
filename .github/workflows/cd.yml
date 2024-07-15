@@ -5,7 +5,7 @@ on:
   workflow_run:
     workflows: ['trello nestJS CD']
     types: [completed] # 완료 되었을 때
-    branches: [main, dev] # main 브랜치
+    branches: [CICD, CICD] # main 브랜치
 
 jobs:
   deploy:

@@ -3,10 +3,10 @@ name: trello nestJS CI
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches: [CICD]
   pull_request:
     types: [opened, reopened, synchronize]
-    branches: [main, dev]
+    branches: [CICD, CICD]
 
 jobs:
   ci-test:
