@@ -35,19 +35,19 @@ export class Card {
   @Column({ nullable: true })
   color: string;
 
-  @Column({ type: 'double' })
+  @Column({ type: 'decimal' , precision: 10, scale : 4 })
   position: number;
 
   @Column({ type: 'boolean' })
-  isExpired: boolean;
+  isExpired?: boolean;
 
   @IsDate()
   @Column({ type: 'date', nullable: true })
-  startDate: Date;
+  startDate?: Date;
 
   @IsDate()
   @Column({ type: 'date', nullable: true })
-  dueDate: Date;
+  dueDate?: Date;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -56,7 +56,7 @@ export class Card {
   updatedAt: Date;
 
   @DeleteDateColumn()
-  deletedAt: Date;
+  deletedAt?: Date;
 
   @OneToMany(() => CardAssigness, (cardAssigness) => cardAssigness.card, { cascade: true })
   cardAssigness: CardAssigness[];
