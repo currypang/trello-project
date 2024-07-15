@@ -2,10 +2,11 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { CreateListDto } from './dto/create-list.dto';
 import { UpdateListDto } from './dto/update-list.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { List } from './entities/list.entity';
 import { Board } from '../board/entities/board.entity';
 import { UpdateListOrderDto } from './dto/update-list-order.dto';
+import Decimal from 'decimal.js';
 
 @Injectable()
 export class ListsService {
@@ -13,7 +14,8 @@ export class ListsService {
     @InjectRepository(List)
     private readonly listRepository: Repository<List>,
     @InjectRepository(Board)
-    private readonly boardRepository: Repository<Board>
+    private readonly boardRepository: Repository<Board>,
+    private readonly dataSource: DataSource
   ) {}
 
   //리스트 생성
@@ -29,17 +31,15 @@ export class ListsService {
     }
 
     // 트랜잭션 시작
-    return await this.listRepository.manager.transaction(async (transactionalEntityManager) => {
+    return await this.dataSource.transaction(async (transactionalEntityManager: EntityManager) => {
       // 보드 ID에서 마지막 리스트 찾음
       const lastList = await transactionalEntityManager.findOne(List, {
         where: { boardId },
         order: { position: 'DESC' },
       });
-
-      // 리스트 위치 지정
       const newPosition = lastList
-        ? lastList.position + Math.trunc(Math.random() * 20000)
-        : Math.trunc(Math.random() * 10000);
+        ? new Decimal(lastList.position).plus(new Decimal(Math.random()).times(20000)).toNumber()
+        : new Decimal(Math.random()).times(10000).toNumber();
 
       // 새로운 리스트 생성
       const list = transactionalEntityManager.create(List, {
@@ -83,42 +83,50 @@ export class ListsService {
   //리스트 순서 변경
   async updateOrder(id: number, updateListOrderDto: UpdateListOrderDto) {
     const { position } = updateListOrderDto;
-    // 리스트 id를 받아 리스트 정보를 가져오기
-    const listToUpdateOrder = await this.listRepository.findOneBy({ id });
-    if (!listToUpdateOrder) {
-      throw new NotFoundException('리스트를 찾을 수 없습니다.');
-    }
 
-    // 리스트가 속한 보드의 정보를 가져오기
-    const board = await this.boardRepository.findOne({
-      where: { id: listToUpdateOrder.boardId },
-      relations: ['lists'],
+    return await this.dataSource.transaction(async (transactionalEntityManager: EntityManager) => {
+      // 리스트 id를 받아 리스트 정보를 가져오기
+      const listToUpdateOrder = await transactionalEntityManager.findOne(List, { where: { id } });
+      if (!listToUpdateOrder) {
+        throw new NotFoundException('리스트를 찾을 수 없습니다.');
+      }
+
+      // 리스트가 속한 보드의 정보를 가져오기
+      const board = await transactionalEntityManager.findOne(Board, {
+        where: { id: listToUpdateOrder.boardId },
+        relations: ['lists'],
+      });
+      if (!board) {
+        throw new NotFoundException('보드를 찾을 수 없습니다.');
+      }
+
+      // 보드의 모든 리스트들을 가져오기
+      const listsInBoard = board.lists;
+      listsInBoard.sort((a: List, b: List): number => a.position - b.position);
+
+      // 바꾸려는 위치의 리스트의 position값
+      const targetPosition = listsInBoard[position].position;
+      console.log(targetPosition);
+      // 바꾸는 위치 이전 포지션 값
+      const previousTargetPosition = listsInBoard[position - 1]?.position;
+      console.log(previousTargetPosition);
+
+      // 포지션 계산
+      const newPosition = previousTargetPosition
+        ? new Decimal(new Decimal(targetPosition).minus(previousTargetPosition))
+            .times(Math.random())
+            .plus(previousTargetPosition)
+            .toNumber()
+        : new Decimal(targetPosition).times(Math.random()).toNumber();
+
+      // 리스트의 position 업데이트
+      listToUpdateOrder.position = newPosition;
+
+      Object.assign(listToUpdateOrder, { position: newPosition });
+
+      const updatedList = await transactionalEntityManager.save(List, listToUpdateOrder);
+
+      return updatedList;
     });
-    if (!board) {
-      throw new NotFoundException('보드를 찾을 수 없습니다.');
-    }
-    // 보드의 모든 리스트들을 가져오기
-    const listsInBoard = board.lists;
-    listsInBoard.sort((a: List, b: List): number => a.position - b.position);
-
-    //바꾸려는 위치의 리스트의 position값
-    const targetPosition = listsInBoard[position].position;
-    //바꾸는 위치 이전 포지션 값
-    const previousTargetPosition = listsInBoard[position - 1]?.position;
-
-    //포지션 계산
-    const newPosition = !previousTargetPosition
-      ? Math.trunc(targetPosition * Math.random())
-      : targetPosition - previousTargetPosition < 2000
-        ? previousTargetPosition + (targetPosition - previousTargetPosition) * Math.random() //데시멀 사용
-        : Math.trunc(previousTargetPosition + (targetPosition - previousTargetPosition) * Math.random());
-
-    // 리스트의 position 업데이트
-    listToUpdateOrder.position = newPosition;
-
-    Object.assign(listToUpdateOrder, { position: newPosition });
-
-    const updatedList = await this.listRepository.save(listToUpdateOrder);
-    return updatedList;
   }
 }
