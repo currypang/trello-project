@@ -1,4 +1,4 @@
-name: Sparta Nest.js CD
+name: Sparta Nest.js CD Build
 
 on:
   workflow_dispatch: # 수동 실행
