@@ -50,11 +50,7 @@ jobs:
             echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
             echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-            if [ "${{ secrets.DB_SYNC }}" = "true" ]; then
-            echo "DB_SYNC=true" >> .env
-          else
-            echo "DB_SYNC=false" >> .env
-          fi
+            echo "DB_SYNC=$(if [ "${{ secrets.DB_SYNC }}" == "true" ]; then echo true; else echo false; fi)" >> .env
             echo "ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}" >> .env
             echo "ACCESS_TOKEN_EXPIRES=${{ secrets.ACCESS_TOKEN_EXPIRES }}" >> .env
             echo "REFRESH_TOKEN_SECRET=${{ secrets.REFRESH_TOKEN_SECRET }}" >> .env
