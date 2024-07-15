@@ -31,7 +31,7 @@ jobs:
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
             [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
-
+            export PATH="$NVM_DIR/versions/node/$(node -v)/bin:$PATH"
 
             # 프로젝트 폴더로 이동
             cd /home/ubuntu/trello-project
@@ -51,7 +51,7 @@ jobs:
             echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
             echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
-            echo "DB_SYNC=${{ secrets.DB_SYNC }}" >> .env
+            echo "DB_SYNC=${{ secrets.DB_SYNC }}"  | sed 's/"//g'  >> .env
             echo "ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}" >> .env
             echo "ACCESS_TOKEN_EXPIRES=${{ secrets.ACCESS_TOKEN_EXPIRES }}" >> .env
             echo "REFRESH_TOKEN_SECRET=${{ secrets.REFRESH_TOKEN_SECRET }}" >> .env
