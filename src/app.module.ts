@@ -13,6 +13,7 @@ import { ActivityModule } from './activity/activity.module';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
 import { InvitationModule } from './invitation/invitation.module';
+import { SseModule } from './sse/sse.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { InvitationModule } from './invitation/invitation.module';
     AuthModule,
     EmailModule,
     InvitationModule,
+    SseModule,
   ],
   controllers: [AppController],
   providers: [AppService],
