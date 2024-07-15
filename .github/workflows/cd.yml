@@ -1,4 +1,4 @@
-name: trello nestJS CD
+name: trello nestJS Power CD
 
 on:
   workflow_dispatch:
