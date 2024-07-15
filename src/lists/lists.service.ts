@@ -55,10 +55,10 @@ export class ListsService {
   }
   //리스트 수정(이름)
   async update(id: number, updateListDto: UpdateListDto) {
-    const listToUpdate = await this.listRepository.findOneBy({ id });
+    const listToUpdate = await this.listRepository.findOne({ where: { id, deletedAt: null } });
 
     if (!listToUpdate) {
-      return;
+      throw new NotFoundException('리스트를 찾을 수 없습니다.');
     }
 
     Object.assign(listToUpdate, updateListDto);
