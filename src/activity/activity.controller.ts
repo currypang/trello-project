@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards } from '@nestjs/common';
 import { ActivityService } from './activity.service';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
 
@@ -7,14 +8,15 @@ import { UpdateActivityDto } from './dto/update-activity.dto';
 export class ActivityController {
   constructor(private readonly activityService: ActivityService) {}
 
-  @Post()
-  create(@Body() createActivityDto: CreateActivityDto) {
-    return this.activityService.create(createActivityDto);
+  @UseGuards(JwtAuthGuard)
+  @Post('cards/:cardId')
+  create(@Body() createActivityDto: CreateActivityDto, @Request() req, @Param('id') cardId: string) {
+    return this.activityService.create(createActivityDto, req.user.id, +cardId);
   }
 
-  @Get()
-  findAll() {
-    return this.activityService.findAll();
+  @Get('cards/:cardId')
+  findAll(@Param('id') cardId: string) {
+    return this.activityService.findAll(+cardId);
   }
 
   @Get(':id')
@@ -22,13 +24,15 @@ export class ActivityController {
     return this.activityService.findOne(+id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateActivityDto: UpdateActivityDto) {
-    return this.activityService.update(+id, updateActivityDto);
+  update(@Param('id') id: string, @Body() updateActivityDto: UpdateActivityDto, @Request() req) {
+    return this.activityService.update(+id, updateActivityDto, req.user.id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.activityService.remove(+id);
+  remove(@Param('id') id: string, @Request() req) {
+    return this.activityService.remove(+id, req.user.id);
   }
 }

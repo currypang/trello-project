@@ -8,6 +8,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
+import { IsNotEmpty, IsString } from 'class-validator';
 import { Card } from '../../cards/entities/card.entity';
 import { BoardMembers } from '../../board/entities/board-member.entity';
 
@@ -20,8 +21,10 @@ export class Activity {
   userId: number;
 
   @Column({ unsigned: true })
-  cardId: string;
+  cardId: number;
 
+  @IsString()
+  @IsNotEmpty({ message: '내용을 입력해주세요.' })
   @Column({ type: 'text' })
   content: string;
 
@@ -32,7 +35,7 @@ export class Activity {
   updatedAt: Date;
 
   @DeleteDateColumn()
-  deletedAt: Date;
+  deletedAt?: Date;
 
   @Column({ type: 'boolean' })
   isLog: boolean;

@@ -9,6 +9,8 @@ import { UpdateCardDto } from './dto/update-card.dto';
 import { Card } from './entities/card.entity'
 import { CardAssigness } from './entities/card-assigness.entity'
 import { List } from '../lists/entities/list.entity'
+import { BoardMembers } from 'src/board/entities/board-member.entity'
+
 
 @Injectable()
 export class CardsService {
@@ -16,6 +18,7 @@ export class CardsService {
     @InjectRepository(Card) private cardRepository: Repository<Card>,
     @InjectRepository(CardAssigness) private cardAssignessRepository: Repository<CardAssigness>,
     @InjectRepository(List) private listRepository: Repository<List>,
+    @InjectRepository(BoardMembers) private boardMembersRepository: Repository<BoardMembers>,
   ) {}
 
   async create(createCardDto: CreateCardDto, userId: number) {
@@ -52,9 +55,9 @@ export class CardsService {
         } 
       ] as DeepPartial<CardAssigness>[]
       });
-      await transactionalEntityManager.save(Card, card);
+      const result = await transactionalEntityManager.save(Card, card);
 
-      return card;
+      return result;
     });
   }
 
@@ -86,8 +89,82 @@ export class CardsService {
     return post;
   }
 
+  async createMembers(userId: number, cardId: number) {
+    const cardInfo = await this.findOne(cardId);
+    const listInfo = await this.listRepository.findOneBy({id: cardInfo.listId});
+    const verifyMemberbyId = await this.boardMembersRepository.find({
+      where : {
+        userId,
+        boardId : listInfo.boardId,        
+      }
+    })
+    if (_.isNil(verifyMemberbyId)) {
+      throw new NotFoundException('borad에 존재하지 않는 멤버입니다.');
+    }
 
-  private async verifyCardById(id: number) {
+    const createMember = await this.cardAssignessRepository.delete({
+      userId,
+      cardId,
+    });
+
+    return createMember;
+  }
+
+
+  async deleteMembers(userId: number, cardId: number) {
+    const cardInfo = await this.findOne(cardId);
+    const listInfo = await this.listRepository.findOneBy({id: cardInfo.listId});
+    const verifyMemberbyId = await this.boardMembersRepository.find({
+      where : {
+        userId,
+        boardId : listInfo.boardId,        
+      }
+    })
+    if (_.isNil(verifyMemberbyId)) {
+      throw new NotFoundException('borad에 존재하지 않는 멤버입니다.');
+    }
+
+    const verifyCardMemberbyId = await this.cardAssignessRepository.find({
+      where : {
+        userId,
+        cardId,       
+      }
+    })
+    if (_.isNil(verifyCardMemberbyId)) {
+      throw new NotFoundException('card에 존재하지 않는 멤버입니다.');
+    }
+
+    const deleteMember = await this.cardAssignessRepository.delete({
+      userId,
+      cardId,
+    });
+    
+    return deleteMember;
+  }
+
+  async updateCardDate(id: number, updateCardDto: UpdateCardDto){
+    const { startDate, dueDate } = updateCardDto;
+
+    await this.verifyCardById(id);
+
+    if (!(updateCardDto instanceof UpdateCardDto)) {
+      throw new BadRequestException('Invalid updateCardDto');
+    }
+
+    return await this.cardRepository.update({ id }, {
+      isExpired : false,
+      startDate, 
+      dueDate, } );
+  }
+
+  async updateDateExpire(id: number){
+    await this.verifyCardById(id);
+
+    return await this.cardRepository.update({ id }, { isExpired : true, } );
+  }
+
+
+  async verifyCardById(id: number) {
     const card = await this.cardRepository.findOneBy({ id });
     if (_.isNil(card)) {
       throw new NotFoundException('존재하지 않는 카드입니다.');

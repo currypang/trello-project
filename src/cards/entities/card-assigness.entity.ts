@@ -1,4 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { IsNotEmpty } from 'class-validator';
 import { Card } from './card.entity';
 import { BoardMembers } from '../../board/entities/board-member.entity';
 
@@ -7,6 +8,7 @@ export class CardAssigness {
   @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
 
+  @IsNotEmpty({ message: '유저를 선택해주세요.' })
   @Column({ unsigned: true })
   userId: number;
 
