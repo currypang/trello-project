@@ -65,6 +65,7 @@ export class CardsController {
     return [deleteMembers, log];
   }
 
+  // 카드 일정 수정 및 추가
   @UseGuards(JwtAuthGuard)
   @Patch(':id/Date')
   updateCardDate(@Param('id') id: string, @Body() updateCardDto: UpdateCardDto, @Request() req) {
@@ -73,7 +74,7 @@ export class CardsController {
     return [updateCardDate, log];
   }
 
-
+  // 카드 일정 마감
   @UseGuards(JwtAuthGuard)
   @Patch(':id/DateExpired')
   updateDateExpire(@Param('id') id: string, @Request() req) {
