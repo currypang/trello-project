@@ -25,7 +25,7 @@ jobs:
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 
-            cd /home/ubuntu/trello-projecty
+            cd /home/ubuntu/trello-project
             git fetch
             git switch CICD
             git pull
