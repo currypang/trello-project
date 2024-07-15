@@ -1,4 +1,4 @@
-name: trello nestJS CI
+name: trello nestJS StartCI
 
 on:
   workflow_dispatch:
