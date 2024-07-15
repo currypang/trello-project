@@ -1,4 +1,5 @@
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import Decimal from 'decimal.js';
 import { Board } from 'src/board/entities/board.entity';
 import { Card } from 'src/cards/entities/card.entity';
 import {
@@ -18,6 +19,11 @@ export class List {
   @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
 
+  /**스웨거 테스트
+   * 리스트 보드 아이디
+   * @example "1"
+   */
+
   @IsNotEmpty()
   @IsNumber()
   @Column({ unsigned: true })
@@ -25,7 +31,7 @@ export class List {
 
   /**스웨거 테스트
    * 리스트 이름
-   * @example To do
+   * @example "To do"
    */
   @IsNotEmpty({ message: '리스트 이름을 입력해 주세요.' })
   @IsString()
@@ -34,7 +40,7 @@ export class List {
 
   /**스웨거 테스트
    * 리스트 위치 번호
-   *@example 12000
+   *@example "2"
    */
 
   @IsNumber()

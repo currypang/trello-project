@@ -15,6 +15,7 @@ import { CreateListDto } from './dto/create-list.dto';
 import { UpdateListDto } from './dto/update-list.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { UpdateListOrderDto } from './dto/update-list-order.dto';
 
 @ApiTags('리스트')
 @Controller('lists')
@@ -72,20 +73,19 @@ export class ListsController {
     };
   }
   /**
-   * 리스트 수정
+   * 리스트 순서 변경
    * @param listId
-   * @param updateListDto
+   * @param UpdateListDto
    * @returns
    */
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Patch(':listId/order')
-  async updateOrder(@Param('listId', ParseIntPipe) listId: number, @Body() updateListDto: UpdateListDto) {
-    const data = await this.listsService.updateOrder(listId, updateListDto);
-
+  async updateOrder(@Param('listId', ParseIntPipe) listId: number, @Body() updateListOrderDto: UpdateListOrderDto) {
+    const data = await this.listsService.updateOrder(listId, updateListOrderDto);
     return {
       statusCode: HttpStatus.OK,
-      message: '리스트 수정에 성공했습니다.',
+      message: '리스트 순서 변경에 성공했습니다.',
       data,
     };
   }

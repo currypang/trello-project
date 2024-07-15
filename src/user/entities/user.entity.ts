@@ -24,7 +24,6 @@ export class User {
   @IsString()
   @Column()
   username: string;
-
   /**
    * 이메일
    * @example "example@example.com"
