@@ -45,7 +45,7 @@ export class List {
 
   @IsNumber()
   @IsNotEmpty({ message: '위치 번호를 입력해 주세요.' })
-  @Column()
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
   position: number;
 
   @CreateDateColumn()
