@@ -51,7 +51,7 @@ export class BoardController {
             data,
         }
     }
-
+    
     /**
      * 보드 상세조회
      * @param id 
@@ -99,11 +99,10 @@ export class BoardController {
     @Delete(':id')
     async delete(@Request() req , @Param('id') id: number){
         const userId= req.user.id
-        const data = await this.boardService.delete(id,userId)
+        await this.boardService.delete(id,userId)
         return {
             statusCode: HttpStatus.OK,
-            message: MESSAGES_CONSTANT.BOARD.DELETE_BOARD.SUCCEED,
-            data
+            message: MESSAGES_CONSTANT.BOARD.DELETE_BOARD.SUCCEED
         }
     }
     
