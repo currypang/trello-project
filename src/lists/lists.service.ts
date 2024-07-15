@@ -75,9 +75,7 @@ export class ListsService {
     if (!listToDelete) {
       throw new NotFoundException('리스트를 찾을 수 없습니다.');
     }
-    listToDelete.deletedAt = new Date();
-
-    const list = await this.listRepository.save(listToDelete);
+    const list = await this.listRepository.softRemove(listToDelete);
     return list;
   }
   //리스트 순서 변경
