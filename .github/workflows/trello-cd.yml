@@ -5,7 +5,7 @@ on:
   workflow_run: # 특정 workflow가 실행됐을 때
     workflows: ['trello nestJS StartCI'] # CI workflow
     types: [completed] # 완료 되었을 때
-    branches: [feat/workflow] # main 브랜치
+    branches: [dev] # main 브랜치
 
 jobs:
   deploy:
