@@ -3,10 +3,10 @@ name: trello nestJS StartCI
 on:
   workflow_dispatch:
   push:
-    branches: [CICD]
+    branches: [feat/workflow]
   pull_request:
     types: [opened, reopened, synchronize]
-    branches: [CICD]
+    branches: [feat/workflow]
 
 jobs:
   ci-test:
