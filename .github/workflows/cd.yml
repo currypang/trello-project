@@ -2,9 +2,10 @@ name: trello nestJS CD
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - CICD
+  workflow_run: # 특정 workflow가 실행됐을 때
+    workflows: ['trello nestJS CD'] # CI workflow
+    types: [completed] # 완료 되었을 때
+    branches: [CICD] # main 브랜치
 
 jobs:
   deploy:
