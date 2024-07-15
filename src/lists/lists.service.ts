@@ -37,8 +37,8 @@ export class ListsService {
 
       // 리스트 위치 지정
       const newPosition = lastList
-        ? lastList.position + Math.floor(Math.random() * 10000)
-        : Math.floor(Math.random() * 1000);
+        ? lastList.position + Math.trunc(Math.random() * 20000)
+        : Math.trunc(Math.random() * 10000);
 
       // 새로운 리스트 생성
       const list = transactionalEntityManager.create(List, {
