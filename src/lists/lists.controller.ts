@@ -70,7 +70,6 @@ export class ListsController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Patch(':listId/order')
-  // updateListDto: UpdateListDto
   async updateOrder(@Param('listId', ParseIntPipe) listId: number, @Body() updateListOrderDto: UpdateListOrderDto) {
     const data = await this.listsService.updateOrder(listId, updateListOrderDto);
     return {

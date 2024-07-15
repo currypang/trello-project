@@ -64,7 +64,7 @@ export class ListsService {
 
     Object.assign(listToUpdate, updateListDto);
 
-    const list = await this.listRepository.save(listToUpdate);
+    const list = await this.listRepository.update(listToUpdate, updateListDto);
 
     return list;
   }
