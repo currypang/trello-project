@@ -6,10 +6,11 @@ import { UserController } from './user.controller';
 import { AuthModule } from 'src/auth/auth.module';
 import { EmailModule } from 'src/email/email.module';
 import { SseModule } from 'src/sse/sse.module';
+import { RedisService } from 'src/redis/redis.service';
 
 @Module({
   imports: [AuthModule, TypeOrmModule.forFeature([User]), EmailModule, SseModule],
   controllers: [UserController],
-  providers: [UserService],
+  providers: [UserService, RedisService],
 })
 export class UserModule {}

@@ -94,4 +94,14 @@ export class UserController {
       message: '댓글 작성 테스트 완료 알림',
     };
   }
+  // 레디스 get 테스트
+  @Get('/comment')
+  async getComment() {
+    const data = await this.userService.getComment();
+    return {
+      statusCode: HttpStatus.OK,
+      message: '댓글 작성 겟 완료 알림',
+      data,
+    };
+  }
 }

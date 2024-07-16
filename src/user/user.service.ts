@@ -5,13 +5,15 @@ import { User } from './entities/user.entity';
 import _ from 'lodash';
 import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 import { SseService } from 'src/sse/sse.service';
+import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly sseService: SseService
+    private readonly sseService: SseService,
+    private readonly redisService: RedisService
   ) {}
 
   async findUserById(id: number) {
@@ -25,8 +27,17 @@ export class UserService {
   }
   // 알림 테스트
   async createComment(user) {
-    console.log(user);
+    const key = '1';
+    const existedData = await this.redisService.get(key);
+    const data = _.isNil(existedData) ? [] : existedData;
+
+    data.push(user);
+    await this.redisService.set(key, data);
     this.sseService.emitCardChangeEvent(user.id, user.data);
-    return;
+  }
+  async getComment() {
+    const data = await this.redisService.get('1');
+
+    return data;
   }
 }
