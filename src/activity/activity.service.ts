@@ -26,7 +26,7 @@ export class ActivityService {
       content,
       isLog: false,
     });
-    // this.sseService.emitCardChangeEvent(userId, data);
+    this.sseService.emitCardChangeEvent(userId, { message: 'new activity' });
     return data;
   }
 

@@ -6,13 +6,14 @@ import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
-import { CreateCardAssignessDto } from './dto/create-cardAssigness.dto'
-import { DeleteCardAssignessDto } from './dto/delete-cardAssigness.dto'
+import { CreateCardAssignessDto } from './dto/create-cardAssigness.dto';
+import { DeleteCardAssignessDto } from './dto/delete-cardAssigness.dto';
 
 @Controller('cards')
 export class CardsController {
-  constructor(private readonly cardsService: CardsService,
-              private readonly activityService: ActivityService,
+  constructor(
+    private readonly cardsService: CardsService,
+    private readonly activityService: ActivityService
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -138,5 +139,4 @@ export class CardsController {
       } 
     }
   }
-
 }

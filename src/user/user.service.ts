@@ -26,7 +26,7 @@ export class UserService {
   // 알림 테스트
   async createComment(user) {
     console.log(user);
-    this.sseService.emitCardChangeEvent(user.id);
+    this.sseService.emitCardChangeEvent(user.id, user.data);
     return;
   }
 }
