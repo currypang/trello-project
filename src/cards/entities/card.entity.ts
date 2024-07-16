@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsDate, IsNumber, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional } from 'class-validator';
 import { CardAssigness } from './card-assigness.entity';
 import { Activity } from '../../activity/entities/activity.entity';
 import { List } from 'src/lists/entities/list.entity';
