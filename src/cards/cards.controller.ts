@@ -20,16 +20,23 @@ import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 import { CreateCardAssignessDto } from './dto/create-cardAssigness.dto';
 import { DeleteCardAssignessDto } from './dto/delete-cardAssigness.dto';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { UpdateListOrderDto } from 'src/lists/dto/update-list-order.dto';
 
+@ApiTags('카드')
 @Controller('cards')
 export class CardsController {
   constructor(
     private readonly cardsService: CardsService,
     private readonly activityService: ActivityService
   ) {}
-
+  /**
+   * 카드 생성
+   * @param CreateCardDto
+   * @returns
+   */
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Post()
   async create(@Body() createCardDto: CreateCardDto, @Request() req) {
@@ -154,17 +161,17 @@ export class CardsController {
     }
   }
   /**
-   * 리스트 순서 변경
-   * @param listId
-   * @param UpdateListDto
+   * 카드 순서 변경
+   * @param cardId
+   * @param UpdateListOrderDto
    * @returns
    */
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
-  @Patch(':listId/order')
+  @Patch(':cardId/order')
   async updateOrder(
     @Request() req,
-    @Param('listId', ParseIntPipe) listId: number,
+    @Param('cardId', ParseIntPipe) listId: number,
     @Body() updateListOrderDto: UpdateListOrderDto
   ) {
     const userId = req.user.id;

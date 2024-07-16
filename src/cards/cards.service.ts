@@ -1,8 +1,8 @@
 import _, { isNull } from 'lodash';
-import { DataSource, DeepPartial, Repository } from 'typeorm';
+import { DataSource, DeepPartial, EntityManager, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 
@@ -13,6 +13,7 @@ import { BoardMembers } from 'src/board/entities/board-member.entity';
 import { SseService } from 'src/sse/sse.service';
 import { idText } from 'typescript';
 import Decimal from 'decimal.js';
+import { UpdateCardOrderDto } from './dto/update-card-order.dto';
 
 @Injectable()
 export class CardsService {
@@ -207,30 +208,34 @@ export class CardsService {
 
     return card;
   }
-  //리스트 순서 변경
-  async updateOrder(userId, id: number, updateListOrderDto: UpdateListOrderDto) {
-    const { position } = updateListOrderDto;
+  //카드 순서 변경
+  async updateOrder(userId, id: number, updateCardOrderDto: UpdateCardOrderDto) {
+    const { position } = updateCardOrderDto;
     return await this.dataSource.transaction(async (transactionalEntityManager: EntityManager) => {
-      // 리스트 id를 받아 리스트 정보를 가져오기
-      const listToUpdateOrder = await transactionalEntityManager.findOne(List, { where: { id } });
-      console.log('listToUpdateOrder', listToUpdateOrder);
-      if (!listToUpdateOrder) {
-        throw new NotFoundException('리스트를 찾을 수 없습니다.');
+      // 카드id를 받아 카드 정보를 가져오기
+      const cardToUpdateOrder = await transactionalEntityManager.findOne(Card, {
+        where: { id },
+      });
+      if (!cardToUpdateOrder) {
+        throw new NotFoundException('카드를 찾을 수 없습니다.');
       }
-      const BoardMember = await this.boardMembersRepository.findOne({ where: { userId } });
-      const userBoardId = BoardMember.boardId;
-      const listBoardId = listToUpdateOrder.boardId;
+      console.log('cardToUpdateOrder', cardToUpdateOrder);
+      const boardInfo = await this.listRepository.findOne({ where: { id: cardListId } });
+
+      const boardMember = await this.boardMembersRepository.findOne({ where: { userId } });
+      const userBoardId = boardMember.boardId;
+      const listBoardId = cardToUpdateOrder.boardId;
 
       if (listBoardId !== userBoardId) {
         throw new ForbiddenException('보드에 가입된 유저가 아닙니다.');
       }
 
-      // 리스트가 속한 보드의 정보를 가져오기
-      const board = await transactionalEntityManager.findOne(Board, {
-        where: { id: listToUpdateOrder.boardId },
-        relations: ['lists'],
+      // 카드가 속한 리스트의 정보를 가져오기
+      const list = await transactionalEntityManager.findOne(Card, {
+        where: { id: cardToUpdateOrder.listId },
+        relations: ['card'],
       });
-      if (!board) {
+      if (!list) {
         throw new NotFoundException('보드를 찾을 수 없습니다.');
       }
 
@@ -260,13 +265,13 @@ export class CardsService {
             : new Decimal(targetPosition).times(Math.random()).toNumber();
 
       // 리스트의 position 업데이트
-      listToUpdateOrder.position = newPosition;
+      cardToUpdateOrder.position = newPosition;
 
-      Object.assign(listToUpdateOrder, { position: newPosition });
+      Object.assign(cardToUpdateOrder, { position: newPosition });
 
-      const updatedList = await transactionalEntityManager.save(List, listToUpdateOrder);
+      const updatedList = await transactionalEntityManager.save(Card, cardToUpdateOrder);
 
-      return updatedList;
+      return cardToUpdateOrder;
     });
   }
 }
