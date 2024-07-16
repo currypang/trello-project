@@ -33,9 +33,9 @@ export class ActivityController {
     }   
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    const data = await this.activityService.findOne(+id);
+  @Get(':activityId')
+  async findOne(@Param('activityId') activityId: string) {
+    const data = await this.activityService.findOne(+activityId);
 
     return{
       statusCode:HttpStatus.OK,
@@ -46,9 +46,9 @@ export class ActivityController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(':activityId')
-  async update(@Param('activityId') id: string, @Body() updateActivityDto: UpdateActivityDto, @Request() req) {
-    await this.activityService.update(+id, updateActivityDto, req.user.id);
-    const data = await this.activityService.findOne(+id);
+  async update(@Param('activityId') activityId: string, @Body() updateActivityDto: UpdateActivityDto, @Request() req) {
+    await this.activityService.update(+activityId, updateActivityDto, req.user.id);
+    const data = await this.activityService.findOne(+activityId);
 
     return{
       statusCode:HttpStatus.OK,
@@ -59,8 +59,8 @@ export class ActivityController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':activityId')
-  async remove(@Param('activityId') id: string, @Request() req) {
-    const data = await this.activityService.remove(+id, req.user.id);
+  async remove(@Param('activityId') activityId: string, @Request() req) {
+    const data = await this.activityService.remove(+activityId, req.user.id);
 
     return{
       statusCode:HttpStatus.OK,
