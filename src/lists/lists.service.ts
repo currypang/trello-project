@@ -22,8 +22,15 @@ export class ListsService {
   ) {}
 
   //리스트 생성
-  async create(createListDto: CreateListDto) {
+  async create(userId, createListDto: CreateListDto) {
     const { name, boardId } = createListDto;
+
+    const BoardMember = await this.boardMembersRepository.findOne({ where: { userId } });
+    const userBoardId = BoardMember.boardId;
+
+    if (boardId !== userBoardId) {
+      throw new ForbiddenException('보드에 가입된 유저가 아닙니다.');
+    }
 
     // 보드가 존재하는지 확인
     const existingBoard = await this.boardRepository.findOne({
