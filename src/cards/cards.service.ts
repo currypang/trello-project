@@ -1,4 +1,4 @@
-import _, { isNull } from 'lodash';
+import _ from 'lodash';
 import { DeepPartial, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
