@@ -66,8 +66,9 @@ export class ListsController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Delete(':listId')
-  async remove(@Param('listId', ParseIntPipe) listId: number) {
-    const data = await this.listsService.remove(listId);
+  async remove(@Request() req, @Param('listId', ParseIntPipe) listId: number) {
+    const userId = req.user.id;
+    const data = await this.listsService.remove(userId, listId);
     return {
       statusCode: HttpStatus.OK,
       message: '리스트 삭제에 성공했습니다.',
