@@ -49,7 +49,6 @@ export class CardsController {
       log,
     };
   }
-
   /**
    * 카드 전체 조회 -> 혹시 몰라서 만들어 놓은 것
    * @returns

@@ -254,12 +254,7 @@ export class CardsService {
     const { position } = updateCardOrderDto;
     return await this.dataSource.transaction(async (transactionalEntityManager: EntityManager) => {
       // 카드id를 받아 카드 정보를 가져오기
-      const cardToUpdateOrder = await transactionalEntityManager.findOne(Card, {
-        where: { id },
-      });
-      if (!cardToUpdateOrder) {
-        throw new NotFoundException('카드를 찾을 수 없습니다.');
-      }
+      const cardToUpdateOrder = await this.verifyCardById(id);
       //카드 리스트 아이디
       const cardListId = cardToUpdateOrder.listId;
       //카드의 리스트 정보
@@ -292,7 +287,6 @@ export class CardsService {
       if (position + 1 >= cardArrayLangth) {
         throw new BadRequestException('옮길 수 있는 위치가 아닙니다.');
       }
-      console.log('cardArrayLangth', cardArrayLangth);
       // 바꾸려는 위치의 리스트의 position값
       const targetPosition = cardsInlist[position].position;
       // 바꾸는 위치 이전 포지션 값
