@@ -45,7 +45,7 @@ export class Board {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @DeleteDateColumn()
+  @DeleteDateColumn({select:false})
   deletedAt: Date;
 
   @OneToMany(() => BoardMembers, (boardMembers) => boardMembers.board)

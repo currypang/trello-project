@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -21,101 +21,136 @@ export class AuthService {
     private readonly jwtService: JwtService
   ) {}
 
-  private async hashingPassword(password: string): Promise<string> {
-    return bcrypt.hash(password, 10);
+  private async hashPassword(password: string): Promise<string> {
+    try {
+      return bcrypt.hash(password, 10);
+    } catch (error) {
+      throw new InternalServerErrorException(MESSAGES_CONSTANT.AUTH.COMMON.HASH_ERROR);
+    }
   }
-  private async comparePassword(inputPassword: string, password: string): Promise<void> {
+  private async verifyPassword(inputPassword: string, password: string): Promise<void> {
     const isCurrentPasswordValid = bcrypt.compareSync(inputPassword, password);
     if (!isCurrentPasswordValid) {
       throw new UnauthorizedException(MESSAGES_CONSTANT.AUTH.SIGN_UP.NOT_MATCHED_PASSWORD);
     }
   }
+  private generateTokens(payload: { id: number; email: string }) {
+    try {
+      const accessToken = this.jwtService.sign(payload);
+      const refreshToken = this.jwtService.sign(payload, {
+        secret: this.configService.get<string>('REFRESH_TOKEN_SECRET'),
+        expiresIn: this.configService.get<string>('REFRESH_TOKEN_EXPIRES'),
+      });
+
+      return { accessToken, refreshToken };
+    } catch (error) {
+      throw new InternalServerErrorException(MESSAGES_CONSTANT.AUTH.COMMON.HASH_ERROR);
+    }
+  }
   async signUp({ email, password, confirmPassword, username }: SignUpDto) {
-    const isMatched = password === confirmPassword;
-    if (!isMatched) {
+    if (password !== confirmPassword) {
       throw new BadRequestException(MESSAGES_CONSTANT.AUTH.SIGN_UP.NOT_MATCHED_PASSWORD);
     }
-    // 유저 복구기능은 현재 없습니다.
-    const existUser = await this.userRepository.findOneBy({ email });
-    if (!_.isNil(existUser)) {
-      throw new BadRequestException(MESSAGES_CONSTANT.AUTH.SIGN_UP.EXISTED_EMAIL);
+    try {
+      const existUser = await this.userRepository.findOneBy({ email });
+
+      if (existUser) {
+        throw new BadRequestException(MESSAGES_CONSTANT.AUTH.SIGN_UP.EXISTED_EMAIL);
+      }
+
+      const hashedPassword = await this.hashPassword(password);
+
+      const user = this.userRepository.create({
+        email,
+        password: hashedPassword,
+        username,
+      });
+
+      await this.userRepository.save(user);
+      return { email: user.email };
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(MESSAGES_CONSTANT.AUTH.SIGN_UP.FAILED);
     }
-
-    const hashedPassword = await this.hashingPassword(password);
-
-    const user = this.userRepository.create({
-      email,
-      password: hashedPassword,
-      username,
-    });
-    await this.userRepository.save(user);
-    return { email: user.email };
   }
 
   async validateUser({ email, password }: SignInDto) {
-    const user = await this.userRepository.findOne({
-      where: { email, deletedAt: null },
-      select: { id: true, password: true, email: true },
-    });
-    if (!user) {
-      return null;
+    try {
+      const user = await this.userRepository.findOne({
+        where: { email, deletedAt: null },
+        select: { id: true, password: true, email: true },
+      });
+      if (!user) {
+        return null;
+      }
+      await this.verifyPassword(password, user.password);
+      return { id: user.id, email: user.email };
+    } catch (error) {
+      throw new UnauthorizedException(MESSAGES_CONSTANT.AUTH.STRATEGY.UNAUTHORIZED_ERROR);
     }
-    await this.comparePassword(password, user.password);
-
-    return { id: user.id, email: user.email };
   }
   signIn(userId: number, email: string) {
     const payload = { id: userId, email };
-    const accessToken = this.jwtService.sign(payload);
-    const refreshToken = this.jwtService.sign(payload, {
-      secret: this.configService.get<string>('REFRESH_TOKEN_SECRET'),
-      expiresIn: this.configService.get<string>('REFRESH_TOKEN_EXPIRES'),
-    });
-
-    return { accessToken, refreshToken };
+    return this.generateTokens(payload);
   }
+
   async updateUserPassword(userId: number, updateUserPasswordDto: UpdateUserPasswordDto) {
     const { currentPassword, newPassword, confirmNewPassword } = updateUserPasswordDto;
 
-    const user = await this.userRepository.findOne({
-      where: { id: userId, deletedAt: null },
-      select: { password: true },
-    });
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id: userId, deletedAt: null },
+        select: { password: true },
+      });
 
-    if (_.isNil(user)) {
-      throw new UnauthorizedException(MESSAGES_CONSTANT.AUTH.STRATEGY.UNAUTHORIZED);
+      if (!user) {
+        throw new UnauthorizedException(MESSAGES_CONSTANT.AUTH.STRATEGY.UNAUTHORIZED);
+      }
+
+      await this.verifyPassword(currentPassword, user.password);
+
+      if (newPassword !== confirmNewPassword) {
+        throw new BadRequestException(MESSAGES_CONSTANT.AUTH.UPDATE_USER_PASSWORD.NOT_MATCHED_NEW_PASSWORD);
+      }
+
+      const hashedNewPassword = await this.hashPassword(newPassword);
+      await this.userRepository.update(userId, { password: hashedNewPassword });
+
+      return { message: MESSAGES_CONSTANT.AUTH.UPDATE_USER_PASSWORD.SUCCEED };
+    } catch (error) {
+      if (error instanceof BadRequestException || error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(MESSAGES_CONSTANT.AUTH.UPDATE_USER_PASSWORD.FAILED);
     }
-
-    await this.comparePassword(currentPassword, user.password);
-
-    const isMatched = newPassword === confirmNewPassword;
-    if (!isMatched) {
-      throw new BadRequestException(MESSAGES_CONSTANT.AUTH.UPDATE_USER_PASSWORD.NOT_MATCHED_NEW_PASSWORD);
-    }
-
-    const hashedNewPassword = await this.hashingPassword(newPassword);
-    await this.userRepository.update(userId, { password: hashedNewPassword });
-
-    return { message: MESSAGES_CONSTANT.AUTH.UPDATE_USER_PASSWORD.SUCCEED };
   }
 
   async deleteUser(userId: number, deleteUserDto: DeleteUserDto) {
     const { password } = deleteUserDto;
 
-    const user = await this.userRepository.findOne({
-      where: { id: userId, deletedAt: null },
-      select: { password: true, id: true },
-    });
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id: userId, deletedAt: null },
+        select: { password: true, id: true },
+      });
 
-    if (!user) {
-      throw new UnauthorizedException(MESSAGES_CONSTANT.AUTH.STRATEGY.UNAUTHORIZED);
+      if (!user) {
+        throw new UnauthorizedException(MESSAGES_CONSTANT.AUTH.STRATEGY.UNAUTHORIZED);
+      }
+
+      await this.verifyPassword(password, user.password);
+
+      await this.userRepository.softRemove(user);
+
+      return { message: MESSAGES_CONSTANT.AUTH.DELETE_USER.SUCCEED };
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(MESSAGES_CONSTANT.AUTH.DELETE_USER.FAILED);
     }
-
-    await this.comparePassword(password, user.password);
-
-    await this.userRepository.softRemove(user);
-
-    return { message: MESSAGES_CONSTANT.AUTH.DELETE_USER.SUCCEED };
   }
 
   async refreshTokens(refreshToken: string) {
@@ -133,13 +168,7 @@ export class AuthService {
       }
 
       const newPayload = { id: user.id, email: user.email };
-      const newAccessToken = this.jwtService.sign(newPayload);
-      const newRefreshToken = this.jwtService.sign(newPayload, {
-        secret: this.configService.get<string>('REFRESH_TOKEN_SECRET'),
-        expiresIn: this.configService.get<string>('REFRESH_TOKEN_EXPIRES'),
-      });
-
-      return { accessToken: newAccessToken, refreshToken: newRefreshToken };
+      return this.generateTokens(newPayload);
     } catch (e) {
       throw new UnauthorizedException(MESSAGES_CONSTANT.AUTH.COMMON.INVALID_TOKEN);
     }

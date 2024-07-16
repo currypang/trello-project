@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _, { isNull } from 'lodash';
 import { DeepPartial, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -105,7 +105,17 @@ export class CardsService {
       throw new NotFoundException('borad에 존재하지 않는 멤버입니다.');
     }
 
-    const createMember = await this.cardAssignessRepository.delete({
+    const verifyCardMemberbyId = await this.cardAssignessRepository.find({
+      where : {
+        userId,
+        cardId,       
+      }
+    })
+    if (verifyCardMemberbyId.length !== 0) {
+      throw new NotFoundException('card에 이미 존재하는 멤버입니다.');
+    }
+
+    const createMember = await this.cardAssignessRepository.save({
       userId,
       cardId,
     });
@@ -129,10 +139,10 @@ export class CardsService {
     const verifyCardMemberbyId = await this.cardAssignessRepository.find({
       where: {
         userId,
-        cardId,
-      },
-    });
-    if (_.isNil(verifyCardMemberbyId)) {
+        cardId,       
+      }
+    })
+    if (verifyCardMemberbyId.length === 0) {
       throw new NotFoundException('card에 존재하지 않는 멤버입니다.');
     }
 

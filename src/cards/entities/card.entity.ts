@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsDate } from 'class-validator';
+import { IsNotEmpty, IsString, IsDate, IsNumber, IsOptional } from 'class-validator';
 import { CardAssigness } from './card-assigness.entity';
 import { Activity } from '../../activity/entities/activity.entity';
 import { List } from 'src/lists/entities/list.entity';
@@ -19,6 +19,7 @@ export class Card {
   @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
 
+  @IsNotEmpty({ message: '리스트를 입력해주세요.' })
   @Column({ unsigned: true })
   listId: number;
 
@@ -32,8 +33,10 @@ export class Card {
   @Column({ type: 'text' })
   description: string;
 
+  @IsOptional()
+  @IsString()
   @Column({ nullable: true })
-  color: string;
+  color?: string;
 
   @Column({ type: 'decimal' , precision: 10, scale : 4 })
   position: number;
@@ -41,11 +44,13 @@ export class Card {
   @Column({ type: 'boolean' })
   isExpired?: boolean;
 
-  @IsDate()
+  @IsOptional()
+  @IsString()
   @Column({ type: 'date', nullable: true })
   startDate?: Date;
 
-  @IsDate()
+  @IsOptional()
+  @IsString()
   @Column({ type: 'date', nullable: true })
   dueDate?: Date;
 

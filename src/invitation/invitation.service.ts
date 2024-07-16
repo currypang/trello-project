@@ -48,6 +48,11 @@ export class InvitationService {
     const board = await this.boardRepository.find({
           where: {id:boardId,ownerId:userId}
     })
+    const usereMail = await this.userRepository.findOneBy({email:emailAddress})
+    if(!usereMail){
+      throw new NotFoundException('사용자를 찾을수 없습니다.')
+    }
+
       if(board.length === 0){
         throw new NotFoundException('보드가 존재하지 않거나,초대권한이 없습니다.')
       }
