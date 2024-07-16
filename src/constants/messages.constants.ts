@@ -33,6 +33,7 @@ export const MESSAGES_CONSTANT = {
     },
     DELETE_USER: {
       SUCCEED: '사용자 계정이 성공적으로 삭제되었습니다.',
+      FAILED: '사용자 삭제 중 오류가 발생했습니다.',
     },
     REFRESH_TOKEN: {
       SUCCEED: '토큰이 성공적으로 발급 되었습니다.',

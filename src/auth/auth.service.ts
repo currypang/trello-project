@@ -25,7 +25,7 @@ export class AuthService {
     try {
       return bcrypt.hash(password, 10);
     } catch (error) {
-      throw new InternalServerErrorException('비밀번호 해싱 중 오류가 발생했습니다.');
+      throw new InternalServerErrorException(MESSAGES_CONSTANT.AUTH.COMMON.HASH_ERROR);
     }
   }
   private async verifyPassword(inputPassword: string, password: string): Promise<void> {
@@ -53,6 +53,7 @@ export class AuthService {
     }
     try {
       const existUser = await this.userRepository.findOneBy({ email });
+
       if (existUser) {
         throw new BadRequestException(MESSAGES_CONSTANT.AUTH.SIGN_UP.EXISTED_EMAIL);
       }
@@ -64,6 +65,7 @@ export class AuthService {
         password: hashedPassword,
         username,
       });
+
       await this.userRepository.save(user);
       return { email: user.email };
     } catch (error) {
