@@ -52,7 +52,7 @@ export class CardsController {
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async update(@Param('id') id: string, @Body() updateCardDto: UpdateCardDto, @Request() req) {
-    const update =  await this.cardsService.update(+id, updateCardDto);
+    await this.cardsService.update(+id, req.user.id, updateCardDto);
     const card = await this.cardsService.findOne(+id);
     const log = await this.activityService.createLog(req.user.id, +id, 'updateCard');
     return{
