@@ -85,12 +85,21 @@ export class ListsService {
     return list;
   }
   //리스트 삭제
-  async remove(id: number) {
+  async remove(userId, id: number) {
     const listToDelete = await this.listRepository.findOneBy({ id });
 
     if (!listToDelete) {
       throw new NotFoundException('리스트를 찾을 수 없습니다.');
     }
+
+    const BoardMember = await this.boardMembersRepository.findOne({ where: { userId } });
+    const userBoardId = BoardMember.boardId;
+    const listBoardId = listToDelete.boardId;
+
+    if (listBoardId !== userBoardId) {
+      throw new ForbiddenException('보드에 가입된 유저가 아닙니다.');
+    }
+
     const list = await this.listRepository.softRemove(listToDelete);
     return list;
   }
