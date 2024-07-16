@@ -47,8 +47,9 @@ export class ListsController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Patch(':listId')
-  async update(@Param('listId', ParseIntPipe) listId: number, @Body() updateListDto: UpdateListDto) {
-    const data = await this.listsService.update(listId, updateListDto);
+  async update(@Request() req, @Param('listId', ParseIntPipe) listId: number, @Body() updateListDto: UpdateListDto) {
+    const userId = req.user.id;
+    const data = await this.listsService.update(listId, userId, updateListDto);
 
     return {
       statusCode: HttpStatus.OK,
