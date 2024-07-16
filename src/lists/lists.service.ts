@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateListDto } from './dto/create-list.dto';
 import { UpdateListDto } from './dto/update-list.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -7,6 +7,7 @@ import { List } from './entities/list.entity';
 import { Board } from '../board/entities/board.entity';
 import { UpdateListOrderDto } from './dto/update-list-order.dto';
 import Decimal from 'decimal.js';
+import { BoardMembers } from 'src/board/entities/board-member.entity';
 
 @Injectable()
 export class ListsService {
@@ -15,6 +16,8 @@ export class ListsService {
     private readonly listRepository: Repository<List>,
     @InjectRepository(Board)
     private readonly boardRepository: Repository<Board>,
+    @InjectRepository(BoardMembers)
+    private readonly boardMembersRepository: Repository<BoardMembers>,
     private readonly dataSource: DataSource
   ) {}
 
@@ -55,11 +58,17 @@ export class ListsService {
     });
   }
   //리스트 수정(이름)
-  async update(id: number, updateListDto: UpdateListDto) {
+  async update(id: number, userId, updateListDto: UpdateListDto) {
     const listToUpdate = await this.listRepository.findOne({ where: { id, deletedAt: null } });
-
     if (!listToUpdate) {
       throw new NotFoundException('리스트를 찾을 수 없습니다.');
+    }
+    const BoardMember = await this.boardMembersRepository.findOne({ where: { userId } });
+    const listBoardId = listToUpdate.boardId;
+    const userBoardId = BoardMember.boardId;
+
+    if (listBoardId !== userBoardId) {
+      throw new ForbiddenException('보드에 가입된 유저가 아닙니다.');
     }
 
     Object.assign(listToUpdate, updateListDto);
