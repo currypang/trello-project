@@ -84,8 +84,13 @@ export class ListsController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Patch(':listId/order')
-  async updateOrder(@Param('listId', ParseIntPipe) listId: number, @Body() updateListOrderDto: UpdateListOrderDto) {
-    const data = await this.listsService.updateOrder(listId, updateListOrderDto);
+  async updateOrder(
+    @Request() req,
+    @Param('listId', ParseIntPipe) listId: number,
+    @Body() updateListOrderDto: UpdateListOrderDto
+  ) {
+    const userId = req.user.id;
+    const data = await this.listsService.updateOrder(userId, listId, updateListOrderDto);
     return {
       statusCode: HttpStatus.OK,
       message: '리스트 순서 변경에 성공했습니다.',

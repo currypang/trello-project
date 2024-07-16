@@ -104,13 +104,21 @@ export class ListsService {
     return list;
   }
   //리스트 순서 변경
-  async updateOrder(id: number, updateListOrderDto: UpdateListOrderDto) {
+  async updateOrder(userId, id: number, updateListOrderDto: UpdateListOrderDto) {
     const { position } = updateListOrderDto;
     return await this.dataSource.transaction(async (transactionalEntityManager: EntityManager) => {
       // 리스트 id를 받아 리스트 정보를 가져오기
       const listToUpdateOrder = await transactionalEntityManager.findOne(List, { where: { id } });
+      console.log('listToUpdateOrder', listToUpdateOrder);
       if (!listToUpdateOrder) {
         throw new NotFoundException('리스트를 찾을 수 없습니다.');
+      }
+      const BoardMember = await this.boardMembersRepository.findOne({ where: { userId } });
+      const userBoardId = BoardMember.boardId;
+      const listBoardId = listToUpdateOrder.boardId;
+
+      if (listBoardId !== userBoardId) {
+        throw new ForbiddenException('보드에 가입된 유저가 아닙니다.');
       }
 
       // 리스트가 속한 보드의 정보를 가져오기
@@ -127,7 +135,7 @@ export class ListsService {
       listsInBoard.sort((a: List, b: List): number => a.position - b.position);
 
       const listArrayLangth = listsInBoard.length;
-      if (position >= listArrayLangth) {
+      if (position + 1 >= listArrayLangth) {
         throw new BadRequestException('옮길 수 있는 위치가 아닙니다.');
       }
       // 바꾸려는 위치의 리스트의 position값
