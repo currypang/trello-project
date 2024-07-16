@@ -6,11 +6,12 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 
-import { Card } from './entities/card.entity'
-import { CardAssigness } from './entities/card-assigness.entity'
-import { List } from '../lists/entities/list.entity'
-import { BoardMembers } from 'src/board/entities/board-member.entity'
-
+import { Card } from './entities/card.entity';
+import { CardAssigness } from './entities/card-assigness.entity';
+import { List } from '../lists/entities/list.entity';
+import { BoardMembers } from 'src/board/entities/board-member.entity';
+import { SseService } from 'src/sse/sse.service';
+import { idText } from 'typescript';
 
 @Injectable()
 export class CardsService {
@@ -19,6 +20,7 @@ export class CardsService {
     @InjectRepository(CardAssigness) private cardAssignessRepository: Repository<CardAssigness>,
     @InjectRepository(List) private listRepository: Repository<List>,
     @InjectRepository(BoardMembers) private boardMembersRepository: Repository<BoardMembers>,
+    private readonly sseService: SseService
   ) {}
 
   async create(createCardDto: CreateCardDto, userId: number) {
@@ -49,11 +51,11 @@ export class CardsService {
         name,
         listId,
         position: newPosition,
-        cardAssigness : [
+        cardAssigness: [
           {
-          userId : userId,
-        } 
-      ] as DeepPartial<CardAssigness>[]
+            userId: userId,
+          },
+        ] as DeepPartial<CardAssigness>[],
       });
       const result = await transactionalEntityManager.save(Card, card);
 
@@ -73,14 +75,15 @@ export class CardsService {
     });
   }
 
-  async update(id: number, updateCardDto: UpdateCardDto) {
+  async update(id: number, userId: number, updateCardDto: UpdateCardDto) {
     await this.verifyCardById(id);
 
     if (!(updateCardDto instanceof UpdateCardDto)) {
       throw new BadRequestException('Invalid updateCardDto');
     }
-
-    return await this.cardRepository.update({ id }, updateCardDto );
+    const data = await this.cardRepository.update({ id }, updateCardDto);
+    this.sseService.emitCardChangeEvent(userId, { message: 'update card' });
+    return data;
   }
 
   async delete(id: number) {
@@ -91,13 +94,13 @@ export class CardsService {
 
   async createMembers(userId: number, cardId: number) {
     const cardInfo = await this.findOne(cardId);
-    const listInfo = await this.listRepository.findOneBy({id: cardInfo.listId});
+    const listInfo = await this.listRepository.findOneBy({ id: cardInfo.listId });
     const verifyMemberbyId = await this.boardMembersRepository.find({
-      where : {
+      where: {
         userId,
-        boardId : listInfo.boardId,        
-      }
-    })
+        boardId: listInfo.boardId,
+      },
+    });
     if (_.isNil(verifyMemberbyId)) {
       throw new NotFoundException('borad에 존재하지 않는 멤버입니다.');
     }
@@ -110,26 +113,25 @@ export class CardsService {
     return createMember;
   }
 
-
   async deleteMembers(userId: number, cardId: number) {
     const cardInfo = await this.findOne(cardId);
-    const listInfo = await this.listRepository.findOneBy({id: cardInfo.listId});
+    const listInfo = await this.listRepository.findOneBy({ id: cardInfo.listId });
     const verifyMemberbyId = await this.boardMembersRepository.find({
-      where : {
+      where: {
         userId,
-        boardId : listInfo.boardId,        
-      }
-    })
+        boardId: listInfo.boardId,
+      },
+    });
     if (_.isNil(verifyMemberbyId)) {
       throw new NotFoundException('borad에 존재하지 않는 멤버입니다.');
     }
 
     const verifyCardMemberbyId = await this.cardAssignessRepository.find({
-      where : {
+      where: {
         userId,
-        cardId,       
-      }
-    })
+        cardId,
+      },
+    });
     if (_.isNil(verifyCardMemberbyId)) {
       throw new NotFoundException('card에 존재하지 않는 멤버입니다.');
     }
@@ -138,11 +140,11 @@ export class CardsService {
       userId,
       cardId,
     });
-    
+
     return deleteMember;
   }
 
-  async updateCardDate(id: number, updateCardDto: UpdateCardDto){
+  async updateCardDate(id: number, updateCardDto: UpdateCardDto) {
     const { startDate, dueDate } = updateCardDto;
 
     await this.verifyCardById(id);
@@ -151,18 +153,21 @@ export class CardsService {
       throw new BadRequestException('Invalid updateCardDto');
     }
 
-    return await this.cardRepository.update({ id }, {
-      isExpired : false,
-      startDate, 
-      dueDate, } );
+    return await this.cardRepository.update(
+      { id },
+      {
+        isExpired: false,
+        startDate,
+        dueDate,
+      }
+    );
   }
 
-  async updateDateExpire(id: number){
+  async updateDateExpire(id: number) {
     await this.verifyCardById(id);
 
-    return await this.cardRepository.update({ id }, { isExpired : true, } );
+    return await this.cardRepository.update({ id }, { isExpired: true });
   }
-
 
   async verifyCardById(id: number) {
     const card = await this.cardRepository.findOneBy({ id });

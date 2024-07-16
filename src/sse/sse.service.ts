@@ -8,10 +8,10 @@ export class SseService {
   private observer = this.users$.asObservable();
 
   // 이벤트 발생 함수
-  emitCardChangeEvent(userId: number) {
+  emitCardChangeEvent(userId: number, data) {
     // next를 통해 이벤트를 생성
     console.log('emitCardChangeEvent', userId);
-    this.users$.next({ id: userId });
+    this.users$.next({ id: userId, data });
   }
 
   // 이벤트 연결

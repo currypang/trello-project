@@ -5,13 +5,14 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
-import { CreateCardAssignessDto } from './dto/create-cardAssigness.dto'
-import { DeleteCardAssignessDto } from './dto/delete-cardAssigness.dto'
+import { CreateCardAssignessDto } from './dto/create-cardAssigness.dto';
+import { DeleteCardAssignessDto } from './dto/delete-cardAssigness.dto';
 
 @Controller('cards')
 export class CardsController {
-  constructor(private readonly cardsService: CardsService,
-              private readonly activityService: ActivityService,
+  constructor(
+    private readonly cardsService: CardsService,
+    private readonly activityService: ActivityService
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -35,7 +36,7 @@ export class CardsController {
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateCardDto: UpdateCardDto, @Request() req) {
-    const update =  this.cardsService.update(+id, updateCardDto);
+    const update = this.cardsService.update(+id, req.user.id, updateCardDto);
     const log = this.activityService.createLog(req.user.id, +id, 'updateCard');
     return [update, log];
   }
@@ -48,20 +49,20 @@ export class CardsController {
   // 카드 멤버 추가
   @UseGuards(JwtAuthGuard)
   @Post(':id/members')
-  createMembers(@Param('id') id: string, @Body() createCardAssignessDto: CreateCardAssignessDto, @Request() req){
-    const createMembers = this.cardsService.createMembers( +id, createCardAssignessDto.userId);
+  createMembers(@Param('id') id: string, @Body() createCardAssignessDto: CreateCardAssignessDto, @Request() req) {
+    const createMembers = this.cardsService.createMembers(+id, createCardAssignessDto.userId);
     const log = this.activityService.createLog(req.user.id, +id, 'createCardMembers');
-    
+
     return [createMembers, log];
   }
 
   // 카드 멤버 삭제
   @UseGuards(JwtAuthGuard)
   @Delete(':id/members')
-  deleteMembers(@Param('id') id: string, @Body() deleteCardAssignessDto: DeleteCardAssignessDto, @Request() req){
-    const deleteMembers = this.cardsService.createMembers( +id, deleteCardAssignessDto.userId);
+  deleteMembers(@Param('id') id: string, @Body() deleteCardAssignessDto: DeleteCardAssignessDto, @Request() req) {
+    const deleteMembers = this.cardsService.createMembers(+id, deleteCardAssignessDto.userId);
     const log = this.activityService.createLog(req.user.id, +id, 'deleteCardMembers');
-    
+
     return [deleteMembers, log];
   }
 
@@ -69,7 +70,7 @@ export class CardsController {
   @UseGuards(JwtAuthGuard)
   @Patch(':id/Date')
   updateCardDate(@Param('id') id: string, @Body() updateCardDto: UpdateCardDto, @Request() req) {
-    const updateCardDate =  this.cardsService.updateCardDate(+id, updateCardDto);
+    const updateCardDate = this.cardsService.updateCardDate(+id, updateCardDto);
     const log = this.activityService.createLog(req.user.id, +id, 'updateCardDate');
     return [updateCardDate, log];
   }
@@ -78,9 +79,8 @@ export class CardsController {
   @UseGuards(JwtAuthGuard)
   @Patch(':id/DateExpired')
   updateDateExpire(@Param('id') id: string, @Request() req) {
-    const updateDateExpire =  this.cardsService.updateDateExpire(+id);
+    const updateDateExpire = this.cardsService.updateDateExpire(+id);
     const log = this.activityService.createLog(req.user.id, +id, 'updateDateExpired');
     return [updateDateExpire, log];
   }
-
 }
