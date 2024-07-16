@@ -7,6 +7,7 @@ import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { InvitationService } from 'src/invitation/invitation.service';
 import { FindAllBoardDto } from './dto/find-all-board.dto';
+import { InviteDto } from './dto/invite-board.dto';
 
 @ApiTags('보드')
 @Controller('board')
@@ -40,6 +41,7 @@ export class BoardController {
      * 보드 전체 조회
      * @returns 
      */
+    @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     @Get()
     async findAll(@Request() req , @Query() findAllBoardDto:FindAllBoardDto){
@@ -57,6 +59,7 @@ export class BoardController {
      * @param id 
      * @returns 
      */
+    @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     @Get(':id')
     async findOne(@Request() req,@Param('id') id:number){
@@ -75,6 +78,7 @@ export class BoardController {
      * @param updateBoardDto 
      * @returns 
      */
+    @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     @Patch(':id')
     async update(@Request() req,
@@ -95,6 +99,7 @@ export class BoardController {
      * @param id 
      * @returns 
      */
+    @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     @Delete(':id')
     async delete(@Request() req , @Param('id') id: number){
@@ -107,16 +112,17 @@ export class BoardController {
     }
     
     /**
-     * 보드 초대
+     * 
      * @param req 
-     * @param param1 
+     * @param inviteDto 
      * @returns 
      */
+    @ApiBearerAuth()
     @Post('/email')
     @UseGuards(JwtAuthGuard)
-    async sendEmail(@Request() req,@Body() {email, boardId}){
+    async sendEmail(@Request() req,@Body() inviteDto:InviteDto){
         const userId =req.user.id
-        await this.inviteService.sendInvitieVertification(email, boardId,userId)
+        await this.inviteService.sendInvitieVertification(inviteDto.email, inviteDto.boardId,userId)
         return{
             statusCode: HttpStatus.OK,
             message: '이메일로 인증링크를 보냈습니다.',
