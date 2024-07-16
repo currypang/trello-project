@@ -90,7 +90,6 @@ export class ListsService {
   //리스트 순서 변경
   async updateOrder(id: number, updateListOrderDto: UpdateListOrderDto) {
     const { position } = updateListOrderDto;
-
     return await this.dataSource.transaction(async (transactionalEntityManager: EntityManager) => {
       // 리스트 id를 받아 리스트 정보를 가져오기
       const listToUpdateOrder = await transactionalEntityManager.findOne(List, { where: { id } });
@@ -111,20 +110,26 @@ export class ListsService {
       const listsInBoard = board.lists;
       listsInBoard.sort((a: List, b: List): number => a.position - b.position);
 
+      const listArrayLangth = listsInBoard.length;
+      if (position >= listArrayLangth) {
+        throw new BadRequestException('옮길 수 있는 위치가 아닙니다.');
+      }
       // 바꾸려는 위치의 리스트의 position값
       const targetPosition = listsInBoard[position].position;
-      console.log(targetPosition);
       // 바꾸는 위치 이전 포지션 값
       const previousTargetPosition = listsInBoard[position - 1]?.position;
-      console.log(previousTargetPosition);
+      //위치 리스트의 마지막 표지션
 
       // 포지션 계산
-      const newPosition = previousTargetPosition
-        ? new Decimal(new Decimal(targetPosition).minus(previousTargetPosition))
-            .times(Math.random())
-            .plus(previousTargetPosition)
-            .toNumber()
-        : new Decimal(targetPosition).times(Math.random()).toNumber();
+      const newPosition =
+        position + 1 == listArrayLangth
+          ? new Decimal(previousTargetPosition).plus(new Decimal(Math.random()).times(20000)).toNumber()
+          : previousTargetPosition
+            ? new Decimal(new Decimal(targetPosition).minus(previousTargetPosition))
+                .times(Math.random())
+                .plus(previousTargetPosition)
+                .toNumber()
+            : new Decimal(targetPosition).times(Math.random()).toNumber();
 
       // 리스트의 position 업데이트
       listToUpdateOrder.position = newPosition;
