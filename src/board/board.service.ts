@@ -8,6 +8,7 @@ import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 import { BOARD_CONSTANT } from 'src/constants/board.constants';
 import { BoardMembers } from './entities/board-member.entity';
 import { FindAllBoardDto } from './dto/find-all-board.dto';
+import _ from 'lodash';
 
 @Injectable()
 export class BoardService {
@@ -25,17 +26,10 @@ export class BoardService {
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try{
-        const board = this.boardRepository.create({
-            name:name,
-            background_color:background_color,
-            ownerId: userId
-        })
+        const board = this.boardRepository.create(_.assign({ ownerId: userId }, { name, background_color }))
         await queryRunner.manager.save(board)
-        const member = this.boardMemberRepository.create({
-            userId,
-            boardId:board.id
-        })
-        queryRunner.manager.save(member)
+        const member = this.boardMemberRepository.create(_.assign({userId}, {boardId:board.id}))
+        await queryRunner.manager.save(member)
         await queryRunner.commitTransaction();
         return board
         } catch(error){
@@ -74,9 +68,11 @@ export class BoardService {
 
     async findOne(id:number, userId:number){
         const board = await this.boardRepository.findOne({
-            relations:{members: true},
+            relations:{members: true, lists:{
+                cards:true
+            }},
             where: {id, members:{
-                userId:userId
+                userId,
             }},
         })
         if(!board){
@@ -92,18 +88,18 @@ export class BoardService {
                 members: true
             },
             where:{id, members:{
-                userId:userId
+                userId,
             }}
         })
         if(!board){
             throw new NotFoundException(MESSAGES_CONSTANT.BOARD.UPDATE_BOARD.NOT_FOUND)
         }
         
-        const newboard = {
+        const newBoard = {
             ...board,
             ...updateBoardDto
         }
-        const  data = await this.boardRepository.save(newboard)
+        const  data = await this.boardRepository.save(newBoard)
         return data
     }
     
