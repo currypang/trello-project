@@ -169,8 +169,22 @@ export class CardsService {
 
   async updateDateExpire(id: number){
     await this.verifyCardById(id);
+    const cardInfo = await this.findOne(id);
+    let cardDate;
+    if(cardInfo.dueDate){
+      cardDate = new Date(cardInfo.dueDate);
+    }else{
+      throw new BadRequestException('일정이 지정되지 않았습니다.');
+    }
+    const today = new Date();
 
-    return await this.cardRepository.update({ id }, { isExpired : true, } );
+    if (cardDate < today) {
+      return false;
+    } else if (cardDate > today) {
+      return await this.cardRepository.update({ id }, { isExpired : true, } );
+    } else {
+      return false;
+    }
   }
 
 

@@ -73,13 +73,55 @@ export const MESSAGES_CONSTANT = {
 
   CARD: {
     CREATE_CARD: {
-      NOT_FOUND: '존재하지 않는 보드입니다.',
+      SUCCEED: '카드 생성에 성공했습니다',
+      NOT_FOUND: '존재하지 않는 카드입니다.',
+    },
+    READ_CARDS :{
+      SUCCEED: '카드 읽기에 성공했습니다',
+      NOT_FOUND: '존재하지 않는 카드입니다.',
+    },
+    READ_CARD :{
+      SUCCEED: '카드 읽기에 성공했습니다',
+      NOT_FOUND: '존재하지 않는 카드입니다.',
     },
     UPDATE_CARD: {
+      SUCCEED: '카드 수정에 성공했습니다',
       INVALID_TAPE: 'Invalid updateCardDto',
     },
     DELETE_CARD: {
+      SUCCEED: '카드 삭제에 성공했습니다',
       NOT_FOUND: '존재하지 않는 카드입니다.',
+    },
+    CREATE_MEMBER_CARD :{
+      SUCCEED: '카드 멤버 추가에 성공했습니다',
+    },
+    DELETE_MEMBER_CARD :{
+      SUCCEED: '카드 멤버 삭제에 성공했습니다',
+    },
+    UPDATE_DATE_CARD :{
+      SUCCEED: '카드 마감 설정에 성공했습니다',
+    },
+    UPDATE_DATE_EXPIRE_CARD :{
+      SUCCEED: '카드가 마감 되었습니다',
+      FAILED: '카드의 일정이 남아 있습니다'
+    },
+  },
+
+  ACTIVITY: {
+    CREATE_ACTIVITY : {
+      SUCCEED: '액티비티 생성에 성공했습니다',
+    },
+    READ_ACTIVITY : {
+      SUCCEED: '액티비티 조회에 성공했습니다',
+    },
+    UPDATE_ACTIVITY : {
+      SUCCEED: '액티비티 수정에 성공했습니다',
+    },
+    DELETE_ACTIVITY : {
+      SUCCEED: '액티비티 삭제에 성공했습니다',
+    },
+    CREATE_LOG_ACTIVITY : {
+      SUCCEED: '로그 액티비티 생성에 성공했습니다',
     },
   },
 
