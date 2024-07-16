@@ -76,11 +76,11 @@ export const MESSAGES_CONSTANT = {
       SUCCEED: '카드 생성에 성공했습니다',
       NOT_FOUND: '존재하지 않는 카드입니다.',
     },
-    READ_CARDS :{
+    READ_CARDS: {
       SUCCEED: '카드 읽기에 성공했습니다',
       NOT_FOUND: '존재하지 않는 카드입니다.',
     },
-    READ_CARD :{
+    READ_CARD: {
       SUCCEED: '카드 읽기에 성공했습니다',
       NOT_FOUND: '존재하지 않는 카드입니다.',
     },
@@ -92,41 +92,46 @@ export const MESSAGES_CONSTANT = {
       SUCCEED: '카드 삭제에 성공했습니다',
       NOT_FOUND: '존재하지 않는 카드입니다.',
     },
-    CREATE_MEMBER_CARD :{
+    CREATE_MEMBER_CARD: {
       SUCCEED: '카드 멤버 추가에 성공했습니다',
     },
-    DELETE_MEMBER_CARD :{
+    DELETE_MEMBER_CARD: {
       SUCCEED: '카드 멤버 삭제에 성공했습니다',
     },
-    UPDATE_DATE_CARD :{
+    UPDATE_DATE_CARD: {
       SUCCEED: '카드 마감 설정에 성공했습니다',
     },
-    UPDATE_DATE_EXPIRE_CARD :{
+    UPDATE_DATE_EXPIRE_CARD: {
       SUCCEED: '카드가 마감 되었습니다',
-      FAILED: '카드의 일정이 남아 있습니다'
+      FAILED: '카드의 일정이 남아 있습니다',
     },
   },
 
   ACTIVITY: {
-    CREATE_ACTIVITY : {
+    CREATE_ACTIVITY: {
       SUCCEED: '액티비티 생성에 성공했습니다',
     },
-    READ_ACTIVITY : {
+    READ_ACTIVITY: {
       SUCCEED: '액티비티 조회에 성공했습니다',
     },
-    UPDATE_ACTIVITY : {
+    UPDATE_ACTIVITY: {
       SUCCEED: '액티비티 수정에 성공했습니다',
     },
-    DELETE_ACTIVITY : {
+    DELETE_ACTIVITY: {
       SUCCEED: '액티비티 삭제에 성공했습니다',
     },
-    CREATE_LOG_ACTIVITY : {
+    CREATE_LOG_ACTIVITY: {
       SUCCEED: '로그 액티비티 생성에 성공했습니다',
     },
   },
 
   LIST: {
     COMMON: {
+      BOARD_NOT_FOUND: '없는 보드입니다.',
+      LIST_NOT_FOUND: '리스트를 찾을 수 없습니다.',
+      FORBIDDEN: '보드에 가입된 유저가 아닙니다.',
+      INVALID_POSITION: '옮길 수 있는 위치가 아닙니다.',
+
       NAME: {
         REQUIRED: '리스트 이름을 입력해 주세요.',
       },
@@ -135,6 +140,7 @@ export const MESSAGES_CONSTANT = {
       },
     },
     CREATE_LIST: {
+      FAILED: '리스트 생성 중 에러가 발생했습니다.',
       SUCCEED: '리스트 생성에 성공했습니다.',
       NOT_FOUND: '존재하지 않는 보드입니다.',
     },
