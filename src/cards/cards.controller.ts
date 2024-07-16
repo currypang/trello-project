@@ -18,6 +18,12 @@ export class CardsController {
     private readonly activityService: ActivityService
   ) {}
 
+  /** 
+     * 카드 생성
+     * @param createCardDto 
+     * @param req 
+     * @returns 
+     */
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Post()
@@ -32,6 +38,10 @@ export class CardsController {
     }   
   }
 
+  /** 
+     * 카드 전체 조회 -> 혹시 몰라서 만들어 놓은 것
+     * @returns 
+     */
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get()
@@ -44,6 +54,11 @@ export class CardsController {
     }   
   }
 
+  /** 
+     * 카드 상세 조회
+     * @param cardId 
+     * @returns 
+     */
   @Get(':cardId')
   async findOne(@Param('cardId') cardId: string) {
     const card = await this.cardsService.findOne(+cardId);
@@ -54,6 +69,13 @@ export class CardsController {
     }   
   }
 
+  /** 
+     * 카드 수정
+     * @param cardId 
+     * @param updateCardDto
+     * @param req
+     * @returns 
+     */
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Patch(':cardId')
@@ -69,6 +91,11 @@ export class CardsController {
     }  
   }
 
+  /** 
+     * 카드 삭제
+     * @param cardId 
+     * @returns 
+     */
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Delete(':cardId')
@@ -81,7 +108,13 @@ export class CardsController {
     }  
   }
 
-  // 카드 멤버 추가
+  /** 
+     * 카드 멤버 추가
+     * @param cardId 
+     * @param createCardAssignessDto
+     * @param req
+     * @returns 
+     */
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Post(':cardId/members')
@@ -97,7 +130,13 @@ export class CardsController {
     }  
   }
 
-  // 카드 멤버 삭제
+  /** 
+     * 카드 멤버 삭제
+     * @param cardId 
+     * @param deleteCardAssignessDto
+     * @param req
+     * @returns 
+     */
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Delete(':cardId/members')
@@ -113,7 +152,13 @@ export class CardsController {
     }  
   }
 
-  // 카드 일정 수정 및 추가
+  /** 
+     * 카드 일정 수정 및 추가
+     * @param cardId 
+     * @param updateCardDto
+     * @param req
+     * @returns 
+     */
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Patch(':cardId/Date')
@@ -130,7 +175,12 @@ export class CardsController {
     }  
   }
 
-  // 카드 일정 마감
+  /** 
+     * 카드 일정 마감
+     * @param cardId 
+     * @param req
+     * @returns 
+     */
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Patch(':cardId/DateExpired')
@@ -152,7 +202,13 @@ export class CardsController {
     }
   }
 
-  // 카드 리스트 이동
+  /** 
+     * 카드 리스트 이동
+     * @param cardId 
+     * @param listId
+     * @param req
+     * @returns 
+     */
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Patch(':cardId/lists/:listId')
