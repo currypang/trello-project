@@ -112,7 +112,7 @@ export class BoardController {
     }
     
     /**
-     * 
+     * 보드초대
      * @param req 
      * @param inviteDto 
      * @returns 
