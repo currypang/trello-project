@@ -12,6 +12,13 @@ import { UpdateActivityDto } from './dto/update-activity.dto';
 export class ActivityController {
   constructor(private readonly activityService: ActivityService) {}
 
+  /** 
+     * 액티비티 생성
+     * @param CreateActivityDto 
+     * @param req 
+     * @param cardId 
+     * @returns 
+     */
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Post('cards/:cardId')
@@ -24,6 +31,12 @@ export class ActivityController {
     }   
   }
 
+
+  /** 
+     * 카드 내 액티비티 전체조회 
+     * @param cardId 
+     * @returns 
+     */
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get('cards/:cardId')
@@ -37,6 +50,11 @@ export class ActivityController {
     }   
   }
 
+  /** 
+     * 액티비티 상세조회 
+     * @param activityId 
+     * @returns 
+     */
   @Get(':activityId')
   async findOne(@Param('activityId') activityId: string) {
     const data = await this.activityService.findOne(+activityId);
@@ -48,6 +66,13 @@ export class ActivityController {
     }   
   }
 
+  /** 
+     * 액티비티 수정
+     * @param activityId 
+     * @param updateActivityDto
+     * @param req
+     * @returns 
+     */
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Patch(':activityId')
@@ -62,6 +87,12 @@ export class ActivityController {
     }
   }
 
+  /** 
+     * 액티비티 삭제
+     * @param activityId 
+     * @param req
+     * @returns 
+     */
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Delete(':activityId')

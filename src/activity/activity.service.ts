@@ -9,13 +9,15 @@ import { UpdateActivityDto } from './dto/update-activity.dto';
 import { Activity } from './entities/activity.entity';
 import { Card } from 'src/cards/entities/card.entity';
 import { SseService } from 'src/sse/sse.service';
+import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class ActivityService {
   constructor(
     @InjectRepository(Card) private cardRepository: Repository<Card>,
     @InjectRepository(Activity) private activityRepository: Repository<Activity>,
-    private readonly sseService: SseService
+    private readonly sseService: SseService,
+    private readonly redisService: RedisService
   ) {}
 
   async create(createActivityDto: CreateActivityDto, userId: number, cardId: number) {
@@ -26,6 +28,13 @@ export class ActivityService {
       content,
       isLog: false,
     });
+    const key = `${userId}`;
+    const existedData = await this.redisService.get(key);
+    const currentData = _.isNil(existedData) ? [] : existedData;
+
+    currentData.push(data);
+    await this.redisService.set(key, currentData);
+
     this.sseService.emitCardChangeEvent(userId, { message: 'new activity' });
     return data;
   }
