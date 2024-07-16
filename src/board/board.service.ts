@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Board } from './entities/board.entity';
-import { DataSource, Like, Repository } from 'typeorm';
+import { DataSource, In, Like, Repository } from 'typeorm';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
 import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
@@ -49,27 +49,21 @@ export class BoardService {
     async findAll({keyword} : FindAllBoardDto,userId:number){
         const existMember = await this.boardMemberRepository.find({
             where:{userId: userId}
-        })
+        }) 
+        const boardsId = existMember.map((member)=> 
+                member.boardId
+        )
         const boards = await this.boardRepository.find({
-            where:{...(keyword && {name:Like(`%${keyword}%`)})},
-            order:{
-                id: BOARD_CONSTANT.ORDER.DESC 
+            where:{
+                id:In(boardsId),
+                ...(keyword && { name: Like(`%${keyword}%`) })
             },
+            order:{id:BOARD_CONSTANT.ORDER.DESC}
         })
-        const boardsId = existMember.map((member)=> {
-            if (member.userId === userId){
-                return member.boardId
-            }
-        })
-        const newBoards = boards.filter((board) => {
-            if(boardsId.includes(board.id)){
-                return board
-            }
-        })
-        if(newBoards.length === 0){
+        if(boards.length === 0){
             throw new NotFoundException('사용중인 보드가 없습니다.')
         }
-        return newBoards
+        return boards
     }
 
     async findOne(id:number, userId:number){
