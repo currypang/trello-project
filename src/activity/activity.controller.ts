@@ -21,6 +21,7 @@ export class ActivityController {
     }   
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get('cards/:cardId')
   async findAll(@Param('cardId') cardId: string) {
     const data = await this.activityService.findAll(+cardId);

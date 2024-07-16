@@ -11,6 +11,7 @@ import { CardAssigness } from './entities/card-assigness.entity';
 import { List } from '../lists/entities/list.entity';
 import { BoardMembers } from 'src/board/entities/board-member.entity';
 import { SseService } from 'src/sse/sse.service';
+import Decimal from 'decimal.js';
 import { idText } from 'typescript';
 import Decimal from 'decimal.js';
 import { UpdateCardOrderDto } from './dto/update-card-order.dto';
@@ -33,16 +34,16 @@ export class CardsService {
   async create(createCardDto: CreateCardDto, userId: number) {
     const { name, listId } = createCardDto;
 
-    // 보드가 존재하는지 확인
+    // 리스트가 존재하는지 확인
     const existingList = await this.listRepository.findOne({
       where: { id: listId },
     });
     if (!existingList) {
-      throw new BadRequestException('없는 보드입니다.');
+      throw new BadRequestException('없는 리스트입니다.');
     }
 
     return await this.cardRepository.manager.transaction(async (transactionalEntityManager) => {
-      // 보드 ID에서 마지막 카드 찾음
+      // 리스트 ID에서 마지막 카드 찾음
       const lastCard = await transactionalEntityManager.findOne(Card, {
         where: { listId },
         order: { position: 'DESC' },
@@ -50,8 +51,8 @@ export class CardsService {
 
       // 카드 위치 지정
       const newPosition = lastCard
-        ? lastCard.position + Math.floor(Math.random() * 10000)
-        : Math.floor(Math.random() * 1000);
+        ? new Decimal(lastCard.position).plus(new Decimal(Math.random()).times(20000)).toNumber()
+        : new Decimal(Math.random()).times(10000).toNumber();
 
       // 새로운 카드 생성
       const card = transactionalEntityManager.create(Card, {
@@ -198,6 +199,43 @@ export class CardsService {
     } else {
       return false;
     }
+  }
+
+  async updateCardList(id: number, listId: number){
+    await this.verifyCardById(id);
+
+    const cardListId = await this.cardRepository.findOneBy({ id });
+    const listBoardId = await this.listRepository.findOne({
+      where: { id: cardListId.listId },
+    });
+    // 리스트가 존재하는지 확인
+    const existingList = await this.listRepository.findOne({
+      where: { id: listId },
+    });
+    if (!existingList) {
+      throw new BadRequestException('없는 리스트입니다.');
+    }
+
+    if(existingList.boardId !== listBoardId.boardId){
+      throw new BadRequestException('서로 다른 보드입니다.');
+    }
+    const lastCard = await this.cardRepository.findOne({
+      where: { listId },
+      select: ['position'],
+      order: { position: 'DESC' },
+    });
+
+    const newPosition = +lastCard
+        ? new Decimal(+lastCard).plus(new Decimal(Math.random()).times(20000)).toNumber()
+        : new Decimal(Math.random()).times(10000).toNumber();
+
+    // 카드 리스트id 업데이트 생성
+    const card = this.cardRepository.update({ id },{
+      listId,
+      position: newPosition,
+    });
+
+    return card;
   }
 
   async verifyCardById(id: number) {

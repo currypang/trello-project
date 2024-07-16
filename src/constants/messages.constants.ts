@@ -105,6 +105,9 @@ export const MESSAGES_CONSTANT = {
       SUCCEED: '카드가 마감 되었습니다',
       FAILED: '카드의 일정이 남아 있습니다',
     },
+    UPDATE_LIST_CARD :{
+      SUCCEED: '카드가 (리스트)이동 되었습니다',
+    }
   },
 
   ACTIVITY: {
