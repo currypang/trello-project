@@ -85,4 +85,13 @@ export class UserController {
       message: MESSAGES_CONSTANT.USER.VERIFY_EMAIL.SUCCEED,
     };
   }
+  // 알림 테스트
+  @Post('/comment')
+  async createComment(@Body() body: any) {
+    this.userService.createComment(body);
+    return {
+      statusCode: HttpStatus.OK,
+      message: '댓글 작성 테스트 완료 알림',
+    };
+  }
 }
