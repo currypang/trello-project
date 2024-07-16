@@ -14,8 +14,8 @@ import { ListsService } from './lists.service';
 import { CreateListDto } from './dto/create-list.dto';
 import { UpdateListDto } from './dto/update-list.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { AuthGuard } from '@nestjs/passport';
 import { UpdateListOrderDto } from './dto/update-list-order.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @ApiTags('리스트')
 @Controller('lists')
@@ -27,7 +27,7 @@ export class ListsController {
    * @returns
    */
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Post()
   async create(@Request() req, @Body() createListDto: CreateListDto) {
     const userId = req.user.id;
@@ -46,7 +46,7 @@ export class ListsController {
    * @returns
    */
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Patch(':listId')
   async update(@Request() req, @Param('listId', ParseIntPipe) listId: number, @Body() updateListDto: UpdateListDto) {
     const userId = req.user.id;
@@ -64,7 +64,7 @@ export class ListsController {
    * @returns
    */
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Delete(':listId')
   async remove(@Request() req, @Param('listId', ParseIntPipe) listId: number) {
     const userId = req.user.id;
@@ -82,7 +82,7 @@ export class ListsController {
    * @returns
    */
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Patch(':listId/order')
   async updateOrder(
     @Request() req,
