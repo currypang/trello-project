@@ -29,6 +29,7 @@ export class CardsController {
     }   
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   async findAll() {
     const cards = await this.cardsService.findAll();
@@ -63,6 +64,7 @@ export class CardsController {
     }  
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async delete(@Param('id') id: string) {
     const card = await this.cardsService.delete(+id);
@@ -138,5 +140,21 @@ export class CardsController {
         message:MESSAGES_CONSTANT.CARD.UPDATE_DATE_EXPIRE_CARD.FAILED,
       } 
     }
+  }
+
+  // 카드 리스트 이동
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id/lists/:listId')
+  async updateCardList(@Param('id') id: string, @Param('listId') listId: string, @Request() req){
+    await this.cardsService.updateCardList(+id, +listId);
+    const updateCardList = await this.cardsService.findOne(+id);
+    const log = await this.activityService.createLog(req.user.id, +id, 'updateCardListId');
+    
+    return{
+      statusCode:HttpStatus.OK,
+      message:MESSAGES_CONSTANT.CARD.UPDATE_LIST_CARD.SUCCEED,
+      updateCardList,
+      log
+    }  
   }
 }
