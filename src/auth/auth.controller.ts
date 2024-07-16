@@ -1,15 +1,22 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Request, Headers } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, Request, Headers, Query } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dtos/sign-up.dto';
 import { SignInDto } from './dtos/sign-in.dto';
 
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 import { LocalAuthGuard } from './guards/local-auth.guard';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { EmailService } from 'src/email/email.service';
+import { SendEmailDto } from './dtos/send-email.dto';
+import { VerifyEmailQueryDto } from './dtos/verify-email.query.dto';
 @ApiTags('인증')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly emailService: EmailService
+  ) {}
 
   /**
    * 회원가입
@@ -68,6 +75,31 @@ export class AuthController {
       statusCode: HttpStatus.OK,
       message: MESSAGES_CONSTANT.AUTH.REFRESH_TOKEN.SUCCEED,
       data: tokens,
+    };
+  }
+
+  // 이메일 인증
+  // @UseGuards(RolesGuard)
+  // @Roles(Role.VerifiedUser)
+  @ApiBearerAuth()
+  @Post('/email')
+  @UseGuards(JwtAuthGuard)
+  async sendEmail(@Request() req, @Body() sendEmailDto: SendEmailDto) {
+    const userId = req.user.id;
+    const email = sendEmailDto.email;
+    await this.emailService.sendMemberJoinVerification(email, userId);
+    return {
+      statusCode: HttpStatus.OK,
+      message: MESSAGES_CONSTANT.AUTH.SEND_EMAIL.SUCCEED,
+    };
+  }
+  // 이메일 인증 링크 확인
+  @Post('/email/email-verify')
+  async verifyEmail(@Query() query: VerifyEmailQueryDto) {
+    await this.emailService.verifyEmail(query);
+    return {
+      statusCode: HttpStatus.OK,
+      message: MESSAGES_CONSTANT.AUTH.VERIFY_EMAIL.SUCCEED,
     };
   }
 }

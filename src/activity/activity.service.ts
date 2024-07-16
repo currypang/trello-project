@@ -10,6 +10,7 @@ import { Activity } from './entities/activity.entity';
 import { Card } from 'src/cards/entities/card.entity';
 import { SseService } from 'src/sse/sse.service';
 import { RedisService } from 'src/redis/redis.service';
+import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 
 @Injectable()
 export class ActivityService {
@@ -35,14 +36,16 @@ export class ActivityService {
     currentData.push(data);
     await this.redisService.set(key, currentData);
 
-    this.sseService.emitCardChangeEvent(userId, { message: 'new activity' });
+    this.sseService.emitCardChangeEvent(userId, {
+      message: MESSAGES_CONSTANT.ACTIVITY.CREATE_ACTIVITY.SSE_NEW_ACTIVITY,
+    });
     return data;
   }
 
   async findAll(cardId: number) {
     const existCard = this.cardRepository.findOneBy({ id: cardId });
     if (_.isNil(existCard)) {
-      throw new NotFoundException('존재하지 않는 카드입니다.');
+      throw new NotFoundException(MESSAGES_CONSTANT.ACTIVITY.READ_ACTIVITY.NOT_FOUND);
     }
 
     const activitys = await this.activityRepository.find({
@@ -55,7 +58,7 @@ export class ActivityService {
   async findOne(id: number) {
     const activity = await this.activityRepository.findOneBy({ id });
     if (_.isNil(activity)) {
-      throw new NotFoundException('존재하지 않는 activity입니다.');
+      throw new NotFoundException(MESSAGES_CONSTANT.ACTIVITY.READ_ACTIVITY.NOT_FOUND_DETAIL);
     }
     return activity;
   }
@@ -63,10 +66,10 @@ export class ActivityService {
   async update(id: number, updateActivityDto: UpdateActivityDto, userId: number) {
     const activity = await this.activityRepository.findOneBy({ id });
     if (_.isNil(activity)) {
-      throw new NotFoundException('존재하지 않는 activity입니다.');
+      throw new NotFoundException(MESSAGES_CONSTANT.ACTIVITY.UPDATE_ACTIVITY.NOT_FOUND);
     }
     if (activity.userId !== userId) {
-      throw new BadRequestException('수정 권한이 없습니다.');
+      throw new BadRequestException(MESSAGES_CONSTANT.ACTIVITY.UPDATE_ACTIVITY.BAD_REQUEST);
     }
 
     return await this.activityRepository.update({ id }, updateActivityDto);
@@ -75,10 +78,10 @@ export class ActivityService {
   async remove(id: number, userId: number) {
     const activity = await this.activityRepository.findOneBy({ id });
     if (_.isNil(activity)) {
-      throw new NotFoundException('존재하지 않는 activity입니다.');
+      throw new NotFoundException(MESSAGES_CONSTANT.ACTIVITY.DELETE_ACTIVITY.NOT_FOUND);
     }
     if (activity.userId !== userId) {
-      throw new BadRequestException('삭제 권한이 없습니다.');
+      throw new BadRequestException(MESSAGES_CONSTANT.ACTIVITY.DELETE_ACTIVITY.BAD_REQUEST);
     }
     return this.activityRepository.delete({ id });
   }

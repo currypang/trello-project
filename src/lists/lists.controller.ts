@@ -15,9 +15,14 @@ import { CreateListDto } from './dto/create-list.dto';
 import { UpdateListDto } from './dto/update-list.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UpdateListOrderDto } from './dto/update-list-order.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { Role } from 'src/user/types/roles.type';
 
 @ApiTags('리스트')
+@UseGuards(RolesGuard)
+@Roles(Role.VerifiedUser)
 @Controller('lists')
 export class ListsController {
   constructor(private readonly listsService: ListsService) {}
@@ -27,7 +32,6 @@ export class ListsController {
    * @returns
    */
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Post()
   async create(@Request() req, @Body() createListDto: CreateListDto) {
     const userId = req.user.id;
@@ -35,7 +39,7 @@ export class ListsController {
 
     return {
       statusCode: HttpStatus.CREATED,
-      message: '리스트 생성에 성공했습니다.',
+      message: MESSAGES_CONSTANT.LIST.UPDATE_LIST.SUCCEED,
       data,
     };
   }
@@ -46,7 +50,6 @@ export class ListsController {
    * @returns
    */
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Patch(':listId')
   async update(@Request() req, @Param('listId', ParseIntPipe) listId: number, @Body() updateListDto: UpdateListDto) {
     const userId = req.user.id;
@@ -54,7 +57,7 @@ export class ListsController {
 
     return {
       statusCode: HttpStatus.OK,
-      message: '리스트 수정에 성공했습니다.',
+      message: MESSAGES_CONSTANT.LIST.UPDATE_LIST.SUCCEED,
       data,
     };
   }
@@ -64,14 +67,13 @@ export class ListsController {
    * @returns
    */
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Delete(':listId')
   async remove(@Request() req, @Param('listId', ParseIntPipe) listId: number) {
     const userId = req.user.id;
     const data = await this.listsService.remove(userId, listId);
     return {
       statusCode: HttpStatus.OK,
-      message: '리스트 삭제에 성공했습니다.',
+      message: MESSAGES_CONSTANT.LIST.DELETE_LIST.SUCCEED,
       data,
     };
   }
@@ -82,7 +84,6 @@ export class ListsController {
    * @returns
    */
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Patch(':listId/order')
   async updateOrder(
     @Request() req,
@@ -93,7 +94,7 @@ export class ListsController {
     const data = await this.listsService.updateOrder(userId, listId, updateListOrderDto);
     return {
       statusCode: HttpStatus.OK,
-      message: '리스트 순서 변경에 성공했습니다.',
+      message: MESSAGES_CONSTANT.LIST.UPDATE_ORDER.SUCCEED,
       data,
     };
   }

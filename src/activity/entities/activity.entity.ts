@@ -11,6 +11,7 @@ import {
 import { IsNotEmpty, IsString } from 'class-validator';
 import { Card } from '../../cards/entities/card.entity';
 import { BoardMembers } from '../../board/entities/board-member.entity';
+import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 
 @Entity('Activity')
 export class Activity {
@@ -24,7 +25,7 @@ export class Activity {
   cardId: number;
 
   @IsString()
-  @IsNotEmpty({ message: '내용을 입력해주세요.' })
+  @IsNotEmpty({ message: MESSAGES_CONSTANT.ACTIVITY.COMMON.CONTENT.REQUIRED })
   @Column({ type: 'text' })
   content: string;
 
