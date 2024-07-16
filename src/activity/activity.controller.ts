@@ -1,6 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards, HttpStatus } from '@nestjs/common';
 import { ActivityService } from './activity.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
+
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
 
@@ -10,29 +12,59 @@ export class ActivityController {
 
   @UseGuards(JwtAuthGuard)
   @Post('cards/:cardId')
-  create(@Body() createActivityDto: CreateActivityDto, @Request() req, @Param('cardId') cardId: string) {
-    return this.activityService.create(createActivityDto, req.user.id, +cardId);
+  async create(@Body() createActivityDto: CreateActivityDto, @Request() req, @Param('cardId') cardId: string) {
+    const data = await this.activityService.create(createActivityDto, req.user.id, +cardId);
+    return{
+      statusCode:HttpStatus.CREATED,
+      message:MESSAGES_CONSTANT.ACTIVITY.CREATE_ACTIVITY.SUCCEED,
+      data
+    }   
   }
 
   @Get('cards/:cardId')
-  findAll(@Param('cardId') cardId: string) {
-    return this.activityService.findAll(+cardId);
+  async findAll(@Param('cardId') cardId: string) {
+    const data = await this.activityService.findAll(+cardId);
+
+    return{
+      statusCode:HttpStatus.OK,
+      message:MESSAGES_CONSTANT.ACTIVITY.READ_ACTIVITY.SUCCEED,
+      data
+    }   
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.activityService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const data = await this.activityService.findOne(+id);
+
+    return{
+      statusCode:HttpStatus.OK,
+      message:MESSAGES_CONSTANT.ACTIVITY.READ_ACTIVITY.SUCCEED,
+      data
+    }   
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch(':activityId')
-  update(@Param('activityId') id: string, @Body() updateActivityDto: UpdateActivityDto, @Request() req) {
-    return this.activityService.update(+id, updateActivityDto, req.user.id);
+  async update(@Param('activityId') id: string, @Body() updateActivityDto: UpdateActivityDto, @Request() req) {
+    await this.activityService.update(+id, updateActivityDto, req.user.id);
+    const data = await this.activityService.findOne(+id);
+
+    return{
+      statusCode:HttpStatus.OK,
+      message:MESSAGES_CONSTANT.ACTIVITY.UPDATE_ACTIVITY.SUCCEED,
+      data
+    }
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':activityId')
-  remove(@Param('activityId') id: string, @Request() req) {
-    return this.activityService.remove(+id, req.user.id);
+  async remove(@Param('activityId') id: string, @Request() req) {
+    const data = await this.activityService.remove(+id, req.user.id);
+
+    return{
+      statusCode:HttpStatus.OK,
+      message:MESSAGES_CONSTANT.ACTIVITY.DELETE_ACTIVITY.SUCCEED,
+      data
+    }
   }
 }

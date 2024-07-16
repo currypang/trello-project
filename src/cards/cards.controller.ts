@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards, HttpStatus } from '@nestjs/common';
 import { CardsService } from './cards.service';
 import { ActivityService } from 'src/activity/activity.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
@@ -19,68 +20,123 @@ export class CardsController {
   @Post()
   async create(@Body() createCardDto: CreateCardDto, @Request() req) {
     const createCard = await this.cardsService.create(createCardDto, req.user.id);
-    const log = this.activityService.createLog(req.user.id, createCard.id, 'CreateCard');
-    return [createCard, log];
+    const log = await this.activityService.createLog(req.user.id, createCard.id, 'CreateCard');
+    return{
+      statusCode:HttpStatus.CREATED,
+      message:MESSAGES_CONSTANT.CARD.CREATE_CARD.SUCCEED,
+      createCard,
+      log
+    }   
   }
 
   @Get()
-  findAll() {
-    return this.cardsService.findAll();
+  async findAll() {
+    const cards = await this.cardsService.findAll();
+    return{
+      statusCode:HttpStatus.OK,
+      message:MESSAGES_CONSTANT.CARD.READ_CARDS.SUCCEED,
+      cards
+    }   
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.cardsService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const card = await this.cardsService.findOne(+id);
+    return{
+      statusCode:HttpStatus.OK,
+      message:MESSAGES_CONSTANT.CARD.READ_CARD.SUCCEED,
+      card
+    }   
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCardDto: UpdateCardDto, @Request() req) {
-    const update = this.cardsService.update(+id, req.user.id, updateCardDto);
-    const log = this.activityService.createLog(req.user.id, +id, 'updateCard');
-    return [update, log];
+  async update(@Param('id') id: string, @Body() updateCardDto: UpdateCardDto, @Request() req) {
+    const update =  await this.cardsService.update(+id, updateCardDto);
+    const card = await this.cardsService.findOne(+id);
+    const log = await this.activityService.createLog(req.user.id, +id, 'updateCard');
+    return{
+      statusCode:HttpStatus.OK,
+      message:MESSAGES_CONSTANT.CARD.UPDATE_CARD.SUCCEED,
+      card,
+      log
+    }  
   }
 
   @Delete(':id')
-  delete(@Param('id') id: string) {
-    return this.cardsService.delete(+id);
+  async delete(@Param('id') id: string) {
+    const card = await this.cardsService.delete(+id);
+    return{
+      statusCode:HttpStatus.OK,
+      message:MESSAGES_CONSTANT.CARD.DELETE_CARD.SUCCEED,
+      card
+    }  
   }
 
   // 카드 멤버 추가
   @UseGuards(JwtAuthGuard)
   @Post(':id/members')
-  createMembers(@Param('id') id: string, @Body() createCardAssignessDto: CreateCardAssignessDto, @Request() req){
-    const createMembers = this.cardsService.createMembers(createCardAssignessDto.userId, +id);
-    const log = this.activityService.createLog(req.user.id, +id, 'createCardMembers');
-
-    return [createMembers, log];
+  async createMembers(@Param('id') id: string, @Body() createCardAssignessDto: CreateCardAssignessDto, @Request() req){
+    const createMembers = await this.cardsService.createMembers(createCardAssignessDto.userId, +id);
+    const log = await this.activityService.createLog(req.user.id, +id, 'createCardMembers');
+    
+    return{
+      statusCode:HttpStatus.OK,
+      message:MESSAGES_CONSTANT.CARD.CREATE_MEMBER_CARD.SUCCEED,
+      createMembers,
+      log
+    }  
   }
 
   // 카드 멤버 삭제
   @UseGuards(JwtAuthGuard)
   @Delete(':id/members')
-  deleteMembers(@Param('id') id: string, @Body() deleteCardAssignessDto: DeleteCardAssignessDto, @Request() req){
-    const deleteMembers = this.cardsService.deleteMembers(deleteCardAssignessDto.userId, +id);
-    const log = this.activityService.createLog(req.user.id, +id, 'deleteCardMembers');
-
-    return [deleteMembers, log];
+  async deleteMembers(@Param('id') id: string, @Body() deleteCardAssignessDto: DeleteCardAssignessDto, @Request() req){
+    const deleteMembers = await this.cardsService.deleteMembers(deleteCardAssignessDto.userId, +id);
+    const log = await this.activityService.createLog(req.user.id, +id, 'deleteCardMembers');
+    
+    return{
+      statusCode:HttpStatus.OK,
+      message:MESSAGES_CONSTANT.CARD.DELETE_MEMBER_CARD.SUCCEED,
+      deleteMembers,
+      log
+    }  
   }
 
   // 카드 일정 수정 및 추가
   @UseGuards(JwtAuthGuard)
   @Patch(':id/Date')
-  updateCardDate(@Param('id') id: string, @Body() updateCardDto: UpdateCardDto, @Request() req) {
-    const updateCardDate = this.cardsService.updateCardDate(+id, updateCardDto);
-    const log = this.activityService.createLog(req.user.id, +id, 'updateCardDate');
-    return [updateCardDate, log];
+  async updateCardDate(@Param('id') id: string, @Body() updateCardDto: UpdateCardDto, @Request() req) {
+    await this.cardsService.updateCardDate(+id, updateCardDto);
+    const updateCardDate = await this.cardsService.findOne(+id);
+    const log = await this.activityService.createLog(req.user.id, +id, 'updateCardDate');
+
+    return{
+      statusCode:HttpStatus.OK,
+      message:MESSAGES_CONSTANT.CARD.UPDATE_DATE_CARD.SUCCEED,
+      updateCardDate,
+      log
+    }  
   }
 
   // 카드 일정 마감
   @UseGuards(JwtAuthGuard)
   @Patch(':id/DateExpired')
-  updateDateExpire(@Param('id') id: string, @Request() req) {
-    const updateDateExpire = this.cardsService.updateDateExpire(+id);
-    const log = this.activityService.createLog(req.user.id, +id, 'updateDateExpired');
-    return [updateDateExpire, log];
+  async updateDateExpire(@Param('id') id: string, @Request() req) {
+    const updateDateExpire =  await this.cardsService.updateDateExpire(+id);
+    const log = await this.activityService.createLog(req.user.id, +id, 'updateDateExpired');
+    if(updateDateExpire){
+      return{
+        statusCode:HttpStatus.OK,
+        message:MESSAGES_CONSTANT.CARD.UPDATE_DATE_EXPIRE_CARD.SUCCEED,
+        updateDateExpire,
+        log
+      }  
+    }else if(!updateDateExpire){
+      return{
+        statusCode:HttpStatus.OK,
+        message:MESSAGES_CONSTANT.CARD.UPDATE_DATE_EXPIRE_CARD.FAILED,
+      } 
+    }
   }
 }
