@@ -52,7 +52,7 @@ export class ActivityService {
     if (_.isNil(activity)) {
       throw new NotFoundException('존재하지 않는 activity입니다.');
     }
-    if (activity.userId === userId) {
+    if (activity.userId !== userId) {
       throw new BadRequestException('수정 권한이 없습니다.');
     }
 
@@ -64,13 +64,13 @@ export class ActivityService {
     if (_.isNil(activity)) {
       throw new NotFoundException('존재하지 않는 activity입니다.');
     }
-    if (activity.userId === userId) {
+    if (activity.userId !== userId) {
       throw new BadRequestException('삭제 권한이 없습니다.');
     }
     return this.activityRepository.delete({ id });
   }
 
-
+  // 카드 로그 생성
   async createLog(userId : number, cardId : number, content : string) {
     return await this.activityRepository.save({
       userId,

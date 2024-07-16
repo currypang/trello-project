@@ -10,12 +10,12 @@ export class ActivityController {
 
   @UseGuards(JwtAuthGuard)
   @Post('cards/:cardId')
-  create(@Body() createActivityDto: CreateActivityDto, @Request() req, @Param('id') cardId: string) {
+  create(@Body() createActivityDto: CreateActivityDto, @Request() req, @Param('cardId') cardId: string) {
     return this.activityService.create(createActivityDto, req.user.id, +cardId);
   }
 
   @Get('cards/:cardId')
-  findAll(@Param('id') cardId: string) {
+  findAll(@Param('cardId') cardId: string) {
     return this.activityService.findAll(+cardId);
   }
 
@@ -25,14 +25,14 @@ export class ActivityController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateActivityDto: UpdateActivityDto, @Request() req) {
+  @Patch(':activityId')
+  update(@Param('activityId') id: string, @Body() updateActivityDto: UpdateActivityDto, @Request() req) {
     return this.activityService.update(+id, updateActivityDto, req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete(':id')
-  remove(@Param('id') id: string, @Request() req) {
+  @Delete(':activityId')
+  remove(@Param('activityId') id: string, @Request() req) {
     return this.activityService.remove(+id, req.user.id);
   }
 }
