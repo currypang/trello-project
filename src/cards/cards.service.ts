@@ -1,8 +1,8 @@
+import { DataSource, DeepPartial, EntityManager, Repository } from 'typeorm';
 import _ from 'lodash';
-import { DeepPartial, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 
@@ -13,15 +13,21 @@ import { BoardMembers } from 'src/board/entities/board-member.entity';
 import { SseService } from 'src/sse/sse.service';
 import Decimal from 'decimal.js';
 import { idText } from 'typescript';
+import { UpdateCardOrderDto } from './dto/update-card-order.dto';
 
 @Injectable()
 export class CardsService {
   constructor(
-    @InjectRepository(Card) private cardRepository: Repository<Card>,
-    @InjectRepository(CardAssigness) private cardAssignessRepository: Repository<CardAssigness>,
-    @InjectRepository(List) private listRepository: Repository<List>,
-    @InjectRepository(BoardMembers) private boardMembersRepository: Repository<BoardMembers>,
-    private readonly sseService: SseService
+    @InjectRepository(Card)
+    private cardRepository: Repository<Card>,
+    @InjectRepository(CardAssigness)
+    private cardAssignessRepository: Repository<CardAssigness>,
+    @InjectRepository(List)
+    private listRepository: Repository<List>,
+    @InjectRepository(BoardMembers)
+    private boardMembersRepository: Repository<BoardMembers>,
+    private readonly sseService: SseService,
+    private readonly dataSource: DataSource
   ) {}
 
   async create(createCardDto: CreateCardDto, userId: number) {
@@ -107,11 +113,11 @@ export class CardsService {
     }
 
     const verifyCardMemberbyId = await this.cardAssignessRepository.find({
-      where : {
+      where: {
         userId,
-        cardId,       
-      }
-    })
+        cardId,
+      },
+    });
     if (verifyCardMemberbyId.length !== 0) {
       throw new NotFoundException('card에 이미 존재하는 멤버입니다.');
     }
@@ -140,9 +146,9 @@ export class CardsService {
     const verifyCardMemberbyId = await this.cardAssignessRepository.find({
       where: {
         userId,
-        cardId,       
-      }
-    })
+        cardId,
+      },
+    });
     if (verifyCardMemberbyId.length === 0) {
       throw new NotFoundException('card에 존재하지 않는 멤버입니다.');
     }
@@ -178,9 +184,9 @@ export class CardsService {
     await this.verifyCardById(id);
     const cardInfo = await this.findOne(id);
     let cardDate;
-    if(cardInfo.dueDate){
+    if (cardInfo.dueDate) {
       cardDate = new Date(cardInfo.dueDate);
-    }else{
+    } else {
       throw new BadRequestException('일정이 지정되지 않았습니다.');
     }
     const today = new Date();
@@ -188,13 +194,13 @@ export class CardsService {
     if (cardDate < today) {
       return false;
     } else if (cardDate > today) {
-      return await this.cardRepository.update({ id }, { isExpired : true, } );
+      return await this.cardRepository.update({ id }, { isExpired: true });
     } else {
       return false;
     }
   }
 
-  async updateCardList(id: number, listId: number){
+  async updateCardList(id: number, listId: number) {
     await this.verifyCardById(id);
 
     const cardListId = await this.cardRepository.findOneBy({ id });
@@ -209,7 +215,7 @@ export class CardsService {
       throw new BadRequestException('없는 리스트입니다.');
     }
 
-    if(existingList.boardId !== listBoardId.boardId){
+    if (existingList.boardId !== listBoardId.boardId) {
       throw new BadRequestException('서로 다른 보드입니다.');
     }
     const lastCard = await this.cardRepository.findOne({
@@ -219,14 +225,17 @@ export class CardsService {
     });
 
     const newPosition = +lastCard
-        ? new Decimal(+lastCard).plus(new Decimal(Math.random()).times(20000)).toNumber()
-        : new Decimal(Math.random()).times(10000).toNumber();
+      ? new Decimal(+lastCard).plus(new Decimal(Math.random()).times(20000)).toNumber()
+      : new Decimal(Math.random()).times(10000).toNumber();
 
     // 카드 리스트id 업데이트 생성
-    const card = this.cardRepository.update({ id },{
-      listId,
-      position: newPosition,
-    });
+    const card = this.cardRepository.update(
+      { id },
+      {
+        listId,
+        position: newPosition,
+      }
+    );
 
     return card;
   }
@@ -238,5 +247,76 @@ export class CardsService {
     }
 
     return card;
+  }
+
+  //카드 순서 변경
+  async updateOrder(userId, id: number, updateCardOrderDto: UpdateCardOrderDto) {
+    const { position } = updateCardOrderDto;
+    return await this.dataSource.transaction(async (transactionalEntityManager: EntityManager) => {
+      // 카드id를 받아 카드 정보를 가져오기
+      const cardToUpdateOrder = await transactionalEntityManager.findOne(Card, {
+        where: { id },
+      });
+      if (!cardToUpdateOrder) {
+        throw new NotFoundException('카드를 찾을 수 없습니다.');
+      }
+      //카드 리스트 아이디
+      const cardListId = cardToUpdateOrder.listId;
+      //카드의 리스트 정보
+      const listInfo = await transactionalEntityManager.findOne(List, { where: { id: cardListId } });
+
+      //카드 보드 아이디
+      const listBoardId = listInfo.boardId;
+
+      const boardMember = await transactionalEntityManager.findOne(BoardMembers, { where: { userId } });
+
+      const userBoardId = boardMember.boardId;
+
+      if (listBoardId !== userBoardId) {
+        throw new ForbiddenException('보드에 가입된 유저가 아닙니다.');
+      }
+
+      // 카드가 속한 리스트의 정보를 가져오기
+      const list = await transactionalEntityManager.findOne(List, {
+        where: { id: cardListId },
+        relations: ['cards'],
+      });
+      if (!list) {
+        throw new NotFoundException('리스트를 찾을 수 없습니다.');
+      }
+      // 리스트의 모든 카드들을 가져오기
+      const cardsInlist = list.cards;
+      cardsInlist.sort((a: Card, b: Card): number => a.position - b.position);
+
+      const cardArrayLangth = cardsInlist.length;
+      if (position + 1 >= cardArrayLangth) {
+        throw new BadRequestException('옮길 수 있는 위치가 아닙니다.');
+      }
+      console.log('cardArrayLangth', cardArrayLangth);
+      // 바꾸려는 위치의 리스트의 position값
+      const targetPosition = cardsInlist[position].position;
+      // 바꾸는 위치 이전 포지션 값
+      const previousTargetPosition = cardsInlist[position - 1]?.position;
+
+      // 포지션 계산
+      const newPosition =
+        position + 1 == cardArrayLangth
+          ? new Decimal(previousTargetPosition).plus(new Decimal(Math.random()).times(20000)).toNumber()
+          : previousTargetPosition
+            ? new Decimal(new Decimal(targetPosition).minus(previousTargetPosition))
+                .times(Math.random())
+                .plus(previousTargetPosition)
+                .toNumber()
+            : new Decimal(targetPosition).times(Math.random()).toNumber();
+
+      // 카드의 position 업데이트
+      cardToUpdateOrder.position = newPosition;
+
+      Object.assign(cardToUpdateOrder, { position: newPosition });
+
+      const updatedCard = await transactionalEntityManager.save(Card, cardToUpdateOrder);
+
+      return updatedCard;
+    });
   }
 }

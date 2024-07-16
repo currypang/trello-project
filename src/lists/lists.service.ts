@@ -123,7 +123,6 @@ export class ListsService {
     return await this.dataSource.transaction(async (transactionalEntityManager: EntityManager) => {
       // 리스트 id를 받아 리스트 정보를 가져오기
       const listToUpdateOrder = await transactionalEntityManager.findOne(List, { where: { id } });
-      console.log('listToUpdateOrder', listToUpdateOrder);
       if (!listToUpdateOrder) {
         throw new NotFoundException(MESSAGES_CONSTANT.LIST.COMMON.LIST_NOT_FOUND);
       }

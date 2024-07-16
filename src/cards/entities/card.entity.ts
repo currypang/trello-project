@@ -19,9 +19,18 @@ export class Card {
   @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
 
+  /**스웨거 테스트
+   * 카드 리스트 아이디
+   * @example "1"
+   */
+
   @IsNotEmpty({ message: '리스트를 입력해주세요.' })
   @Column({ unsigned: true })
   listId: number;
+  /**스웨거 테스트
+   * 카드 이름
+   * @example "To do"
+   */
 
   @IsString()
   @IsNotEmpty({ message: '카드 이름을 입력해주세요.' })
@@ -37,8 +46,12 @@ export class Card {
   @IsString()
   @Column({ nullable: true })
   color?: string;
+  /**스웨거 테스트
+   * 카드 위치 번호
+   *@example "2"
+   */
 
-  @Column({ type: 'decimal' , precision: 10, scale : 4 })
+  @Column({ type: 'decimal', precision: 10, scale: 4 })
   position: number;
 
   @Column({ type: 'boolean' })
