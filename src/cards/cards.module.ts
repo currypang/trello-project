@@ -11,9 +11,10 @@ import { BoardMembers } from '../board/entities/board-member.entity';
 import { List } from '../lists/entities/list.entity';
 import { Activity } from 'src/activity/entities/activity.entity';
 import { SseModule } from 'src/sse/sse.module';
+import { RedisModule } from 'src/redis/redis.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Card, CardAssigness, BoardMembers, List, Activity]), SseModule],
+  imports: [TypeOrmModule.forFeature([Card, CardAssigness, BoardMembers, List, Activity]), SseModule, RedisModule],
   controllers: [CardsController],
   providers: [CardsService, ActivityService],
 })

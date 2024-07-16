@@ -14,6 +14,7 @@ import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
 import { InvitationModule } from './invitation/invitation.module';
 import { SseModule } from './sse/sse.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { SseModule } from './sse/sse.module';
     EmailModule,
     InvitationModule,
     SseModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [AppService],

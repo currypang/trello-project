@@ -8,10 +8,11 @@ import { Activity } from './entities/activity.entity';
 import { Card } from '../cards/entities/card.entity';
 import { BoardMembers } from '../board/entities/board-member.entity';
 import { SseModule } from 'src/sse/sse.module';
+import { RedisService } from 'src/redis/redis.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Activity, Card, BoardMembers]), SseModule],
   controllers: [ActivityController],
-  providers: [ActivityService],
+  providers: [ActivityService, RedisService],
 })
 export class ActivityModule {}
