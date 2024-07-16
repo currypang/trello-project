@@ -209,69 +209,73 @@ export class CardsService {
     return card;
   }
   //카드 순서 변경
-  // async updateOrder(userId, id: number, updateCardOrderDto: UpdateCardOrderDto) {
-  //   const { position } = updateCardOrderDto;
-  //   return await this.dataSource.transaction(async (transactionalEntityManager: EntityManager) => {
-  //     // 카드id를 받아 카드 정보를 가져오기
-  //     const cardToUpdateOrder = await transactionalEntityManager.findOne(Card, {
-  //       where: { id },
-  //     });
-  //     if (!cardToUpdateOrder) {
-  //       throw new NotFoundException('카드를 찾을 수 없습니다.');
-  //     }
-  //     console.log('cardToUpdateOrder', cardToUpdateOrder);
-  //     const boardInfo = await this.listRepository.findOne({ where: { id: cardListId } });
+  async updateOrder(userId, id: number, updateCardOrderDto: UpdateCardOrderDto) {
+    const { position } = updateCardOrderDto;
+    return await this.dataSource.transaction(async (transactionalEntityManager: EntityManager) => {
+      // 카드id를 받아 카드 정보를 가져오기
+      const cardToUpdateOrder = await transactionalEntityManager.findOne(Card, {
+        where: { id },
+      });
+      if (!cardToUpdateOrder) {
+        throw new NotFoundException('카드를 찾을 수 없습니다.');
+      }
+      //카드 리스트 아이디
+      const cardListId = cardToUpdateOrder.listId;
+      //카드의 리스트 정보
+      const listInfo = await this.transactionalEntityManager.findOne(List, { where: { id: cardListId } });
+      //카드 보드 아이디
+      const listBoardId = listInfo.boardId;
 
-  //     const boardMember = await this.boardMembersRepository.findOne({ where: { userId } });
-  //     const userBoardId = boardMember.boardId;
-  //     const listBoardId = cardToUpdateOrder.boardId;
+      const boardMember = await this.transactionalEntityManager.findOne({ where: { userId } });
 
-  //     if (listBoardId !== userBoardId) {
-  //       throw new ForbiddenException('보드에 가입된 유저가 아닙니다.');
-  //     }
+      const userBoardId = boardMember.boardId;
 
-  //     // 카드가 속한 리스트의 정보를 가져오기
-  //     const list = await transactionalEntityManager.findOne(Card, {
-  //       where: { id: cardToUpdateOrder.listId },
-  //       relations: ['card'],
-  //     });
-  //     if (!list) {
-  //       throw new NotFoundException('보드를 찾을 수 없습니다.');
-  //     }
+      if (listBoardId !== userBoardId) {
+        throw new ForbiddenException('보드에 가입된 유저가 아닙니다.');
+      }
 
-  //     // 보드의 모든 리스트들을 가져오기
-  //     const listsInBoard = board.lists;
-  //     listsInBoard.sort((a: List, b: List): number => a.position - b.position);
+      // 카드가 속한 리스트의 정보를 가져오기
+      const list = await transactionalEntityManager.findOne(Card, {
+        where: { id: cardToUpdateOrder.listId },
+        relations: ['card'],
+      });
+      if (!list) {
+        throw new NotFoundException('보드를 찾을 수 없습니다.');
+      }
 
-  //     const listArrayLangth = listsInBoard.length;
-  //     if (position + 1 >= listArrayLangth) {
-  //       throw new BadRequestException('옮길 수 있는 위치가 아닙니다.');
-  //     }
-  //     // 바꾸려는 위치의 리스트의 position값
-  //     const targetPosition = listsInBoard[position].position;
-  //     // 바꾸는 위치 이전 포지션 값
-  //     const previousTargetPosition = listsInBoard[position - 1]?.position;
-  //     //위치 리스트의 마지막 표지션
+      // 보드의 모든 리스트들을 가져오기
+      const listsInBoard = board.lists;
+      listsInBoard.sort((a: List, b: List): number => a.position - b.position);
 
-  //     // 포지션 계산
-  //     const newPosition =
-  //       position + 1 == listArrayLangth
-  //         ? new Decimal(previousTargetPosition).plus(new Decimal(Math.random()).times(20000)).toNumber()
-  //         : previousTargetPosition
-  //           ? new Decimal(new Decimal(targetPosition).minus(previousTargetPosition))
-  //               .times(Math.random())
-  //               .plus(previousTargetPosition)
-  //               .toNumber()
-  //           : new Decimal(targetPosition).times(Math.random()).toNumber();
+      const listArrayLangth = listsInBoard.length;
+      if (position + 1 >= listArrayLangth) {
+        throw new BadRequestException('옮길 수 있는 위치가 아닙니다.');
+      }
+      // 바꾸려는 위치의 리스트의 position값
+      const targetPosition = listsInBoard[position].position;
+      // 바꾸는 위치 이전 포지션 값
+      const previousTargetPosition = listsInBoard[position - 1]?.position;
+      //위치 리스트의 마지막 표지션
 
-  //     // 리스트의 position 업데이트
-  //     cardToUpdateOrder.position = newPosition;
+      // 포지션 계산
+      const newPosition =
+        position + 1 == listArrayLangth
+          ? new Decimal(previousTargetPosition).plus(new Decimal(Math.random()).times(20000)).toNumber()
+          : previousTargetPosition
+            ? new Decimal(new Decimal(targetPosition).minus(previousTargetPosition))
+                .times(Math.random())
+                .plus(previousTargetPosition)
+                .toNumber()
+            : new Decimal(targetPosition).times(Math.random()).toNumber();
 
-  //     Object.assign(cardToUpdateOrder, { position: newPosition });
+      // 리스트의 position 업데이트
+      cardToUpdateOrder.position = newPosition;
 
-  //     // const updatedList = await transactionalEntityManager.save(Card, cardToUpdateOrder);
+      Object.assign(cardToUpdateOrder, { position: newPosition });
 
-  //     return cardToUpdateOrder;
-  //   });
-  // }
+      // const updatedList = await transactionalEntityManager.save(Card, cardToUpdateOrder);
+
+      return listInfo;
+    });
+  }
 }

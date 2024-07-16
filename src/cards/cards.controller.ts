@@ -166,20 +166,20 @@ export class CardsController {
    * @param UpdateListOrderDto
    * @returns
    */
-  // @ApiBearerAuth()
-  // @UseGuards(AuthGuard('jwt'))
-  // @Patch(':cardId/order')
-  // async updateOrder(
-  //   @Request() req,
-  //   @Param('cardId', ParseIntPipe) listId: number,
-  //   @Body() updateListOrderDto: UpdateListOrderDto
-  // ) {
-  //   const userId = req.user.id;
-  //   const data = await this.cardsService.updateOrder(userId, listId, updateListOrderDto);
-  //   return {
-  //     statusCode: HttpStatus.OK,
-  //     message: '카드 순서 변경에 성공했습니다.',
-  //     data,
-  //   };
-  // }
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'))
+  @Patch(':cardId/order')
+  async updateOrder(
+    @Request() req,
+    @Param('cardId', ParseIntPipe) listId: number,
+    @Body() updateListOrderDto: UpdateListOrderDto
+  ) {
+    const userId = req.user.id;
+    const data = await this.cardsService.updateOrder(userId, listId, updateListOrderDto);
+    return {
+      statusCode: HttpStatus.OK,
+      message: '카드 순서 변경에 성공했습니다.',
+      data,
+    };
+  }
 }
