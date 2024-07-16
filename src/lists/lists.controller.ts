@@ -29,8 +29,9 @@ export class ListsController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
   @Post()
-  async create(@Body() createListDto: CreateListDto) {
-    const data = await this.listsService.create(createListDto);
+  async create(@Request() req, @Body() createListDto: CreateListDto) {
+    const userId = req.user.id;
+    const data = await this.listsService.create(userId, createListDto);
 
     return {
       statusCode: HttpStatus.CREATED,
