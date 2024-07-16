@@ -28,8 +28,12 @@ export class ListsService {
     private readonly dataSource: DataSource
   ) {}
   private async verifyBoardMembership(userId: number, boardId: number) {
-    const boardMember = await this.boardMembersRepository.findOne({ where: { userId } });
-    if (!boardMember || boardMember.boardId !== boardId) {
+    const boardMembers = await this.boardMembersRepository.find({ where: { userId } });
+    console.log(boardMembers);
+
+    const isMember = boardMembers.some((member) => member.boardId === boardId);
+    console.log(isMember);
+    if (!isMember) {
       throw new ForbiddenException(MESSAGES_CONSTANT.LIST.COMMON.FORBIDDEN);
     }
   }
