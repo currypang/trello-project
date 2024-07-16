@@ -12,8 +12,8 @@ import { List } from '../lists/entities/list.entity';
 import { BoardMembers } from 'src/board/entities/board-member.entity';
 import { SseService } from 'src/sse/sse.service';
 import Decimal from 'decimal.js';
-import { idText } from 'typescript';
 import { UpdateCardOrderDto } from './dto/update-card-order.dto';
+import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class CardsService {
@@ -27,7 +27,8 @@ export class CardsService {
     @InjectRepository(BoardMembers)
     private boardMembersRepository: Repository<BoardMembers>,
     private readonly sseService: SseService,
-    private readonly dataSource: DataSource
+    private readonly dataSource: DataSource,
+    private readonly redisService: RedisService
   ) {}
 
   async create(createCardDto: CreateCardDto, userId: number) {
@@ -88,8 +89,16 @@ export class CardsService {
     if (!(updateCardDto instanceof UpdateCardDto)) {
       throw new BadRequestException('Invalid updateCardDto');
     }
-    const data = await this.cardRepository.update({ id }, updateCardDto);
+    await this.cardRepository.update({ id }, updateCardDto);
+    const data = await this.cardRepository.findOne({ where: { id } });
+    const key = `${userId}`;
+    const existedData = await this.redisService.get(key);
+    const currentData = _.isNil(existedData) ? [] : existedData;
+
+    currentData.push(data);
+    await this.redisService.set(key, currentData);
     this.sseService.emitCardChangeEvent(userId, { message: 'update card' });
+
     return data;
   }
 

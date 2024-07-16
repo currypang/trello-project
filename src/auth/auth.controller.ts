@@ -40,6 +40,7 @@ export class AuthController {
   @ApiOperation({ summary: '로그인' })
   @ApiResponse({ status: HttpStatus.OK, description: '로그인 성공' })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: '로그인 실패' })
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   signIn(@Request() req, @Body() signInDto: SignInDto) {
     const data = this.authService.signIn(req.user.id, req.user.email);
 

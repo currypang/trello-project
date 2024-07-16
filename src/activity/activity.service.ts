@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { DeepPartial, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
