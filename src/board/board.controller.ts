@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Param, ParseIntPipe, Patch, Post, Query, Request, UseGuards } from '@nestjs/common';
 import { BoardService } from './board.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -62,7 +62,7 @@ export class BoardController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     @Get(':id')
-    async findOne(@Request() req,@Param('id') id:number){
+    async findOne(@Request() req,@Param('id',ParseIntPipe) id:number){
         const userId = req.user.id
         const data = await this.boardService.findOne(id, userId)
         return{
@@ -82,7 +82,7 @@ export class BoardController {
     @UseGuards(JwtAuthGuard)
     @Patch(':id')
     async update(@Request() req,
-                 @Param('id') id:number,
+                 @Param('id',ParseIntPipe) id:number,
                  @Body() updateBoardDto:UpdateBoardDto
         ){
         const userId = req.user.id
@@ -102,7 +102,7 @@ export class BoardController {
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
     @Delete(':id')
-    async delete(@Request() req , @Param('id') id: number){
+    async delete(@Request() req , @Param('id',ParseIntPipe) id: number){
         const userId= req.user.id
         await this.boardService.delete(id,userId)
         return {
