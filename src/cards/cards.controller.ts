@@ -49,7 +49,7 @@ export class CardsController {
   @UseGuards(JwtAuthGuard)
   @Post(':id/members')
   createMembers(@Param('id') id: string, @Body() createCardAssignessDto: CreateCardAssignessDto, @Request() req){
-    const createMembers = this.cardsService.createMembers( +id, createCardAssignessDto.userId);
+    const createMembers = this.cardsService.createMembers(createCardAssignessDto.userId, +id);
     const log = this.activityService.createLog(req.user.id, +id, 'createCardMembers');
     
     return [createMembers, log];
@@ -59,7 +59,7 @@ export class CardsController {
   @UseGuards(JwtAuthGuard)
   @Delete(':id/members')
   deleteMembers(@Param('id') id: string, @Body() deleteCardAssignessDto: DeleteCardAssignessDto, @Request() req){
-    const deleteMembers = this.cardsService.createMembers( +id, deleteCardAssignessDto.userId);
+    const deleteMembers = this.cardsService.deleteMembers(deleteCardAssignessDto.userId, +id);
     const log = this.activityService.createLog(req.user.id, +id, 'deleteCardMembers');
     
     return [deleteMembers, log];
