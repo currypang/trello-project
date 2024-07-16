@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -38,6 +38,11 @@ export class EmailService {
   }
   // 인증 링크 전송 로직
   async sendMemberJoinVerification(emailAddress: string, userId: number) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (user.email !== emailAddress) {
+      throw new BadRequestException('가입하신 이메일이 아닙니다.');
+    }
+
     const baseUrl = this.configService.get('MAIL_BASE_URL');
     const payload = { id: userId };
     const token = this.jwtService.sign(payload);

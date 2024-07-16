@@ -70,7 +70,7 @@ export class UserController {
   async sendEmail(@Request() req, @Body() sendEmailDto: SendEmailDto) {
     const userId = req.user.id;
     const email = sendEmailDto.email;
-    this.emailService.sendMemberJoinVerification(email, userId);
+    await this.emailService.sendMemberJoinVerification(email, userId);
     return {
       statusCode: HttpStatus.OK,
       message: MESSAGES_CONSTANT.USER.SEND_EMAIL.SUCCEED,
@@ -79,7 +79,7 @@ export class UserController {
   // 이메일 인증 링크 확인
   @Post('/email/email-verify')
   async verifyEmail(@Query() query: VerifyEmailQueryDto) {
-    this.emailService.verifyEmail(query);
+    await this.emailService.verifyEmail(query);
     return {
       statusCode: HttpStatus.OK,
       message: MESSAGES_CONSTANT.USER.VERIFY_EMAIL.SUCCEED,

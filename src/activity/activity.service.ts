@@ -6,28 +6,32 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
 
-import { Activity } from './entities/activity.entity'
-import { Card } from 'src/cards/entities/card.entity'
+import { Activity } from './entities/activity.entity';
+import { Card } from 'src/cards/entities/card.entity';
+import { SseService } from 'src/sse/sse.service';
 
 @Injectable()
 export class ActivityService {
   constructor(
     @InjectRepository(Card) private cardRepository: Repository<Card>,
     @InjectRepository(Activity) private activityRepository: Repository<Activity>,
+    private readonly sseService: SseService
   ) {}
 
-  async create(createActivityDto: CreateActivityDto, userId : number, cardId : number) {
-    const { content } =  createActivityDto;
-    return await this.activityRepository.save({
+  async create(createActivityDto: CreateActivityDto, userId: number, cardId: number) {
+    const { content } = createActivityDto;
+    const data = await this.activityRepository.save({
       userId,
       cardId,
       content,
-      isLog : false,
+      isLog: false,
     });
+    // this.sseService.emitCardChangeEvent(userId, data);
+    return data;
   }
 
   async findAll(cardId: number) {
-    const existCard = this.cardRepository.findOneBy({ id : cardId });
+    const existCard = this.cardRepository.findOneBy({ id: cardId });
     if (_.isNil(existCard)) {
       throw new NotFoundException('존재하지 않는 카드입니다.');
     }
@@ -35,7 +39,7 @@ export class ActivityService {
     const activitys = await this.activityRepository.find({
       where: { cardId, deletedAt: null },
     });
-    
+
     return activitys;
   }
 
@@ -47,7 +51,7 @@ export class ActivityService {
     return activity;
   }
 
-  async update(id: number, updateActivityDto: UpdateActivityDto, userId : number) {
+  async update(id: number, updateActivityDto: UpdateActivityDto, userId: number) {
     const activity = await this.activityRepository.findOneBy({ id });
     if (_.isNil(activity)) {
       throw new NotFoundException('존재하지 않는 activity입니다.');
@@ -56,10 +60,10 @@ export class ActivityService {
       throw new BadRequestException('수정 권한이 없습니다.');
     }
 
-    return await this.activityRepository.update({ id }, updateActivityDto );
+    return await this.activityRepository.update({ id }, updateActivityDto);
   }
 
-  async remove(id: number, userId : number) {
+  async remove(id: number, userId: number) {
     const activity = await this.activityRepository.findOneBy({ id });
     if (_.isNil(activity)) {
       throw new NotFoundException('존재하지 않는 activity입니다.');
@@ -71,12 +75,12 @@ export class ActivityService {
   }
 
   // 카드 로그 생성
-  async createLog(userId : number, cardId : number, content : string) {
+  async createLog(userId: number, cardId: number, content: string) {
     return await this.activityRepository.save({
       userId,
       cardId,
       content,
-      isLog : true,
+      isLog: true,
     });
   }
 }
