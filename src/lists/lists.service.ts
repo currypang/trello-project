@@ -111,8 +111,6 @@ export class ListsService {
       listsInBoard.sort((a: List, b: List): number => a.position - b.position);
 
       const listArrayLangth = listsInBoard.length;
-      console.log('listArrayLangth', listArrayLangth);
-      console.log('position', position);
       if (position >= listArrayLangth) {
         throw new BadRequestException('옮길 수 있는 위치가 아닙니다.');
       }
