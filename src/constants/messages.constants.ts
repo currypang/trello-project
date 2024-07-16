@@ -2,6 +2,7 @@ export const MESSAGES_CONSTANT = {
   AUTH: {
     COMMON: {
       INVALID_TOKEN: '유효하지 않은 토큰 입니다.',
+      HASH_ERROR: '비밀번호 해싱 중 오류가 발생했습니다.',
       CONFIRM_PASSWORD: {
         REQUIRED: '비밀번호 확인을 입력해 주세요.',
         INVALID_TYPE:
@@ -9,6 +10,7 @@ export const MESSAGES_CONSTANT = {
       },
     },
     SIGN_UP: {
+      FAILED: '회원가입중 오류가 발생했습니다.',
       SUCCEED: '회원가입에 성공했습니다.',
       NOT_MATCHED_PASSWORD: '비밀번호가 일치 하지않습니다.',
       EXISTED_EMAIL: '이미 가입 된 이메일 입니다.',
@@ -21,11 +23,13 @@ export const MESSAGES_CONSTANT = {
       SUCCEED: '로그인에 성공했습니다.',
     },
     STRATEGY: {
+      UNAUTHORIZED_ERROR: '유효성 검사 중 오류가 발생했습니다.',
       UNAUTHORIZED: '일치하는 인증 정보가 없습니다.',
     },
     UPDATE_USER_PASSWORD: {
       NOT_MATCHED_NEW_PASSWORD: '새 비밀번호가 일치하지 않습니다.',
       SUCCEED: '비밀번호가 성공적으로 변경되었습니다.',
+      FAILED: '비밀번호 업데이트 중 오류가 발생했습니다.',
     },
     DELETE_USER: {
       SUCCEED: '사용자 계정이 성공적으로 삭제되었습니다.',
