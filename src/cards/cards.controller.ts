@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Request, UseGuards, HttpStatus } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CardsService } from './cards.service';
 import { ActivityService } from 'src/activity/activity.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -9,6 +10,7 @@ import { UpdateCardDto } from './dto/update-card.dto';
 import { CreateCardAssignessDto } from './dto/create-cardAssigness.dto';
 import { DeleteCardAssignessDto } from './dto/delete-cardAssigness.dto';
 
+@ApiTags('카드')
 @Controller('cards')
 export class CardsController {
   constructor(
@@ -16,6 +18,7 @@ export class CardsController {
     private readonly activityService: ActivityService
   ) {}
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Post()
   async create(@Body() createCardDto: CreateCardDto, @Request() req) {
@@ -29,6 +32,7 @@ export class CardsController {
     }   
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get()
   async findAll() {
@@ -50,6 +54,7 @@ export class CardsController {
     }   
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Patch(':cardId')
   async update(@Param('cardId') cardId: string, @Body() updateCardDto: UpdateCardDto, @Request() req) {
@@ -64,6 +69,7 @@ export class CardsController {
     }  
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Delete(':cardId')
   async delete(@Param('cardId') cardId: string) {
@@ -76,6 +82,7 @@ export class CardsController {
   }
 
   // 카드 멤버 추가
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Post(':cardId/members')
   async createMembers(@Param('cardId') cardId: string, @Body() createCardAssignessDto: CreateCardAssignessDto, @Request() req){
@@ -91,6 +98,7 @@ export class CardsController {
   }
 
   // 카드 멤버 삭제
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Delete(':cardId/members')
   async deleteMembers(@Param('cardId') cardId: string, @Body() deleteCardAssignessDto: DeleteCardAssignessDto, @Request() req){
@@ -106,6 +114,7 @@ export class CardsController {
   }
 
   // 카드 일정 수정 및 추가
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Patch(':cardId/Date')
   async updateCardDate(@Param('cardId') cardId: string, @Body() updateCardDto: UpdateCardDto, @Request() req) {
@@ -122,6 +131,7 @@ export class CardsController {
   }
 
   // 카드 일정 마감
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Patch(':cardId/DateExpired')
   async updateDateExpire(@Param('cardId') cardId: string, @Request() req) {
@@ -143,6 +153,7 @@ export class CardsController {
   }
 
   // 카드 리스트 이동
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Patch(':cardId/lists/:listId')
   async updateCardList(@Param('cardId') cardId: string, @Param('listId') listId: string, @Request() req){
