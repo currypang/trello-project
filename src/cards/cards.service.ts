@@ -301,10 +301,11 @@ export class CardsService {
       const cardListId = cardToUpdateOrder.listId;
       //카드의 리스트 정보
       const listInfo = await transactionalEntityManager.findOne(List, { where: { id: cardListId } });
-
+      if (!listInfo) {
+        throw new NotFoundException(MESSAGES_CONSTANT.CARD.UPDATE_ORDER.NOT_FOUND);
+      }
       //카드 보드 아이디
       const listBoardId = listInfo.boardId;
-
       const boardMember = await transactionalEntityManager.findOne(BoardMembers, { where: { userId } });
 
       const userBoardId = boardMember.boardId;
