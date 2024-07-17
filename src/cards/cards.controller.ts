@@ -95,7 +95,7 @@ export class CardsController {
   @Patch(':cardId')
   async update(@Param('cardId') cardId: string, @Body() updateCardDto: UpdateCardDto, @Request() req) {
     const userId = req.user.id;
-    await this.cardsService.update(+cardId, updateCardDto);
+    await this.cardsService.update(+cardId, updateCardDto, req.user.id);
     const card = await this.cardsService.cardFindOne(+cardId, userId);
     const log = await this.activityService.createLog(req.user.id, +cardId, 'updateCard');
     return {
@@ -216,7 +216,6 @@ export class CardsController {
     }
   }
 
-  
   @ApiBearerAuth()
   @Patch(':cardId/order')
   async updateOrder(
@@ -242,6 +241,7 @@ export class CardsController {
    * @param updateListOrderDto 
    * @returns 
    */
+
   @ApiBearerAuth()
   @Patch(':cardId/lists/:listId')
   async updateCardList(
@@ -264,7 +264,8 @@ export class CardsController {
     };
   } 
 
- /*
+
+
   @ApiBearerAuth()
   @Patch('expire/cron')
   async updateDateExpire_ver2(@Request() req) {
@@ -276,5 +277,5 @@ export class CardsController {
       updateDateExpire,
       //log,
     };
-  }*/
+  }
 }

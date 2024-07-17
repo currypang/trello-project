@@ -39,7 +39,7 @@ export class ListsController {
 
     return {
       statusCode: HttpStatus.CREATED,
-      message: MESSAGES_CONSTANT.LIST.UPDATE_LIST.SUCCEED,
+      message: MESSAGES_CONSTANT.LIST.CREATE_LIST.SUCCEED,
       data,
     };
   }

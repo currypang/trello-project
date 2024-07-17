@@ -110,11 +110,33 @@ export class CardsService {
       where: { id },
     });
   }
-  async update(id: number, updateCardDto: UpdateCardDto) {
+  async update(id: number, updateCardDto: UpdateCardDto, userId: number) {
     await this.verifyCardById(id);
+    const workingBoard = await this.cardRepository.findOne({
+      relations: { list: { board: true } },
+      where: { id },
+    });
+    const validMember = await this.boardMembersRepository.findOne({
+      where: { boardId: workingBoard.list.boardId, userId },
+    });
+    console.log(validMember);
+    if (_.isNil(validMember)) {
+      throw new NotFoundException(MESSAGES_CONSTANT.CARD.UPDATE_CARD.NOT_FOUND);
+    }
 
     const data = await this.cardRepository.update({ id }, updateCardDto);
+    const cardAssignees = await this.cardAssignessRepository.find({ where: { cardId: id }, select: { userId: true } });
+    console.log(cardAssignees);
+    for (let i = 0; i < cardAssignees.length; i++) {
+      const assigneeId = cardAssignees[i].userId;
+      const key = `${assigneeId}`;
+      const existedData = await this.redisService.get(key);
+      const currentData = _.isNil(existedData) ? [] : existedData;
 
+      currentData.push(data);
+      await this.redisService.set(key, currentData);
+      this.sseService.emitCardChangeEvent(assigneeId, { message: MESSAGES_CONSTANT.CARD.UPDATE_CARD.SSE_UPDATE_CARD });
+    }
     return data;
   }
 
@@ -135,7 +157,7 @@ export class CardsService {
     });
 
     if (_.isNil(authority)) {
-      throw new NotFoundException('초대권한 이 없습니다.');
+      throw new NotFoundException(MESSAGES_CONSTANT.CARD.UPDATE_MEMBER_CARD.NOT_FOUND);
     }
 
     const validateReqUser = await this.boardMembersRepository.findOne({
@@ -143,7 +165,7 @@ export class CardsService {
     });
 
     if (_.isNil(validateReqUser)) {
-      throw new NotFoundException('보드에 속한 유저가 아닙니다.');
+      throw new NotFoundException(MESSAGES_CONSTANT.CARD.UPDATE_MEMBER_CARD.NOT_FOUND_MEMBER);
     }
 
     const createMember = await this.cardAssignessRepository.save({
@@ -240,47 +262,65 @@ export class CardsService {
   }
 
   async updateCardList(id: number, listId: number, updateCardOrderDto: UpdateCardOrderDto) {
-    //카드가 존재하는지랑
-    //새로운 리스트의 카드를 배열해서 받고 거기서 계산해야한다.
-    //계산식은 밑에 가져오고
-    //카드 있는지 에러처리용
-    await this.verifyCardById(id);
+    const { position } = updateCardOrderDto;
+    return await this.dataSource.transaction(async (transactionalEntityManager: EntityManager) => {
+      //새로운 리스트의 카드를 배열해서 받고 거기서 계산해야한다.
+      //옮길 리스트의 카드들 불러오기
+      //계산식은 밑에 가져오고
+      //카드 있는지 에러처리용
+      // 카드id를 받아 카드 정보를 가져오기 >> 카드가 존재하는지
+      const cardToUpdateOrder = await this.verifyCardById(id);
+      console.log('cardToUpdateOrder', cardToUpdateOrder);
+      const currentCardPosition = cardToUpdateOrder.position;
+      console.log('currentCardPosition', currentCardPosition);
 
-    const cardListId = await this.cardRepository.findOneBy({ id });
-    const listBoardId = await this.listRepository.findOne({
-      where: { id: cardListId.listId },
-    });
-    // 리스트가 존재하는지 확인
-    const existingList = await this.listRepository.findOne({
-      where: { id: listId },
-    });
-    if (!existingList) {
-      throw new NotFoundException(MESSAGES_CONSTANT.CARD.UPDATE_LIST_CARD.NOT_FOUND);
-    }
-
-    if (existingList.boardId !== listBoardId.boardId) {
-      throw new BadRequestException(MESSAGES_CONSTANT.CARD.UPDATE_LIST_CARD.BAD_REQUEST);
-    }
-    const lastCard = await this.cardRepository.findOne({
-      where: { listId },
-      select: ['position'],
-      order: { position: CARDS_CONSTANT.ORDER.DESC },
-    });
-
-    const newPosition = +lastCard
-      ? new Decimal(+lastCard).plus(new Decimal(Math.random()).times(20000)).toNumber()
-      : new Decimal(Math.random()).times(10000).toNumber();
-
-    // 카드 리스트id 업데이트 생성
-    const card = this.cardRepository.update(
-      { id },
-      {
-        listId,
-        position: newPosition,
+      const targetListCards = await transactionalEntityManager.findOne(List, {
+        where: { id: listId },
+        relations: ['cards'],
+      });
+      if (!targetListCards) {
+        throw new NotFoundException(MESSAGES_CONSTANT.CARD.UPDATE_ORDER.NOT_FOUND);
       }
-    );
+      console.log('targetListCards', targetListCards);
 
-    return card;
+      const targetInCards = targetListCards.cards;
+      console.log('targetInCards', targetInCards);
+
+      targetInCards.sort((a: Card, b: Card): number => a.position - b.position);
+
+      const targetArrayLangth = targetInCards.length;
+      console.log('targetArrayLangth', targetArrayLangth);
+
+      if (position + 1 >= targetArrayLangth) {
+        throw new BadRequestException('옮길 수 있는 위치가 아닙니다.');
+      }
+      // 바꾸려는 위치의 리스트의 position값
+      const targetPosition = targetInCards[position].position;
+      // 바꾸는 위치 이전 포지션 값
+      const previousTargetPosition = targetInCards[position - 1]?.position;
+
+      // 포지션 계산
+      const newPosition =
+        position + 1 == targetArrayLangth
+          ? new Decimal(previousTargetPosition).plus(new Decimal(Math.random()).times(20000)).toNumber()
+          : previousTargetPosition
+            ? new Decimal(new Decimal(targetPosition).minus(previousTargetPosition))
+                .times(Math.random())
+                .plus(previousTargetPosition)
+                .toNumber()
+            : new Decimal(targetPosition).times(Math.random()).toNumber();
+
+      // 카드 리스트id 업데이트 생성
+      const card = this.cardRepository.update(
+        { id },
+        {
+          listId,
+          position: newPosition,
+        }
+      );
+
+      return card;
+    });
   }
 
   async verifyCardById(id: number) {
@@ -310,8 +350,10 @@ export class CardsService {
       if (!listInfo) {
         throw new NotFoundException(MESSAGES_CONSTANT.CARD.UPDATE_ORDER.NOT_FOUND);
       }
+
       //카드 보드 아이디
       const listBoardId = listInfo.boardId;
+
       const boardMember = await transactionalEntityManager.findOne(BoardMembers, { where: { userId } });
       const userBoardId = boardMember.boardId;
       if (listBoardId !== userBoardId) {
