@@ -24,7 +24,6 @@ import { UpdateListOrderDto } from 'src/lists/dto/update-list-order.dto';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/user/types/roles.type';
-import { UpdateCardDateDto } from './dto/update-card-date.dto';
 
 @ApiTags('카드')
 @UseGuards(RolesGuard)
@@ -175,18 +174,14 @@ export class CardsController {
     };
   }
 
-  /**
-   * 카드 일정 수정 및 추가
-   * @param cardId
-   * @param updateCardDateDto
-   * @param req
-   * @returns
-   */
+
+  /*
+ 
   @ApiBearerAuth()
   @Patch(':cardId/date')
   async updateCardDate(@Param('cardId') cardId: string, @Body() updateCardDateDto: UpdateCardDateDto, @Request() req) {
     await this.cardsService.updateCardDate(+cardId, updateCardDateDto);
-    const updateCardDate = await this.cardsService.findOne(+cardId);
+    const updateCardDate = await this.cardsService.cardFindOne(+cardId);
     const log = await this.activityService.createLog(req.user.id, +cardId, 'updateCardDate');
 
     return {
@@ -195,14 +190,8 @@ export class CardsController {
       updateCardDate,
       log,
     };
-  }
+  } 
 
-  /**
-   * 카드 일정 마감
-   * @param cardId
-   * @param req
-   * @returns
-   */
   @ApiBearerAuth()
   @Patch(':cardId/dateExpired')
   async updateDateExpire(@Param('cardId') cardId: string, @Request() req) {
@@ -223,12 +212,7 @@ export class CardsController {
     }
   }
 
-  /**
-   * 카드 순서 변경
-   * @param cardId
-   * @param UpdateListOrderDto
-   * @returns
-   */
+  
   @ApiBearerAuth()
   @Patch(':cardId/order')
   async updateOrder(
@@ -245,13 +229,8 @@ export class CardsController {
     };
   }
 
-  /**
-   * 카드 리스트 이동
-   * @param cardId
-   * @param listId
-   * @param req
-   * @returns
-   */
+
+  /*
   @ApiBearerAuth()
   @Patch(':cardId/lists/:listId')
   async updateCardList(
@@ -274,10 +253,7 @@ export class CardsController {
     };
   }
 
-  /**
-   * 카드 마감 크론 메소드
-   * @returns
-   */
+ 
   @ApiBearerAuth()
   @Patch('expire/cron')
   async updateDateExpire_ver2(@Request() req) {
@@ -289,5 +265,5 @@ export class CardsController {
       updateDateExpire,
       //log,
     };
-  }
+  }*/
 }
