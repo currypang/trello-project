@@ -17,6 +17,7 @@ import { RedisService } from 'src/redis/redis.service';
 import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 import { CARDS_CONSTANT } from 'src/constants/cards.constant';
 import { UpdateCardDateDto } from './dto/update-card-date.dto';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class CardsService {
@@ -43,6 +44,17 @@ export class CardsService {
     });
     if (!existingList) {
       throw new BadRequestException(MESSAGES_CONSTANT.CARD.CREATE_CARD.BAD_REQUEST);
+    }
+
+    const listInfo = await this.listRepository.findOneBy({ id: listId });
+    const verifyMemberbyId = await this.boardMembersRepository.find({
+      where: {
+        userId,
+        boardId: listInfo.boardId,
+      },
+    });
+    if (verifyMemberbyId.length === 0) {
+      throw new NotFoundException(MESSAGES_CONSTANT.CARD.CREATE_CARD.NOT_FOUND_MEMBER);
     }
 
     return await this.cardRepository.manager.transaction(async (transactionalEntityManager) => {
@@ -125,7 +137,7 @@ export class CardsService {
         boardId: listInfo.boardId,
       },
     });
-    if (_.isNil(verifyMemberbyId)) {
+    if (verifyMemberbyId.length === 0) {
       throw new NotFoundException(MESSAGES_CONSTANT.CARD.CREATE_MEMBER_CARD.NOT_FOUND);
     }
 
@@ -156,7 +168,7 @@ export class CardsService {
         boardId: listInfo.boardId,
       },
     });
-    if (_.isNil(verifyMemberbyId)) {
+    if (verifyMemberbyId.length === 0) {
       throw new NotFoundException(MESSAGES_CONSTANT.CARD.DELETE_MEMBER_CARD.NOT_FOUND);
     }
 
@@ -215,6 +227,19 @@ export class CardsService {
     } else {
       return false;
     }
+  }
+
+  @Cron('0 0 * * * *')
+  async updateDateExpire_ver2() {
+    console.log('-----------마감 확인 작업 시작-----------');
+    const today = new Date();
+    const updateCardQuery = this.cardRepository
+      .createQueryBuilder('card')
+      .update(Card)
+      .set({ isExpired: true })
+      .where('dueDate < :date AND isExpired = false', { date: new Date() });
+
+    return await updateCardQuery.execute();
   }
 
   async updateCardList(id: number, listId: number) {

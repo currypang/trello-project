@@ -173,7 +173,7 @@ export class CardsController {
   /**
    * 카드 일정 수정 및 추가
    * @param cardId
-   * @param updateCardDto
+   * @param updateCardDateDto
    * @param req
    * @returns
    */
@@ -258,6 +258,23 @@ export class CardsController {
       message: MESSAGES_CONSTANT.CARD.UPDATE_LIST_CARD.SUCCEED,
       updateCardList,
       log,
+    };
+  }
+
+  /**
+   * 카드 마감 크론 메소드
+   * @returns
+   */
+  @ApiBearerAuth()
+  @Patch('expire/cron')
+  async updateDateExpire_ver2(@Request() req) {
+    const updateDateExpire = await this.cardsService.updateDateExpire_ver2();
+    //const log = await this.activityService.createLog(req.user.id, +cardId, 'updateDateExpire');
+
+    return {
+      statusCode: HttpStatus.OK,
+      updateDateExpire,
+      //log,
     };
   }
 }

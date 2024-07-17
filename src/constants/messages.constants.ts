@@ -133,6 +133,7 @@ export const MESSAGES_CONSTANT = {
     CREATE_CARD: {
       SUCCEED: '카드 생성에 성공했습니다',
       NOT_FOUND: '존재하지 않는 카드입니다.',
+      NOT_FOUND_MEMBER: 'board에 존재하지 않는 멤버입니다.',
       BAD_REQUEST: '없는 리스트입니다.',
     },
     READ_CARDS: {
