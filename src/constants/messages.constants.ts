@@ -143,6 +143,7 @@ export const MESSAGES_CONSTANT = {
     READ_CARD: {
       SUCCEED: '카드 읽기에 성공했습니다',
       NOT_FOUND: '존재하지 않는 카드입니다.',
+      NOT_FOUND_MEMBER: 'board에 존재하지 않는 멤버입니다.',
     },
     UPDATE_CARD: {
       SUCCEED: '카드 수정에 성공했습니다',

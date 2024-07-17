@@ -74,8 +74,9 @@ export class CardsController {
    */
   @ApiBearerAuth()
   @Get(':cardId')
-  async findOne(@Param('cardId') cardId: string) {
-    const card = await this.cardsService.cardFindOne(+cardId);
+  async cardFindOne(@Param('cardId') cardId: string, @Request() req) {
+    const userId = req.user.id;
+    const card = await this.cardsService.cardFindOne(+cardId, userId);
     return {
       statusCode: HttpStatus.OK,
       message: MESSAGES_CONSTANT.CARD.READ_CARD.SUCCEED,
@@ -93,8 +94,9 @@ export class CardsController {
   @ApiBearerAuth()
   @Patch(':cardId')
   async update(@Param('cardId') cardId: string, @Body() updateCardDto: UpdateCardDto, @Request() req) {
-    await this.cardsService.update(+cardId, req.user.id, updateCardDto);
-    const card = await this.cardsService.cardFindOne(+cardId);
+    const userId = req.user.id;
+    await this.cardsService.update(+cardId, updateCardDto);
+    const card = await this.cardsService.cardFindOne(+cardId, userId);
     const log = await this.activityService.createLog(req.user.id, +cardId, 'updateCard');
     return {
       statusCode: HttpStatus.OK,
@@ -111,7 +113,9 @@ export class CardsController {
    */
   @ApiBearerAuth()
   @Delete(':cardId')
-  async delete(@Param('cardId') cardId: string) {
+  async delete(@Param('cardId') cardId: string, @Request() req) {
+    const userId = req.user.id;
+    await this.cardsService.cardFindOne(+cardId, userId);
     const card = await this.cardsService.delete(+cardId);
     return {
       statusCode: HttpStatus.OK,
@@ -120,16 +124,22 @@ export class CardsController {
     };
   }
 
-
+  /**
+   * 카드 멤버 추가
+   * @param cardId
+   * @param createCardAssignessDto
+   * @param req
+   * @returns
+   */
   @ApiBearerAuth()
   @Post(':cardId/members')
   async createMembers(
-    @Param('cardId',ParseIntPipe) cardId: number,
+    @Param('cardId', ParseIntPipe) cardId: number,
     @Body() createCardAssignessDto: CreateCardAssignessDto,
     @Request() req
   ) {
-    const userId = req.user.id
-    const createMembers = await this.cardsService.createMembers(userId,createCardAssignessDto, cardId);
+    const userId = req.user.id;
+    const createMembers = await this.cardsService.createMembers(userId, createCardAssignessDto, cardId);
     const log = await this.activityService.createLog(req.user.id, cardId, 'createCardMembers');
 
     return {
@@ -173,10 +183,10 @@ export class CardsController {
    * @returns
    */
   @ApiBearerAuth()
-  @Patch(':cardId/Date')
-  async updateCardDate(@Param('cardId') cardId: string, @Body() updateCardDto: UpdateCardDto, @Request() req) {
-    await this.cardsService.updateCardDate(+cardId, updateCardDto);
-    const updateCardDate = await this.cardsService.cardFindOne(+cardId);
+  @Patch(':cardId/date')
+  async updateCardDate(@Param('cardId') cardId: string, @Body() updateCardDateDto: UpdateCardDateDto, @Request() req) {
+    await this.cardsService.updateCardDate(+cardId, updateCardDateDto);
+    const updateCardDate = await this.cardsService.findOne(+cardId);
     const log = await this.activityService.createLog(req.user.id, +cardId, 'updateCardDate');
 
     return {
@@ -212,6 +222,7 @@ export class CardsController {
       };
     }
   }
+
   /**
    * 카드 순서 변경
    * @param cardId
@@ -243,9 +254,16 @@ export class CardsController {
    */
   @ApiBearerAuth()
   @Patch(':cardId/lists/:listId')
-  async updateCardList(@Param('cardId') cardId: string, @Param('listId') listId: string, @Request() req) {
-    await this.cardsService.updateCardList(+cardId, +listId);
-    const updateCardList = await this.cardsService.cardFindOne(+cardId);
+  async updateCardList(
+    @Param('cardId') cardId: string,
+    @Param('listId') listId: string,
+    @Request() req,
+    @Body() updateListOrderDto: UpdateListOrderDto //position
+  ) {
+    const userId = req.user.id;
+    await this.cardsService.updateCardList(+cardId, +listId, updateListOrderDto);
+    //이걸 이용하면 카드도 찾고 보드 멤버스가 속하는지 확인가능함
+    const updateCardList = await this.cardsService.cardFindOne(+cardId, userId);
     const log = await this.activityService.createLog(req.user.id, +cardId, 'updateCardListId');
 
     return {

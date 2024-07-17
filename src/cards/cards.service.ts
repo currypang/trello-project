@@ -94,34 +94,25 @@ export class CardsService {
     return await this.cardRepository.find({});
   }
 
-  async cardFindOne(id: number) {
-    await this.verifyCardById(id);
+  async cardFindOne(id: number, userId) {
+    const cardInfo = await this.verifyCardById(id);
+    const listId = cardInfo.listId;
+    const board = await this.listRepository.findOne({ where: { id: listId } });
+    const boardId = board.id;
+    const isBoardMembers = await this.boardMembersRepository.findOne({ where: { userId } });
 
+    if (isBoardMembers.boardId !== boardId) {
+      throw new NotFoundException(MESSAGES_CONSTANT.CARD.READ_CARD.NOT_FOUND_MEMBER);
+    }
     return await this.cardRepository.findOne({
       where: { id, deletedAt: null },
     });
   }
 
-  async update(id: number, userId: number, updateCardDto: UpdateCardDto) {
+  async update(id: number, updateCardDto: UpdateCardDto) {
     await this.verifyCardById(id);
 
-    if (!(updateCardDto instanceof UpdateCardDto)) {
-      throw new BadRequestException(MESSAGES_CONSTANT.CARD.UPDATE_CARD.INVALID_TYPE);
-    }
-    await this.cardRepository.update({ id }, updateCardDto);
-
-    const data = await this.cardRepository.findOne({ where: { id } });
-    const cardAssignees = await this.cardAssignessRepository.find({ where: { cardId: id }, select: { userId: true } });
-    for (let i = 0; i < cardAssignees.length; i++) {
-      const assigneeId = cardAssignees[i].userId;
-      const key = `${assigneeId}`;
-      const existedData = await this.redisService.get(key);
-      const currentData = _.isNil(existedData) ? [] : existedData;
-
-      currentData.push(data);
-      await this.redisService.set(key, currentData);
-      this.sseService.emitCardChangeEvent(assigneeId, { message: MESSAGES_CONSTANT.CARD.UPDATE_CARD.SSE_UPDATE_CARD });
-    }
+    const data = await this.cardRepository.update({ id }, updateCardDto);
 
     return data;
   }
@@ -132,31 +123,30 @@ export class CardsService {
     return post;
   }
 
-  async createMembers(userId: number, createCardAssignessDto:CreateCardAssignessDto,cardId: number) {
+  async createMembers(userId: number, createCardAssignessDto: CreateCardAssignessDto, cardId: number) {
     const workingBoard = await this.cardRepository.findOne({
-      relations: {list: {board: true}},
-      where: {id:cardId}
-    })
-   
-    const authority = await this.boardMembersRepository.findOne({
-      where: {userId:userId, boardId:workingBoard.list.board.id}
-    })
-    
-    if(_.isNil(authority)){
-      throw new NotFoundException('초대권한 이 없습니다.')
-    }
-    
-    const validateReqUser = await this.boardMembersRepository.findOne({
-      where: {userId:createCardAssignessDto.userId, boardId:workingBoard.list.board.id}
-    })
-    
+      relations: { list: { board: true } },
+      where: { id: cardId },
+    });
 
-    if(_.isNil(validateReqUser)){
-      throw new NotFoundException('보드에 속한 유저가 아닙니다.')
+    const authority = await this.boardMembersRepository.findOne({
+      where: { userId: userId, boardId: workingBoard.list.board.id },
+    });
+
+    if (_.isNil(authority)) {
+      throw new NotFoundException('초대권한 이 없습니다.');
+    }
+
+    const validateReqUser = await this.boardMembersRepository.findOne({
+      where: { userId: createCardAssignessDto.userId, boardId: workingBoard.list.board.id },
+    });
+
+    if (_.isNil(validateReqUser)) {
+      throw new NotFoundException('보드에 속한 유저가 아닙니다.');
     }
 
     const createMember = await this.cardAssignessRepository.save({
-      userId:createCardAssignessDto.userId,
+      userId: createCardAssignessDto.userId,
       cardId,
     });
     return createMember;
@@ -237,15 +227,20 @@ export class CardsService {
     console.log('-----------마감 확인 작업 시작-----------');
     const today = new Date();
 
-    const updateCardQuery = this.cardRepository.createQueryBuilder('card')
-    .update(Card)
-    .set({ isExpired: true })
-    .where('dueDate < :date AND isExpired = false', { date: today});
+    const updateCardQuery = this.cardRepository
+      .createQueryBuilder('card')
+      .update(Card)
+      .set({ isExpired: true })
+      .where('dueDate < :date AND isExpired = false', { date: today });
 
     return await updateCardQuery.execute();
   }
 
-  async updateCardList(id: number, listId: number) {
+  async updateCardList(id: number, listId: number, updateCardOrderDto: UpdateCardOrderDto) {
+    //카드가 존재하는지랑
+    //새로운 리스트의 카드를 배열해서 받고 거기서 계산해야한다.
+    //계산식은 밑에 가져오고
+    //카드 있는지 에러처리용
     await this.verifyCardById(id);
 
     const cardListId = await this.cardRepository.findOneBy({ id });
