@@ -56,11 +56,7 @@ npm run start:dev
 
 # 사용 스텍
 
-![image](https://github.com/user-attachments/assets/5fbfc717-d5e5-499c-abfc-88d5e2421697)
-
-
-![image](https://github.com/user-attachments/assets/82a12814-14bc-4f8b-95a9-4fde4390292b)
-
+![image](https://github.com/user-attachments/assets/88672fdf-7330-4751-b6fb-2b94f3870681)
 
 
 
