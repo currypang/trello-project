@@ -92,14 +92,19 @@ export class CardsService {
       throw new BadRequestException(MESSAGES_CONSTANT.CARD.UPDATE_CARD.INVALID_TYPE);
     }
     await this.cardRepository.update({ id }, updateCardDto);
-    const data = await this.cardRepository.findOne({ where: { id } });
-    const key = `${userId}`;
-    const existedData = await this.redisService.get(key);
-    const currentData = _.isNil(existedData) ? [] : existedData;
 
-    currentData.push(data);
-    await this.redisService.set(key, currentData);
-    this.sseService.emitCardChangeEvent(userId, { message: MESSAGES_CONSTANT.CARD.UPDATE_CARD.SSE_UPDATE_CARD });
+    const data = await this.cardRepository.findOne({ where: { id } });
+    const cardAssignees = await this.cardAssignessRepository.find({ where: { cardId: id }, select: { userId: true } });
+    for (let i = 0; i < cardAssignees.length; i++) {
+      const assigneeId = cardAssignees[i].userId;
+      const key = `${assigneeId}`;
+      const existedData = await this.redisService.get(key);
+      const currentData = _.isNil(existedData) ? [] : existedData;
+
+      currentData.push(data);
+      await this.redisService.set(key, currentData);
+      this.sseService.emitCardChangeEvent(assigneeId, { message: MESSAGES_CONSTANT.CARD.UPDATE_CARD.SSE_UPDATE_CARD });
+    }
 
     return data;
   }
