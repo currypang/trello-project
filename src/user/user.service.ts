@@ -4,12 +4,14 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import _ from 'lodash';
 import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
+import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>
+    private readonly userRepository: Repository<User>,
+    private readonly redisService: RedisService
   ) {}
 
   async findUserById(id: number) {
@@ -20,5 +22,15 @@ export class UserService {
     }
 
     return user;
+  }
+
+  async getNotification(userId: number) {
+    const data = await this.redisService.get(`${userId}`);
+    return data;
+  }
+
+  async deleteNotification(userId: number) {
+    await this.redisService.set(`${userId}`, []);
+    return;
   }
 }

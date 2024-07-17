@@ -56,4 +56,28 @@ export class UserController {
       message: result.message,
     };
   }
+
+  @ApiBearerAuth()
+  @Get('/notification')
+  async getNotification(@Request() req) {
+    const userId = req.user.id;
+    const data = await this.userService.getNotification(userId);
+    return {
+      statusCode: HttpStatus.OK,
+      message: MESSAGES_CONSTANT.USER.CONTROLLER.GET_NOTIFICATION,
+      data,
+    };
+  }
+
+  @ApiBearerAuth()
+  @Delete('/notification')
+  async deleteNotification(@Request() req) {
+    const userId = req.user.id;
+    await this.userService.deleteNotification(userId);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: MESSAGES_CONSTANT.USER.CONTROLLER.DELETE_NOTIFICATION,
+    };
+  }
 }
