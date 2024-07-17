@@ -24,6 +24,7 @@ import { UpdateListOrderDto } from 'src/lists/dto/update-list-order.dto';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/user/types/roles.type';
+import { UpdateCardDateDto } from './dto/update-card-date.dto';
 
 @ApiTags('카드')
 @UseGuards(RolesGuard)
@@ -174,14 +175,11 @@ export class CardsController {
     };
   }
 
-
-  /*
- 
   @ApiBearerAuth()
   @Patch(':cardId/date')
   async updateCardDate(@Param('cardId') cardId: string, @Body() updateCardDateDto: UpdateCardDateDto, @Request() req) {
     await this.cardsService.updateCardDate(+cardId, updateCardDateDto);
-    const updateCardDate = await this.cardsService.cardFindOne(+cardId);
+    const updateCardDate = await this.cardsService.cardFindOne(+cardId, req.user.id);
     const log = await this.activityService.createLog(req.user.id, +cardId, 'updateCardDate');
 
     return {
@@ -190,12 +188,18 @@ export class CardsController {
       updateCardDate,
       log,
     };
-  } 
+  }
 
+  /**
+   *
+   * @param cardId
+   * @param req
+   * @returns
+   */
   @ApiBearerAuth()
   @Patch(':cardId/dateExpired')
   async updateDateExpire(@Param('cardId') cardId: string, @Request() req) {
-    const updateDateExpire = await this.cardsService.updateDateExpire(+cardId);
+    const updateDateExpire = await this.cardsService.updateDateExpire(+cardId, req.user.id);
     const log = await this.activityService.createLog(req.user.id, +cardId, 'updateDateExpired');
     if (updateDateExpire) {
       return {
@@ -212,7 +216,7 @@ export class CardsController {
     }
   }
 
-  
+  /*
   @ApiBearerAuth()
   @Patch(':cardId/order')
   async updateOrder(
