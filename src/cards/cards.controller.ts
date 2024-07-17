@@ -258,4 +258,22 @@ export class CardsController {
       log,
     };
   }
+
+
+  /**
+   * 카드 마감 크론 메소드
+   * @returns
+   */
+  @ApiBearerAuth()
+  @Patch('expire/cron')
+  async updateDateExpire_ver2(@Request() req) {
+    const updateDateExpire = await this.cardsService.updateDateExpire_ver2();
+    //const log = await this.activityService.createLog(req.user.id, +cardId, 'updateDateExpire');
+
+    return {
+      statusCode: HttpStatus.OK,
+      updateDateExpire,
+      //log,
+    };
+  }
 }
