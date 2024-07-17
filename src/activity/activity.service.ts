@@ -10,8 +10,10 @@ import { Activity } from './entities/activity.entity';
 import { Card } from 'src/cards/entities/card.entity';
 import { SseService } from 'src/sse/sse.service';
 import { RedisService } from 'src/redis/redis.service';
+
 import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 import { CardAssigness } from 'src/cards/entities/card-assigness.entity';
+
 
 @Injectable()
 export class ActivityService {
@@ -24,6 +26,14 @@ export class ActivityService {
   ) {}
 
   async create(createActivityDto: CreateActivityDto, userId: number, cardId: number) {
+    
+    const validateMember = await this.activityRepository.find({
+        where:{userId, cardId}
+    })
+    const checkCardId = validateMember.some((member) => member.cardId )
+    if(!checkCardId){
+      throw new NotFoundException('댓글작성할 권한이 없습니다.')
+    }
     const { content } = createActivityDto;
     const data = await this.activityRepository.save({
       userId,

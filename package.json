@@ -34,7 +34,7 @@
     "@nestjs/typeorm": "^10.0.2",
     "@types/lodash": "^4.17.6",
     "@types/multer": "^1.4.11",
-    "@upstash/redis": "^1.32.0",
+    "@upstash/redis": "^1.33.0",
     "aws-sdk": "^2.1658.0",
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
