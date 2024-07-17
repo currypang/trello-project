@@ -16,6 +16,7 @@ import { UpdateCardOrderDto } from './dto/update-card-order.dto';
 import { RedisService } from 'src/redis/redis.service';
 import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 import { CARDS_CONSTANT } from 'src/constants/cards.constant';
+import { UpdateCardDateDto } from './dto/update-card-date.dto';
 import { Cron } from '@nestjs/schedule';
 import { CreateCardAssignessDto } from './dto/create-cardAssigness.dto';
 import { Board } from 'src/board/entities/board.entity';
@@ -127,7 +128,7 @@ export class CardsService {
 
   async delete(id: number) {
     await this.verifyCardById(id);
-    const post = await this.cardRepository.delete({ id });
+    const post = await this.cardRepository.softRemove({ id });
     return post;
   }
 
@@ -192,12 +193,12 @@ export class CardsService {
     return deleteMember;
   }
 
-  async updateCardDate(id: number, updateCardDto: UpdateCardDto) {
-    const { startDate, dueDate } = updateCardDto;
+  async updateCardDate(id: number, updateCardDateDto: UpdateCardDateDto) {
+    const { startDate, dueDate } = updateCardDateDto;
 
     await this.verifyCardById(id);
 
-    if (!(updateCardDto instanceof UpdateCardDto)) {
+    if (!(updateCardDateDto instanceof UpdateCardDateDto)) {
       throw new BadRequestException(MESSAGES_CONSTANT.CARD.UPDATE_DATE_CARD.INVALID_TYPE);
     }
 
@@ -230,11 +231,12 @@ export class CardsService {
       return false;
     }
   }
-  
+
   @Cron('0 0 * * * *')
-  async updateDateExpire_ver2(){
-    console.log("-----------마감 확인 작업 시작-----------");
+  async updateDateExpire_ver2() {
+    console.log('-----------마감 확인 작업 시작-----------');
     const today = new Date();
+
     const updateCardQuery = this.cardRepository.createQueryBuilder('card')
     .update(Card)
     .set({ isExpired: true })
