@@ -36,7 +36,7 @@ export class ActivityService {
     });
     const validMember = await this.boardMemberRepository.findOne({ where: { boardId: card.list.boardId, userId } });
     if (_.isNil(validMember)) {
-      throw new NotFoundException('댓글작성할 권한이 없습니다.');
+      throw new NotFoundException(MESSAGES_CONSTANT.ACTIVITY.CREATE_ACTIVITY.NOT_FOUND);
     }
     const { content } = createActivityDto;
     const data = await this.activityRepository.save({
@@ -71,7 +71,7 @@ export class ActivityService {
     const validMember = await this.boardMemberRepository.findOne({ where: { boardId: card.list.boardId, userId } });
     console.log(validMember);
     if (_.isNil(validMember)) {
-      throw new NotFoundException('댓글 목록 조회 권한이 없습니다.');
+      throw new NotFoundException(MESSAGES_CONSTANT.ACTIVITY.READ_ACTIVITY.NOT_FOUND_MEMBER);
     }
 
     const existCard = this.cardRepository.findOneBy({ id: cardId });
@@ -96,7 +96,7 @@ export class ActivityService {
     });
     const validMember = await this.boardMemberRepository.findOne({ where: { boardId: card.list.boardId, userId } });
     if (_.isNil(validMember)) {
-      throw new NotFoundException('댓글 목록 조회 권한이 없습니다.');
+      throw new NotFoundException(MESSAGES_CONSTANT.ACTIVITY.READ_ACTIVITY.NOT_FOUND_MEMBER);
     }
     if (_.isNil(activity)) {
       throw new NotFoundException(MESSAGES_CONSTANT.ACTIVITY.READ_ACTIVITY.NOT_FOUND_DETAIL);

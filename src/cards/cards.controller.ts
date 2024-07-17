@@ -95,7 +95,7 @@ export class CardsController {
   @Patch(':cardId')
   async update(@Param('cardId') cardId: string, @Body() updateCardDto: UpdateCardDto, @Request() req) {
     const userId = req.user.id;
-    await this.cardsService.update(+cardId, updateCardDto);
+    await this.cardsService.update(+cardId, updateCardDto, req.user.id);
     const card = await this.cardsService.cardFindOne(+cardId, userId);
     const log = await this.activityService.createLog(req.user.id, +cardId, 'updateCard');
     return {

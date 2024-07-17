@@ -110,11 +110,33 @@ export class CardsService {
       where: { id },
     });
   }
-  async update(id: number, updateCardDto: UpdateCardDto) {
+  async update(id: number, updateCardDto: UpdateCardDto, userId: number) {
     await this.verifyCardById(id);
+    const workingBoard = await this.cardRepository.findOne({
+      relations: { list: { board: true } },
+      where: { id },
+    });
+    const validMember = await this.boardMembersRepository.findOne({
+      where: { boardId: workingBoard.list.boardId, userId },
+    });
+    console.log(validMember);
+    if (_.isNil(validMember)) {
+      throw new NotFoundException(MESSAGES_CONSTANT.CARD.UPDATE_CARD.NOT_FOUND);
+    }
 
     const data = await this.cardRepository.update({ id }, updateCardDto);
+    const cardAssignees = await this.cardAssignessRepository.find({ where: { cardId: id }, select: { userId: true } });
+    console.log(cardAssignees);
+    for (let i = 0; i < cardAssignees.length; i++) {
+      const assigneeId = cardAssignees[i].userId;
+      const key = `${assigneeId}`;
+      const existedData = await this.redisService.get(key);
+      const currentData = _.isNil(existedData) ? [] : existedData;
 
+      currentData.push(data);
+      await this.redisService.set(key, currentData);
+      this.sseService.emitCardChangeEvent(assigneeId, { message: MESSAGES_CONSTANT.CARD.UPDATE_CARD.SSE_UPDATE_CARD });
+    }
     return data;
   }
 
@@ -135,7 +157,7 @@ export class CardsService {
     });
 
     if (_.isNil(authority)) {
-      throw new NotFoundException('초대권한 이 없습니다.');
+      throw new NotFoundException(MESSAGES_CONSTANT.CARD.UPDATE_MEMBER_CARD.NOT_FOUND);
     }
 
     const validateReqUser = await this.boardMembersRepository.findOne({
@@ -143,7 +165,7 @@ export class CardsService {
     });
 
     if (_.isNil(validateReqUser)) {
-      throw new NotFoundException('보드에 속한 유저가 아닙니다.');
+      throw new NotFoundException(MESSAGES_CONSTANT.CARD.UPDATE_MEMBER_CARD.NOT_FOUND_MEMBER);
     }
 
     const createMember = await this.cardAssignessRepository.save({

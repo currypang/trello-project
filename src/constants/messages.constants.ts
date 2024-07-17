@@ -7,12 +7,14 @@ export const MESSAGES_CONSTANT = {
     },
     CREATE_ACTIVITY: {
       SUCCEED: '액티비티 생성에 성공했습니다',
+      NOT_FOUND: '댓글작성할 권한이 없습니다.',
       SSE_NEW_ACTIVITY: 'new activity',
     },
     READ_ACTIVITY: {
       SUCCEED: '액티비티 조회에 성공했습니다',
       NOT_FOUND: '존재하지 않는 카드입니다.',
       NOT_FOUND_DETAIL: '존재하지 않는 activity입니다.',
+      NOT_FOUND_MEMBER: '댓글 목록 조회 권한이 없습니다.',
     },
     UPDATE_ACTIVITY: {
       SUCCEED: '액티비티 수정에 성공했습니다',
@@ -149,6 +151,7 @@ export const MESSAGES_CONSTANT = {
       SUCCEED: '카드 수정에 성공했습니다',
       INVALID_TYPE: 'Invalid updateCardDto',
       SSE_UPDATE_CARD: 'update card',
+      NOT_FOUND: '카드 수정 할 권한이 없습니다.',
     },
     DELETE_CARD: {
       SUCCEED: '카드 삭제에 성공했습니다',
@@ -158,6 +161,10 @@ export const MESSAGES_CONSTANT = {
       SUCCEED: '카드 멤버 추가에 성공했습니다',
       NOT_FOUND: 'board에 존재하지 않는 멤버입니다.',
       EXISTED_MEMBER: 'card에 이미 존재하는 멤버입니다.',
+    },
+    UPDATE_MEMBER_CARD: {
+      NOT_FOUND: '초대권한이 없습니다.',
+      NOT_FOUND_MEMBER: '보드에 속한 유저가 아닙니다.',
     },
     DELETE_MEMBER_CARD: {
       SUCCEED: '카드 멤버 삭제에 성공했습니다',
