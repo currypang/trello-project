@@ -11,12 +11,14 @@ import { Card } from 'src/cards/entities/card.entity';
 import { SseService } from 'src/sse/sse.service';
 import { RedisService } from 'src/redis/redis.service';
 import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
+import { CardAssigness } from 'src/cards/entities/card-assigness.entity';
 
 @Injectable()
 export class ActivityService {
   constructor(
     @InjectRepository(Card) private cardRepository: Repository<Card>,
     @InjectRepository(Activity) private activityRepository: Repository<Activity>,
+    @InjectRepository(CardAssigness) private cardAssignessRepository: Repository<CardAssigness>,
     private readonly sseService: SseService,
     private readonly redisService: RedisService
   ) {}
@@ -29,16 +31,19 @@ export class ActivityService {
       content,
       isLog: false,
     });
-    const key = `${userId}`;
-    const existedData = await this.redisService.get(key);
-    const currentData = _.isNil(existedData) ? [] : existedData;
+    const CardAssignees = await this.cardAssignessRepository.find({ where: { cardId }, select: { userId: true } });
+    for (let i = 0; i < CardAssignees.length; i++) {
+      const assigneeId = CardAssignees[i].userId;
+      const key = `${assigneeId}`;
+      const existedData = await this.redisService.get(key);
+      const currentData = _.isNil(existedData) ? [] : existedData;
 
-    currentData.push(data);
-    await this.redisService.set(key, currentData);
-
-    this.sseService.emitCardChangeEvent(userId, {
-      message: MESSAGES_CONSTANT.ACTIVITY.CREATE_ACTIVITY.SSE_NEW_ACTIVITY,
-    });
+      currentData.push(data);
+      await this.redisService.set(key, currentData);
+      this.sseService.emitCardChangeEvent(assigneeId, {
+        message: MESSAGES_CONSTANT.ACTIVITY.CREATE_ACTIVITY.SSE_NEW_ACTIVITY,
+      });
+    }
     return data;
   }
 
