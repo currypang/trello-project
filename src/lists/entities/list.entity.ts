@@ -45,7 +45,7 @@ export class List {
 
   @IsNumber()
   @IsNotEmpty({ message: MESSAGES_CONSTANT.LIST.COMMON.POSITION.REQUIRED })
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  @Column({ type: 'decimal', precision: 10, scale: 4 })
   position: number;
 
   @CreateDateColumn()
