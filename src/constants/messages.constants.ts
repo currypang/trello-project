@@ -1,4 +1,34 @@
 export const MESSAGES_CONSTANT = {
+  ACTIVITY: {
+    COMMON: {
+      CONTENT: {
+        REQUIRED: '내용을 입력해주세요.',
+      },
+    },
+    CREATE_ACTIVITY: {
+      SUCCEED: '액티비티 생성에 성공했습니다',
+      SSE_NEW_ACTIVITY: 'new activity',
+    },
+    READ_ACTIVITY: {
+      SUCCEED: '액티비티 조회에 성공했습니다',
+      NOT_FOUND: '존재하지 않는 카드입니다.',
+      NOT_FOUND_DETAIL: '존재하지 않는 activity입니다.',
+    },
+    UPDATE_ACTIVITY: {
+      SUCCEED: '액티비티 수정에 성공했습니다',
+      NOT_FOUND: '존재하지 않는 activity입니다.',
+      BAD_REQUEST: '수정 권한이 없습니다.',
+    },
+    DELETE_ACTIVITY: {
+      SUCCEED: '액티비티 삭제에 성공했습니다',
+      NOT_FOUND: '존재하지 않는 activity입니다.',
+      BAD_REQUEST: '삭제 권한이 없습니다.',
+    },
+    CREATE_LOG_ACTIVITY: {
+      SUCCEED: '로그 액티비티 생성에 성공했습니다',
+    },
+  },
+
   AUTH: {
     COMMON: {
       INVALID_TOKEN: '유효하지 않은 토큰 입니다.',
@@ -39,6 +69,13 @@ export const MESSAGES_CONSTANT = {
       SUCCEED: '토큰이 성공적으로 발급 되었습니다.',
       EXPIRED: '토큰이 만료 되었습니다.',
     },
+    SEND_EMAIL: {
+      SUCCEED: '이메일로 인증링크를 보냈습니다.',
+      BAD_REQUEST: '가입하신 이메일이 아닙니다.',
+    },
+    VERIFY_EMAIL: {
+      SUCCEED: '메일 인증이 완료되었습니다.',
+    },
   },
 
   BOARD: {
@@ -53,9 +90,11 @@ export const MESSAGES_CONSTANT = {
     },
     CREATE_BOARD: {
       SUCCEED: '보드 생성에 성공하였습니다',
+      INTERNAL_ERROR: '트랜잭션 실패',
     },
     FIND_ALL_BOARD: {
       SUCCEED: '보드 목록 조회에 성공하였습니다',
+      NOT_FOUND: '사용중인 보드가 없습니다.',
     },
     FIND_DETAIL_BOARD: {
       SUCCEED: '보드 상세 조회에 성공하였습니다',
@@ -69,12 +108,32 @@ export const MESSAGES_CONSTANT = {
       SUCCEED: '보드 삭제에 성공했습니다',
       NOT_FOUND: '존재하지 않는 보드입니다.',
     },
+    SEND_EMAIL: {
+      SUCCEED: '이메일로 인증링크를 보냈습니다.',
+      NOT_FOUND: '보드가 존재하지 않거나,초대권한이 없습니다.',
+      NOT_FOUND_USER: '사용자를 찾을수 없습니다.',
+    },
   },
 
   CARD: {
+    COMMON: {
+      USER_ID: {
+        REQUIRE: '유저를 선택해주세요.',
+      },
+      LIST_ID: {
+        REQUIRE: '리스트를 입력해주세요.',
+      },
+      NAME: {
+        REQUIRE: '카드 이름을 입력해주세요.',
+      },
+      DESCRIPTION: {
+        REQUIRE: '카드 설명을 입력해주세요.',
+      },
+    },
     CREATE_CARD: {
       SUCCEED: '카드 생성에 성공했습니다',
       NOT_FOUND: '존재하지 않는 카드입니다.',
+      BAD_REQUEST: '없는 리스트입니다.',
     },
     READ_CARDS: {
       SUCCEED: '카드 읽기에 성공했습니다',
@@ -86,7 +145,8 @@ export const MESSAGES_CONSTANT = {
     },
     UPDATE_CARD: {
       SUCCEED: '카드 수정에 성공했습니다',
-      INVALID_TAPE: 'Invalid updateCardDto',
+      INVALID_TYPE: 'Invalid updateCardDto',
+      SSE_UPDATE_CARD: 'update card',
     },
     DELETE_CARD: {
       SUCCEED: '카드 삭제에 성공했습니다',
@@ -94,37 +154,35 @@ export const MESSAGES_CONSTANT = {
     },
     CREATE_MEMBER_CARD: {
       SUCCEED: '카드 멤버 추가에 성공했습니다',
+      NOT_FOUND: 'board에 존재하지 않는 멤버입니다.',
+      EXISTED_MEMBER: 'card에 이미 존재하는 멤버입니다.',
     },
     DELETE_MEMBER_CARD: {
       SUCCEED: '카드 멤버 삭제에 성공했습니다',
+      NOT_FOUND: 'board에 존재하지 않는 멤버입니다.',
+      NOT_FOUND_IN_CARD: 'card에 존재하지 않는 멤버입니다.',
     },
     UPDATE_DATE_CARD: {
       SUCCEED: '카드 마감 설정에 성공했습니다',
+      INVALID_TYPE: 'Invalid updateCardDto',
     },
     UPDATE_DATE_EXPIRE_CARD: {
       SUCCEED: '카드가 마감 되었습니다',
+      BAD_REQUEST: '일정이 지정되지 않았습니다.',
       FAILED: '카드의 일정이 남아 있습니다',
     },
-    UPDATE_LIST_CARD :{
+    UPDATE_LIST_CARD: {
       SUCCEED: '카드가 (리스트)이동 되었습니다',
-    }
-  },
-
-  ACTIVITY: {
-    CREATE_ACTIVITY: {
-      SUCCEED: '액티비티 생성에 성공했습니다',
+      NOT_FOUND: '없는 리스트입니다.',
+      BAD_REQUEST: '서로 다른 보드입니다.',
     },
-    READ_ACTIVITY: {
-      SUCCEED: '액티비티 조회에 성공했습니다',
+    UPDATE_ORDER: {
+      FORBIDDEN: '보드에 가입된 유저가 아닙니다.',
+      NOT_FOUND: '리스트를 찾을 수 없습니다.',
+      BAD_REQUEST: '옮길 수 있는 위치가 아닙니다.',
     },
-    UPDATE_ACTIVITY: {
-      SUCCEED: '액티비티 수정에 성공했습니다',
-    },
-    DELETE_ACTIVITY: {
-      SUCCEED: '액티비티 삭제에 성공했습니다',
-    },
-    CREATE_LOG_ACTIVITY: {
-      SUCCEED: '로그 액티비티 생성에 성공했습니다',
+    VERIFY_CARD_BY_ID: {
+      NOT_FOUND: '존재하지 않는 카드입니다.',
     },
   },
 
@@ -154,6 +212,9 @@ export const MESSAGES_CONSTANT = {
       SUCCEED: '리스트 삭제에 성공했습니다.',
       NOT_FOUND: '리스트를 찾을 수 없습니다.',
     },
+    UPDATE_ORDER: {
+      SUCCEED: '리스트 순서 변경에 성공했습니다.',
+    },
   },
 
   USER: {
@@ -178,12 +239,6 @@ export const MESSAGES_CONSTANT = {
     },
     SERVICE: {
       NOT_FOUND_USER: '사용자를 찾을 수 없습니다.',
-    },
-    SEND_EMAIL: {
-      SUCCEED: '이메일로 인증링크를 보냈습니다.',
-    },
-    VERIFY_EMAIL: {
-      SUCCEED: '메일 인증이 완료되었습니다.',
     },
   },
 };

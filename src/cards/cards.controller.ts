@@ -14,17 +14,20 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CardsService } from './cards.service';
 import { ActivityService } from 'src/activity/activity.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 import { CreateCardAssignessDto } from './dto/create-cardAssigness.dto';
 import { DeleteCardAssignessDto } from './dto/delete-cardAssigness.dto';
-import { AuthGuard } from '@nestjs/passport';
 import { UpdateListOrderDto } from 'src/lists/dto/update-list-order.dto';
+import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { Role } from 'src/user/types/roles.type';
 
 @ApiTags('카드')
+@UseGuards(RolesGuard)
+@Roles(Role.VerifiedUser)
 @Controller('cards')
 export class CardsController {
   constructor(
@@ -37,7 +40,6 @@ export class CardsController {
    * @returns
    */
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Post()
   async create(@Body() createCardDto: CreateCardDto, @Request() req) {
     const createCard = await this.cardsService.create(createCardDto, req.user.id);
@@ -54,7 +56,6 @@ export class CardsController {
    * @returns
    */
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Get()
   async findAll() {
     const cards = await this.cardsService.findAll();
@@ -88,7 +89,6 @@ export class CardsController {
    * @returns
    */
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Patch(':cardId')
   async update(@Param('cardId') cardId: string, @Body() updateCardDto: UpdateCardDto, @Request() req) {
     await this.cardsService.update(+cardId, req.user.id, updateCardDto);
@@ -108,7 +108,6 @@ export class CardsController {
    * @returns
    */
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Delete(':cardId')
   async delete(@Param('cardId') cardId: string) {
     const card = await this.cardsService.delete(+cardId);
@@ -127,7 +126,6 @@ export class CardsController {
    * @returns
    */
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Post(':cardId/members')
   async createMembers(
     @Param('cardId') cardId: string,
@@ -153,7 +151,6 @@ export class CardsController {
    * @returns
    */
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Delete(':cardId/members')
   async deleteMembers(
     @Param('cardId') cardId: string,
@@ -179,7 +176,6 @@ export class CardsController {
    * @returns
    */
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Patch(':cardId/Date')
   async updateCardDate(@Param('cardId') cardId: string, @Body() updateCardDto: UpdateCardDto, @Request() req) {
     await this.cardsService.updateCardDate(+cardId, updateCardDto);
@@ -201,7 +197,6 @@ export class CardsController {
    * @returns
    */
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Patch(':cardId/DateExpired')
   async updateDateExpire(@Param('cardId') cardId: string, @Request() req) {
     const updateDateExpire = await this.cardsService.updateDateExpire(+cardId);
@@ -227,7 +222,6 @@ export class CardsController {
    * @returns
    */
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
   @Patch(':cardId/order')
   async updateOrder(
     @Request() req,
@@ -251,7 +245,6 @@ export class CardsController {
    * @returns
    */
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Patch(':cardId/lists/:listId')
   async updateCardList(@Param('cardId') cardId: string, @Param('listId') listId: string, @Request() req) {
     await this.cardsService.updateCardList(+cardId, +listId);

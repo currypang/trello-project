@@ -15,6 +15,7 @@ import { UpdateListOrderDto } from './dto/update-list-order.dto';
 import Decimal from 'decimal.js';
 import { BoardMembers } from 'src/board/entities/board-member.entity';
 import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
+import { LISTS_CONSTANT } from 'src/constants/lists.constans';
 
 @Injectable()
 export class ListsService {
@@ -72,7 +73,7 @@ export class ListsService {
         // 보드 ID에서 마지막 리스트 찾음
         const lastList = await transactionalEntityManager.findOne(List, {
           where: { boardId },
-          order: { position: 'DESC' },
+          order: { position: LISTS_CONSTANT.ORDER.DESC },
         });
         const newPosition = this.calculateNewPosition(lastList);
         // 새로운 리스트 생성

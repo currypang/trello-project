@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import Decimal from 'decimal.js';
 import { Board } from 'src/board/entities/board.entity';
 import { Card } from 'src/cards/entities/card.entity';
+import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 import {
   Entity,
   Column,
@@ -33,7 +33,7 @@ export class List {
    * 리스트 이름
    * @example "To do"
    */
-  @IsNotEmpty({ message: '리스트 이름을 입력해 주세요.' })
+  @IsNotEmpty({ message: MESSAGES_CONSTANT.LIST.COMMON.NAME.REQUIRED })
   @IsString()
   @Column()
   name: string;
@@ -44,7 +44,7 @@ export class List {
    */
 
   @IsNumber()
-  @IsNotEmpty({ message: '위치 번호를 입력해 주세요.' })
+  @IsNotEmpty({ message: MESSAGES_CONSTANT.LIST.COMMON.POSITION.REQUIRED })
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   position: number;
 

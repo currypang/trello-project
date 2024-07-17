@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-local';
 import { AuthService } from '../auth.service';
+import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
@@ -15,7 +16,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     const user = await this.authService.validateUser({ email, password });
 
     if (!user) {
-      throw new UnauthorizedException('일치하는 인증 정보가 없습니다.');
+      throw new UnauthorizedException(MESSAGES_CONSTANT.AUTH.STRATEGY.UNAUTHORIZED);
     }
 
     return user;
