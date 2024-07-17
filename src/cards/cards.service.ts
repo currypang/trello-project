@@ -94,22 +94,20 @@ export class CardsService {
     return await this.cardRepository.find({});
   }
 
-  async cardFindOne(id: number, userId:number) {
+  async cardFindOne(id: number, userId: number) {
     const cardInfo = await this.verifyCardById(id);
-    console.log(cardInfo)
     const listId = cardInfo.listId;
-    console.log(listId)
-
     const board = await this.listRepository.findOne({ where: { id: listId } });
+
     const boardId = board.boardId;
     const validateMember = await this.boardMembersRepository.findOne({
-      where: {boardId:boardId, userId:userId}
-    })
+      where: { boardId: boardId, userId: userId },
+    });
     if (_.isNil(validateMember)) {
       throw new NotFoundException(MESSAGES_CONSTANT.CARD.READ_CARD.NOT_FOUND_MEMBER);
     }
     return await this.cardRepository.findOne({
-      where: { id},
+      where: { id },
     });
   }
   async update(id: number, updateCardDto: UpdateCardDto) {
@@ -156,8 +154,10 @@ export class CardsService {
   }
 
   async deleteMembers(userId: number, cardId: number) {
-    const cardInfo = await this.cardFindOne(userId,cardId);
+    const cardInfo = await this.cardFindOne(cardId, userId);
+
     const listInfo = await this.listRepository.findOneBy({ id: cardInfo.listId });
+
     const verifyMemberbyId = await this.boardMembersRepository.find({
       where: {
         userId,
@@ -204,10 +204,10 @@ export class CardsService {
       }
     );
   }
-/*
-  async updateDateExpire(id: number) {
+
+  async updateDateExpire(id: number, userId: number) {
     await this.verifyCardById(id);
-    const cardInfo = await this.cardAssignessRepository.find({});
+    const cardInfo = await this.cardFindOne(id, userId);
     let cardDate;
     if (cardInfo.dueDate) {
       cardDate = new Date(cardInfo.dueDate);
@@ -282,7 +282,7 @@ export class CardsService {
 
     return card;
   }
-*/
+
   async verifyCardById(id: number) {
     const card = await this.cardRepository.findOneBy({ id });
     if (_.isNil(card)) {
