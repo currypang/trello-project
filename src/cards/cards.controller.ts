@@ -216,7 +216,6 @@ export class CardsController {
     }
   }
 
-  /*
   @ApiBearerAuth()
   @Patch(':cardId/order')
   async updateOrder(
@@ -233,8 +232,6 @@ export class CardsController {
     };
   }
 
-
-  /*
   @ApiBearerAuth()
   @Patch(':cardId/lists/:listId')
   async updateCardList(
@@ -257,7 +254,6 @@ export class CardsController {
     };
   }
 
- 
   @ApiBearerAuth()
   @Patch('expire/cron')
   async updateDateExpire_ver2(@Request() req) {
@@ -269,5 +265,5 @@ export class CardsController {
       updateDateExpire,
       //log,
     };
-  }*/
+  }
 }
