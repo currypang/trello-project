@@ -16,6 +16,7 @@ import { UpdateCardOrderDto } from './dto/update-card-order.dto';
 import { RedisService } from 'src/redis/redis.service';
 import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 import { CARDS_CONSTANT } from 'src/constants/cards.constant';
+import { UpdateCardDateDto } from './dto/update-card-date.dto';
 
 @Injectable()
 export class CardsService {
@@ -111,7 +112,7 @@ export class CardsService {
 
   async delete(id: number) {
     await this.verifyCardById(id);
-    const post = await this.cardRepository.delete({ id });
+    const post = await this.cardRepository.softRemove({ id });
     return post;
   }
 
@@ -177,12 +178,12 @@ export class CardsService {
     return deleteMember;
   }
 
-  async updateCardDate(id: number, updateCardDto: UpdateCardDto) {
-    const { startDate, dueDate } = updateCardDto;
+  async updateCardDate(id: number, updateCardDateDto: UpdateCardDateDto) {
+    const { startDate, dueDate } = updateCardDateDto;
 
     await this.verifyCardById(id);
 
-    if (!(updateCardDto instanceof UpdateCardDto)) {
+    if (!(updateCardDateDto instanceof UpdateCardDateDto)) {
       throw new BadRequestException(MESSAGES_CONSTANT.CARD.UPDATE_DATE_CARD.INVALID_TYPE);
     }
 

@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, IsHexColor } from 'class-validator';
 import { CardAssigness } from './card-assigness.entity';
 import { Activity } from '../../activity/entities/activity.entity';
 import { List } from 'src/lists/entities/list.entity';
@@ -28,21 +28,30 @@ export class Card {
   @IsNotEmpty({ message: MESSAGES_CONSTANT.CARD.COMMON.LIST_ID.REQUIRE })
   @Column({ unsigned: true })
   listId: number;
+
   /**스웨거 테스트
    * 카드 이름
-   * @example "To do"
+   * @example "나는 일을 안할거예요~"
    */
-
   @IsString()
   @IsNotEmpty({ message: MESSAGES_CONSTANT.CARD.COMMON.NAME.REQUIRE })
   @Column()
   name: string;
 
+  /**스웨거 테스트
+   * 카드 이름
+   * @example "열정적으로 일을 안하는 법 1, 2, 3 당신의 선택은?"
+   */
   @IsString()
   @IsNotEmpty({ message: MESSAGES_CONSTANT.CARD.COMMON.DESCRIPTION.REQUIRE })
   @Column({ type: 'text' })
   description: string;
 
+  /**
+   * 색상
+   * @example "#FF0000"
+   */
+  @IsHexColor({ message: MESSAGES_CONSTANT.BOARD.COMMON.BACKGROUND_COLOR.INVALID_TYPE })
   @IsOptional()
   @IsString()
   @Column({ nullable: true })
