@@ -223,25 +223,6 @@ export class CardsController {
     }
   }
 
-  @ApiBearerAuth()
-  @Post(':cardId/members')
-  async createMembers(
-    @Param('cardId', ParseIntPipe) cardId: number,
-    @Body() createCardAssignessDto: CreateCardAssignessDto,
-    @Request() req
-  ) {
-    const userId = req.user.id;
-    const createMembers = await this.cardsService.createMembers(userId, createCardAssignessDto, cardId);
-    const log = await this.activityService.createLog(req.user.id, cardId, 'createCardMembers');
-
-    return {
-      statusCode: HttpStatus.OK,
-      message: MESSAGES_CONSTANT.CARD.CREATE_MEMBER_CARD.SUCCEED,
-      createMembers,
-      log,
-    };
-  }
-
   /**
    * 카드 순서 변경
    * @param cardId
