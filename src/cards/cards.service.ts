@@ -16,6 +16,7 @@ import { UpdateCardOrderDto } from './dto/update-card-order.dto';
 import { RedisService } from 'src/redis/redis.service';
 import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 import { CARDS_CONSTANT } from 'src/constants/cards.constant';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class CardsService {
@@ -214,6 +215,18 @@ export class CardsService {
     } else {
       return false;
     }
+  }
+  
+  @Cron('0 0 * * * *')
+  async updateDateExpire_ver2(){
+    console.log("-----------마감 확인 작업 시작-----------");
+    const today = new Date();
+    const updateCardQuery = this.cardRepository.createQueryBuilder('card')
+    .update(Card)
+    .set({ isExpired: true })
+    .where('dueDate < :date AND isExpired = false', { date: new Date() });
+
+    return await updateCardQuery.execute();
   }
 
   async updateCardList(id: number, listId: number) {
