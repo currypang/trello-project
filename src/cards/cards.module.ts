@@ -13,10 +13,11 @@ import { Activity } from 'src/activity/entities/activity.entity';
 import { SseModule } from 'src/sse/sse.module';
 import { RedisModule } from 'src/redis/redis.module';
 import { User } from 'src/user/entities/user.entity';
+import { Board } from 'src/board/entities/board.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Card, CardAssigness, BoardMembers, List, Activity, User]),
+    TypeOrmModule.forFeature([Card, CardAssigness, BoardMembers, List, Activity, User,Board]),
     SseModule,
     RedisModule,
   ],

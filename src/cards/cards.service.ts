@@ -18,6 +18,7 @@ import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 import { CARDS_CONSTANT } from 'src/constants/cards.constant';
 import { UpdateCardDateDto } from './dto/update-card-date.dto';
 import { Cron } from '@nestjs/schedule';
+import { CreateCardAssignessDto } from './dto/create-cardAssigness.dto';
 import { Board } from 'src/board/entities/board.entity';
 
 @Injectable()
@@ -31,6 +32,8 @@ export class CardsService {
     private listRepository: Repository<List>,
     @InjectRepository(BoardMembers)
     private boardMembersRepository: Repository<BoardMembers>,
+    @InjectRepository(Board)
+    private boardRepository: Repository<Board>,
     private readonly sseService: SseService,
     private readonly dataSource: DataSource,
     private readonly redisService: RedisService
@@ -120,118 +123,115 @@ export class CardsService {
     return post;
   }
 
-  // async createMembers(userId: number, cardId: number) {
-  //   const cardInfo = await this.findOne(cardId);
-  //   console.log(11111111111);
-  //   console.log('cardInfo', cardInfo);
-  //   const listInfo = await this.listRepository.findOneBy({ id: cardInfo.listId });
-  //   const verifyMemberbyId = await this.boardMembersRepository.find({
-  //     where: {
-  //       userId,
-  //       boardId: listInfo.boardId,
-  //     },
-  //   });
-  //   if (verifyMemberbyId.length === 0) {
-  //     throw new NotFoundException(MESSAGES_CONSTANT.CARD.CREATE_MEMBER_CARD.NOT_FOUND);
-  //   }
+  async createMembers(userId: number, createCardAssignessDto: CreateCardAssignessDto, cardId: number) {
+    const workingBoard = await this.cardRepository.findOne({
+      relations: { list: { board: true } },
+      where: { id: cardId },
+    });
 
-  //   const verifyCardMemberbyId = await this.cardAssignessRepository.find({
-  //     where: {
-  //       userId,
-  //       cardId,
-  //     },
-  //   });
-  //   if (verifyCardMemberbyId.length !== 0) {
-  //     throw new NotFoundException(MESSAGES_CONSTANT.CARD.CREATE_MEMBER_CARD.EXISTED_MEMBER);
-  //   }
+    const authority = await this.boardMembersRepository.findOne({
+      where: { userId: userId, boardId: workingBoard.list.board.id },
+    });
 
-  //   const createMember = await this.cardAssignessRepository.save({
-  //     userId,
-  //     cardId,
-  //   });
+    if (_.isNil(authority)) {
+      throw new NotFoundException('초대권한 이 없습니다.');
+    }
 
-  //   return createMember;
-  // }
+    const validateReqUser = await this.boardMembersRepository.findOne({
+      where: { userId: createCardAssignessDto.userId, boardId: workingBoard.list.board.id },
+    });
 
-  // async deleteMembers(userId: number, cardId: number) {
-  //   const cardInfo = await this.findOne(cardId);
-  //   const listInfo = await this.listRepository.findOneBy({ id: cardInfo.listId });
-  //   const verifyMemberbyId = await this.boardMembersRepository.find({
-  //     where: {
-  //       userId,
-  //       boardId: listInfo.boardId,
-  //     },
-  //   });
-  //   if (verifyMemberbyId.length === 0) {
-  //     throw new NotFoundException(MESSAGES_CONSTANT.CARD.DELETE_MEMBER_CARD.NOT_FOUND);
-  //   }
+    if (_.isNil(validateReqUser)) {
+      throw new NotFoundException('보드에 속한 유저가 아닙니다.');
+    }
 
-  //   const verifyCardMemberbyId = await this.cardAssignessRepository.find({
-  //     where: {
-  //       userId,
-  //       cardId,
-  //     },
-  //   });
-  //   if (verifyCardMemberbyId.length === 0) {
-  //     throw new NotFoundException(MESSAGES_CONSTANT.CARD.DELETE_MEMBER_CARD.NOT_FOUND_IN_CARD);
-  //   }
+    const createMember = await this.cardAssignessRepository.save({
+      userId: createCardAssignessDto.userId,
+      cardId,
+    });
+    return createMember;
+  }
 
-  //   const deleteMember = await this.cardAssignessRepository.delete({
-  //     userId,
-  //     cardId,
-  //   });
+  async deleteMembers(userId: number, cardId: number) {
+    const cardInfo = await this.cardFindOne(cardId);
+    const listInfo = await this.listRepository.findOneBy({ id: cardInfo.listId });
+    const verifyMemberbyId = await this.boardMembersRepository.find({
+      where: {
+        userId,
+        boardId: listInfo.boardId,
+      },
+    });
+    if (verifyMemberbyId.length === 0) {
+      throw new NotFoundException(MESSAGES_CONSTANT.CARD.DELETE_MEMBER_CARD.NOT_FOUND);
+    }
 
-  //   return deleteMember;
-  // }
+    const verifyCardMemberbyId = await this.cardAssignessRepository.find({
+      where: {
+        userId,
+        cardId,
+      },
+    });
+    if (verifyCardMemberbyId.length === 0) {
+      throw new NotFoundException(MESSAGES_CONSTANT.CARD.DELETE_MEMBER_CARD.NOT_FOUND_IN_CARD);
+    }
 
-  // async updateCardDate(id: number, updateCardDateDto: UpdateCardDateDto) {
-  //   const { startDate, dueDate } = updateCardDateDto;
+    const deleteMember = await this.cardAssignessRepository.delete({
+      userId,
+      cardId,
+    });
 
-  //   await this.verifyCardById(id);
+    return deleteMember;
+  }
 
-  //   if (!(updateCardDateDto instanceof UpdateCardDateDto)) {
-  //     throw new BadRequestException(MESSAGES_CONSTANT.CARD.UPDATE_DATE_CARD.INVALID_TYPE);
-  //   }
+  async updateCardDate(id: number, updateCardDateDto: UpdateCardDateDto) {
+    const { startDate, dueDate } = updateCardDateDto;
 
-  //   return await this.cardRepository.update(
-  //     { id },
-  //     {
-  //       isExpired: false,
-  //       startDate,
-  //       dueDate,
-  //     }
-  //   );
-  // }
+    await this.verifyCardById(id);
 
-  // async updateDateExpire(id: number, userId) {
-  //   await this.verifyCardById(id);
-  //   const cardInfo = await this.cardFindOne(id, userId);
-  //   let cardDate;
-  //   if (cardInfo.dueDate) {
-  //     cardDate = new Date(cardInfo.dueDate);
-  //   } else {
-  //     throw new BadRequestException(MESSAGES_CONSTANT.CARD.UPDATE_DATE_EXPIRE_CARD.BAD_REQUEST);
-  //   }
-  //   const today = new Date();
+    if (!(updateCardDateDto instanceof UpdateCardDateDto)) {
+      throw new BadRequestException(MESSAGES_CONSTANT.CARD.UPDATE_DATE_CARD.INVALID_TYPE);
+    }
 
-  //   if (cardDate < today) {
-  //     return false;
-  //   } else if (cardDate > today) {
-  //     return await this.cardRepository.update({ id }, { isExpired: true });
-  //   } else {
-  //     return false;
-  //   }
-  // }
+    return await this.cardRepository.update(
+      { id },
+      {
+        isExpired: false,
+        startDate,
+        dueDate,
+      }
+    );
+  }
+
+  async updateDateExpire(id: number) {
+    await this.verifyCardById(id);
+    const cardInfo = await this.cardFindOne(id);
+    let cardDate;
+    if (cardInfo.dueDate) {
+      cardDate = new Date(cardInfo.dueDate);
+    } else {
+      throw new BadRequestException(MESSAGES_CONSTANT.CARD.UPDATE_DATE_EXPIRE_CARD.BAD_REQUEST);
+    }
+    const today = new Date();
+
+    if (cardDate < today) {
+      return false;
+    } else if (cardDate > today) {
+      return await this.cardRepository.update({ id }, { isExpired: true });
+    } else {
+      return false;
+    }
+  }
 
   @Cron('0 0 * * * *')
   async updateDateExpire_ver2() {
     console.log('-----------마감 확인 작업 시작-----------');
     const today = new Date();
+
     const updateCardQuery = this.cardRepository
       .createQueryBuilder('card')
       .update(Card)
       .set({ isExpired: true })
-      .where('dueDate < :date AND isExpired = false', { date: new Date() });
+      .where('dueDate < :date AND isExpired = false', { date: today });
 
     return await updateCardQuery.execute();
   }

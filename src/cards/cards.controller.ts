@@ -124,105 +124,130 @@ export class CardsController {
     };
   }
 
-  //   /**
-  //    * 카드 멤버 추가
-  //    * @param cardId
-  //    * @param createCardAssignessDto
-  //    * @param req
-  //    * @returns
-  //    */
-  //   @ApiBearerAuth()
-  //   @Post(':cardId/members')
-  //   async createMembers(
-  //     @Param('cardId') cardId: string,
-  //     @Body() createCardAssignessDto: CreateCardAssignessDto,
-  //     @Request() req
-  //   ) {
-  //     const createMembers = await this.cardsService.createMembers(createCardAssignessDto.userId, +cardId);
-  //     const log = await this.activityService.createLog(req.user.id, +cardId, 'createCardMembers');
+  /**
+   * 카드 멤버 추가
+   * @param cardId
+   * @param createCardAssignessDto
+   * @param req
+   * @returns
+   */
+  @ApiBearerAuth()
+  @Post(':cardId/members')
+  async createMembers(
+    @Param('cardId', ParseIntPipe) cardId: number,
+    @Body() createCardAssignessDto: CreateCardAssignessDto,
+    @Request() req
+  ) {
+    const userId = req.user.id;
+    const createMembers = await this.cardsService.createMembers(userId, createCardAssignessDto, cardId);
+    const log = await this.activityService.createLog(req.user.id, cardId, 'createCardMembers');
 
-  //     return {
-  //       statusCode: HttpStatus.OK,
-  //       message: MESSAGES_CONSTANT.CARD.CREATE_MEMBER_CARD.SUCCEED,
-  //       createMembers,
-  //       log,
-  //     };
-  //   }
+    return {
+      statusCode: HttpStatus.OK,
+      message: MESSAGES_CONSTANT.CARD.CREATE_MEMBER_CARD.SUCCEED,
+      createMembers,
+      log,
+    };
+  }
 
-  //   /**
-  //    * 카드 멤버 삭제
-  //    * @param cardId
-  //    * @param deleteCardAssignessDto
-  //    * @param req
-  //    * @returns
-  //    */
-  //   @ApiBearerAuth()
-  //   @Delete(':cardId/members')
-  //   async deleteMembers(
-  //     @Param('cardId') cardId: string,
-  //     @Body() deleteCardAssignessDto: DeleteCardAssignessDto,
-  //     @Request() req
-  //   ) {
-  //     const deleteMembers = await this.cardsService.deleteMembers(deleteCardAssignessDto.userId, +cardId);
-  //     const log = await this.activityService.createLog(req.user.id, +cardId, 'deleteCardMembers');
+  /**
+   * 카드 멤버 삭제
+   * @param cardId
+   * @param deleteCardAssignessDto
+   * @param req
+   * @returns
+   */
+  @ApiBearerAuth()
+  @Delete(':cardId/members')
+  async deleteMembers(
+    @Param('cardId') cardId: string,
+    @Body() deleteCardAssignessDto: DeleteCardAssignessDto,
+    @Request() req
+  ) {
+    const deleteMembers = await this.cardsService.deleteMembers(deleteCardAssignessDto.userId, +cardId);
+    const log = await this.activityService.createLog(req.user.id, +cardId, 'deleteCardMembers');
 
-  //     return {
-  //       statusCode: HttpStatus.OK,
-  //       message: MESSAGES_CONSTANT.CARD.DELETE_MEMBER_CARD.SUCCEED,
-  //       deleteMembers,
-  //       log,
-  //     };
-  //   }
+    return {
+      statusCode: HttpStatus.OK,
+      message: MESSAGES_CONSTANT.CARD.DELETE_MEMBER_CARD.SUCCEED,
+      deleteMembers,
+      log,
+    };
+  }
 
-  //   /**
-  //    * 카드 일정 수정 및 추가
-  //    * @param cardId
-  //    * @param updateCardDateDto
-  //    * @param req
-  //    * @returns
-  //    */
-  //   @ApiBearerAuth()
-  //   @Patch(':cardId/date')
-  //   async updateCardDate(@Param('cardId') cardId: string, @Body() updateCardDateDto: UpdateCardDateDto, @Request() req) {
-  //     await this.cardsService.updateCardDate(+cardId, updateCardDateDto);
-  //     const updateCardDate = await this.cardsService.findOne(+cardId);
-  //     const log = await this.activityService.createLog(req.user.id, +cardId, 'updateCardDate');
+  // /**
+  //  * 카드 일정 수정 및 추가
+  //  * @param cardId
+  //  * @param updateCardDateDto
+  //  * @param req
+  //  * @returns
+  //  */
+  // @ApiBearerAuth()
+  // @Patch(':cardId/date')
+  // async updateCardDate(@Param('cardId') cardId: string, @Body() updateCardDateDto: UpdateCardDateDto, @Request() req) {
+  //   await this.cardsService.updateCardDate(+cardId, updateCardDateDto);
+  //   const updateCardDate = await this.cardsService.findOne(+cardId);
+  //   const log = await this.activityService.createLog(req.user.id, +cardId, 'updateCardDate');
 
-  //     return {
-  //       statusCode: HttpStatus.OK,
-  //       message: MESSAGES_CONSTANT.CARD.UPDATE_DATE_CARD.SUCCEED,
-  //       updateCardDate,
-  //       log,
-  //     };
-  //   }
+  //   return {
+  //     statusCode: HttpStatus.OK,
+  //     message: MESSAGES_CONSTANT.CARD.UPDATE_DATE_CARD.SUCCEED,
+  //     updateCardDate,
+  //     log,
+  //   };
+  // }
 
-  //   /**
-  //    * 카드 일정 마감
-  //    * @param cardId
-  //    * @param req
-  //    * @returns
-  //    */
-  //   @ApiBearerAuth()
-  //   @Patch(':cardId/dateExpired')
-  //   async updateDateExpire(@Param('cardId') cardId: string, @Request() req) {
-  //     const updateDateExpire = await this.cardsService.updateDateExpire(+cardId);
-  //     const log = await this.activityService.createLog(req.user.id, +cardId, 'updateDateExpired');
-  //     if (updateDateExpire) {
-  //       return {
-  //         statusCode: HttpStatus.OK,
-  //         message: MESSAGES_CONSTANT.CARD.UPDATE_DATE_EXPIRE_CARD.SUCCEED,
-  //         updateDateExpire,
-  //         log,
-  //       };
-  //     } else if (!updateDateExpire) {
-  //       return {
-  //         statusCode: HttpStatus.OK,
-  //         message: MESSAGES_CONSTANT.CARD.UPDATE_DATE_EXPIRE_CARD.FAILED,
-  //       };
-  //     }
-  //   }
+  /**
+   * 카드 일정 마감
+   * @param cardId
+   * @param req
+   * @returns
+   */
+  @ApiBearerAuth()
+  @Patch(':cardId/dateExpired')
+  async updateDateExpire(@Param('cardId') cardId: string, @Request() req) {
+    const updateDateExpire = await this.cardsService.updateDateExpire(+cardId);
+    const log = await this.activityService.createLog(req.user.id, +cardId, 'updateDateExpired');
+    if (updateDateExpire) {
+      return {
+        statusCode: HttpStatus.OK,
+        message: MESSAGES_CONSTANT.CARD.UPDATE_DATE_EXPIRE_CARD.SUCCEED,
+        updateDateExpire,
+        log,
+      };
+    } else if (!updateDateExpire) {
+      return {
+        statusCode: HttpStatus.OK,
+        message: MESSAGES_CONSTANT.CARD.UPDATE_DATE_EXPIRE_CARD.FAILED,
+      };
+    }
+  }
+
   /**
    * 카드 리스트 내에서 순서 변경
+
+  @ApiBearerAuth()
+  @Post(':cardId/members')
+  async createMembers(
+    @Param('cardId',ParseIntPipe) cardId: number,
+    @Body() createCardAssignessDto: CreateCardAssignessDto,
+    @Request() req
+  ) {
+    const userId = req.user.id
+    const createMembers = await this.cardsService.createMembers(userId,createCardAssignessDto, cardId);
+    const log = await this.activityService.createLog(req.user.id, cardId, 'createCardMembers');
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: MESSAGES_CONSTANT.CARD.CREATE_MEMBER_CARD.SUCCEED,
+      createMembers,
+      log,
+    };
+  }
+
+
+  /**
+   * 카드 순서 변경
    * @param cardId
    * @param UpdateListOrderDto
    * @returns
