@@ -63,7 +63,7 @@ export class InvitationService {
       to: emailAddress,
       subject: '보드초대 인증 메일',
       html: `
-              초대코드를 입력하시면 인증이 완료됩니다<br/>
+              초대인증버튼을 클릭하시면 인증이 완료됩니다<br/>
                <form action="${url}" method="POST">
                      <button>초대인증</button>
         </form>`,
