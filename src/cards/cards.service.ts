@@ -297,7 +297,12 @@ export class CardsService {
     const { position } = updateCardOrderDto;
     return await this.dataSource.transaction(async (transactionalEntityManager: EntityManager) => {
       // 카드id를 받아 카드 정보를 가져오기
-      const cardToUpdateOrder = await this.verifyCardById(id);
+      const cardToUpdateOrder = await transactionalEntityManager.findOne(Card, {
+        where: { id },
+      });
+      if (!cardToUpdateOrder) {
+        throw new NotFoundException('카드를 찾을 수 없습니다.');
+      }
       //카드 리스트 아이디
       const cardListId = cardToUpdateOrder.listId;
       //카드의 리스트 정보
@@ -308,34 +313,30 @@ export class CardsService {
       //카드 보드 아이디
       const listBoardId = listInfo.boardId;
       const boardMember = await transactionalEntityManager.findOne(BoardMembers, { where: { userId } });
-
       const userBoardId = boardMember.boardId;
-
       if (listBoardId !== userBoardId) {
-        throw new ForbiddenException(MESSAGES_CONSTANT.CARD.UPDATE_ORDER.FORBIDDEN);
+        throw new ForbiddenException('보드에 가입된 유저가 아닙니다.');
       }
-
       // 카드가 속한 리스트의 정보를 가져오기
       const list = await transactionalEntityManager.findOne(List, {
         where: { id: cardListId },
         relations: ['cards'],
       });
       if (!list) {
-        throw new NotFoundException(MESSAGES_CONSTANT.CARD.UPDATE_ORDER.NOT_FOUND);
+        throw new NotFoundException('리스트를 찾을 수 없습니다.');
       }
       // 리스트의 모든 카드들을 가져오기
       const cardsInlist = list.cards;
       cardsInlist.sort((a: Card, b: Card): number => a.position - b.position);
-
       const cardArrayLangth = cardsInlist.length;
       if (position + 1 >= cardArrayLangth) {
-        throw new BadRequestException(MESSAGES_CONSTANT.CARD.UPDATE_ORDER.BAD_REQUEST);
+        throw new BadRequestException('옮길 수 있는 위치가 아닙니다.');
       }
+      console.log('cardArrayLangth', cardArrayLangth);
       // 바꾸려는 위치의 리스트의 position값
       const targetPosition = cardsInlist[position].position;
       // 바꾸는 위치 이전 포지션 값
       const previousTargetPosition = cardsInlist[position - 1]?.position;
-
       // 포지션 계산
       const newPosition =
         position + 1 == cardArrayLangth
@@ -346,14 +347,10 @@ export class CardsService {
                 .plus(previousTargetPosition)
                 .toNumber()
             : new Decimal(targetPosition).times(Math.random()).toNumber();
-
       // 카드의 position 업데이트
       cardToUpdateOrder.position = newPosition;
-
       Object.assign(cardToUpdateOrder, { position: newPosition });
-
       const updatedCard = await transactionalEntityManager.save(Card, cardToUpdateOrder);
-
       return updatedCard;
     });
   }

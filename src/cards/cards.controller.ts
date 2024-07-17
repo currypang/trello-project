@@ -216,7 +216,7 @@ export class CardsController {
     }
   }
 
-  /*
+  
   @ApiBearerAuth()
   @Patch(':cardId/order')
   async updateOrder(
@@ -234,7 +234,14 @@ export class CardsController {
   }
 
 
-  /*
+  /**
+   * 카드와 리스트의 포지션동시 이동
+   * @param cardId 
+   * @param listId 
+   * @param req 
+   * @param updateListOrderDto 
+   * @returns 
+   */
   @ApiBearerAuth()
   @Patch(':cardId/lists/:listId')
   async updateCardList(
@@ -255,9 +262,9 @@ export class CardsController {
       updateCardList,
       log,
     };
-  }
+  } 
 
- 
+ /*
   @ApiBearerAuth()
   @Patch('expire/cron')
   async updateDateExpire_ver2(@Request() req) {
