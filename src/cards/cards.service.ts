@@ -45,6 +45,17 @@ export class CardsService {
       throw new BadRequestException(MESSAGES_CONSTANT.CARD.CREATE_CARD.BAD_REQUEST);
     }
 
+    const listInfo = await this.listRepository.findOneBy({ id: listId });
+    const verifyMemberbyId = await this.boardMembersRepository.find({
+      where: {
+        userId,
+        boardId: listInfo.boardId,
+      },
+    });
+    if (verifyMemberbyId.length === 0) {
+      throw new NotFoundException(MESSAGES_CONSTANT.CARD.CREATE_CARD.NOT_FOUND_MEMBER);
+    }
+
     return await this.cardRepository.manager.transaction(async (transactionalEntityManager) => {
       // 리스트 ID에서 마지막 카드 찾음
       const lastCard = await transactionalEntityManager.findOne(Card, {
@@ -125,7 +136,7 @@ export class CardsService {
         boardId: listInfo.boardId,
       },
     });
-    if (_.isNil(verifyMemberbyId)) {
+    if (verifyMemberbyId.length === 0) {
       throw new NotFoundException(MESSAGES_CONSTANT.CARD.CREATE_MEMBER_CARD.NOT_FOUND);
     }
 
@@ -156,7 +167,7 @@ export class CardsService {
         boardId: listInfo.boardId,
       },
     });
-    if (_.isNil(verifyMemberbyId)) {
+    if (verifyMemberbyId.length === 0) {
       throw new NotFoundException(MESSAGES_CONSTANT.CARD.DELETE_MEMBER_CARD.NOT_FOUND);
     }
 
