@@ -30,10 +30,8 @@ export class ListsService {
   ) {}
   private async verifyBoardMembership(userId: number, boardId: number) {
     const boardMembers = await this.boardMembersRepository.find({ where: { userId } });
-    console.log(boardMembers);
 
     const isMember = boardMembers.some((member) => member.boardId === boardId);
-    console.log(isMember);
     if (!isMember) {
       throw new ForbiddenException(MESSAGES_CONSTANT.LIST.COMMON.FORBIDDEN);
     }
@@ -148,7 +146,6 @@ export class ListsService {
       }
       // 바꾸려는 위치의 리스트의 position값
       const targetPosition = listsInBoard[position].position;
-      console.log(targetPosition);
       // 바꾸는 위치 이전 포지션 값
       const previousTargetPosition = listsInBoard[position - 1]?.position;
 
