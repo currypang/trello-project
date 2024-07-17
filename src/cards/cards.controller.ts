@@ -75,7 +75,7 @@ export class CardsController {
   @ApiBearerAuth()
   @Get(':cardId')
   async findOne(@Param('cardId') cardId: string) {
-    const card = await this.cardsService.findOne(+cardId);
+    const card = await this.cardsService.cardFindOne(+cardId);
     return {
       statusCode: HttpStatus.OK,
       message: MESSAGES_CONSTANT.CARD.READ_CARD.SUCCEED,
@@ -94,7 +94,7 @@ export class CardsController {
   @Patch(':cardId')
   async update(@Param('cardId') cardId: string, @Body() updateCardDto: UpdateCardDto, @Request() req) {
     await this.cardsService.update(+cardId, req.user.id, updateCardDto);
-    const card = await this.cardsService.findOne(+cardId);
+    const card = await this.cardsService.cardFindOne(+cardId);
     const log = await this.activityService.createLog(req.user.id, +cardId, 'updateCard');
     return {
       statusCode: HttpStatus.OK,
@@ -120,22 +120,17 @@ export class CardsController {
     };
   }
 
-  /**
-   * 카드 멤버 추가
-   * @param cardId
-   * @param createCardAssignessDto
-   * @param req
-   * @returns
-   */
+
   @ApiBearerAuth()
   @Post(':cardId/members')
   async createMembers(
-    @Param('cardId') cardId: string,
+    @Param('cardId',ParseIntPipe) cardId: number,
     @Body() createCardAssignessDto: CreateCardAssignessDto,
     @Request() req
   ) {
-    const createMembers = await this.cardsService.createMembers(createCardAssignessDto.userId, +cardId);
-    const log = await this.activityService.createLog(req.user.id, +cardId, 'createCardMembers');
+    const userId = req.user.id
+    const createMembers = await this.cardsService.createMembers(userId,createCardAssignessDto, cardId);
+    const log = await this.activityService.createLog(req.user.id, cardId, 'createCardMembers');
 
     return {
       statusCode: HttpStatus.OK,
@@ -178,10 +173,10 @@ export class CardsController {
    * @returns
    */
   @ApiBearerAuth()
-  @Patch(':cardId/date')
-  async updateCardDate(@Param('cardId') cardId: string, @Body() updateCardDateDto: UpdateCardDateDto, @Request() req) {
-    await this.cardsService.updateCardDate(+cardId, updateCardDateDto);
-    const updateCardDate = await this.cardsService.findOne(+cardId);
+  @Patch(':cardId/Date')
+  async updateCardDate(@Param('cardId') cardId: string, @Body() updateCardDto: UpdateCardDto, @Request() req) {
+    await this.cardsService.updateCardDate(+cardId, updateCardDto);
+    const updateCardDate = await this.cardsService.cardFindOne(+cardId);
     const log = await this.activityService.createLog(req.user.id, +cardId, 'updateCardDate');
 
     return {
@@ -250,7 +245,7 @@ export class CardsController {
   @Patch(':cardId/lists/:listId')
   async updateCardList(@Param('cardId') cardId: string, @Param('listId') listId: string, @Request() req) {
     await this.cardsService.updateCardList(+cardId, +listId);
-    const updateCardList = await this.cardsService.findOne(+cardId);
+    const updateCardList = await this.cardsService.cardFindOne(+cardId);
     const log = await this.activityService.createLog(req.user.id, +cardId, 'updateCardListId');
 
     return {
