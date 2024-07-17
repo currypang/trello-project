@@ -175,27 +175,27 @@ export class CardsController {
     };
   }
 
-  // /**
-  //  * 카드 일정 수정 및 추가
-  //  * @param cardId
-  //  * @param updateCardDateDto
-  //  * @param req
-  //  * @returns
-  //  */
-  // @ApiBearerAuth()
-  // @Patch(':cardId/date')
-  // async updateCardDate(@Param('cardId') cardId: string, @Body() updateCardDateDto: UpdateCardDateDto, @Request() req) {
-  //   await this.cardsService.updateCardDate(+cardId, updateCardDateDto);
-  //   const updateCardDate = await this.cardsService.findOne(+cardId);
-  //   const log = await this.activityService.createLog(req.user.id, +cardId, 'updateCardDate');
+  /**
+   * 카드 일정 수정 및 추가
+   * @param cardId
+   * @param updateCardDateDto
+   * @param req
+   * @returns
+   */
+  @ApiBearerAuth()
+  @Patch(':cardId/date')
+  async updateCardDate(@Param('cardId') cardId: string, @Body() updateCardDateDto: UpdateCardDateDto, @Request() req) {
+    await this.cardsService.updateCardDate(+cardId, updateCardDateDto);
+    const updateCardDate = await this.cardsService.findOne(+cardId);
+    const log = await this.activityService.createLog(req.user.id, +cardId, 'updateCardDate');
 
-  //   return {
-  //     statusCode: HttpStatus.OK,
-  //     message: MESSAGES_CONSTANT.CARD.UPDATE_DATE_CARD.SUCCEED,
-  //     updateCardDate,
-  //     log,
-  //   };
-  // }
+    return {
+      statusCode: HttpStatus.OK,
+      message: MESSAGES_CONSTANT.CARD.UPDATE_DATE_CARD.SUCCEED,
+      updateCardDate,
+      log,
+    };
+  }
 
   /**
    * 카드 일정 마감
@@ -223,18 +223,15 @@ export class CardsController {
     }
   }
 
-  /**
-   * 카드 리스트 내에서 순서 변경
-
   @ApiBearerAuth()
   @Post(':cardId/members')
   async createMembers(
-    @Param('cardId',ParseIntPipe) cardId: number,
+    @Param('cardId', ParseIntPipe) cardId: number,
     @Body() createCardAssignessDto: CreateCardAssignessDto,
     @Request() req
   ) {
-    const userId = req.user.id
-    const createMembers = await this.cardsService.createMembers(userId,createCardAssignessDto, cardId);
+    const userId = req.user.id;
+    const createMembers = await this.cardsService.createMembers(userId, createCardAssignessDto, cardId);
     const log = await this.activityService.createLog(req.user.id, cardId, 'createCardMembers');
 
     return {
@@ -244,7 +241,6 @@ export class CardsController {
       log,
     };
   }
-
 
   /**
    * 카드 순서 변경
