@@ -79,8 +79,6 @@ export class AuthController {
   }
 
   // 이메일 인증
-  // @UseGuards(RolesGuard)
-  // @Roles(Role.VerifiedUser)
   @ApiBearerAuth()
   @Post('/email')
   @UseGuards(JwtAuthGuard)

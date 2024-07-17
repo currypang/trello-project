@@ -236,6 +236,12 @@ export const MESSAGES_CONSTANT = {
     },
     CONTROLLER: {
       FIND_ME: '내 정보 조회에 성공했습니다.',
+      GET_NOTIFICATION: {
+        SUCCESS: '알림 목록을 블러왔습니다.',
+      },
+      DELETE_NOTIFICATION: {
+        SUCCESS: '알림 목록이 삭제되었습니다.',
+      },
     },
     SERVICE: {
       NOT_FOUND_USER: '사용자를 찾을 수 없습니다.',
