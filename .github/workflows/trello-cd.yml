@@ -62,6 +62,13 @@ jobs:
             echo "MAIL_AUTH_PASS=${{ secrets.MAIL_AUTH_PASS }}" >> .env
             echo "MAIL_AUTH_USER=${{ secrets.MAIL_AUTH_USER }}" >> .env
             echo "MAIL_BASE_URL=${{ secrets.MAIL_BASE_URL }}" >> .env
+            echo "INVITE_SERVICE=${{ secrets.INVITE_SERVICE }}" >> .env
+            echo "INVITE_HOST=${{ secrets.INVITE_HOST }}" >> .env
+            echo "INVITE_PORT=${{ secrets.INVITE_PORT }}" >> .env
+            echo "INVITE_AUTH_USER=${{ secrets.INVITE_AUTH_USER }}" >> .env
+            echo "INVITE_AUTH_PASS=${{ secrets.INVITE_AUTH_PASS }}" >> .env
+            echo "UPSTASH_REDIS_REST_URL=${{ secrets.UPSTASH_REDIS_REST_URL }}" >> .env
+            echo "UPSTASH_REDIS_REST_TOKEN=${{ secrets.UPSTASH_REDIS_REST_TOKEN }}" >> .env
             # PM2 설정 파일 생성
             echo "module.exports = {
               apps: [
