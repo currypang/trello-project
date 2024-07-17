@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsDate, IsNumber, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional } from 'class-validator';
 import { CardAssigness } from './card-assigness.entity';
 import { Activity } from '../../activity/entities/activity.entity';
 import { List } from 'src/lists/entities/list.entity';
@@ -13,6 +13,7 @@ import {
   OneToMany,
   JoinColumn,
 } from 'typeorm';
+import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 
 @Entity('card')
 export class Card {
@@ -24,7 +25,7 @@ export class Card {
    * @example "1"
    */
 
-  @IsNotEmpty({ message: '리스트를 입력해주세요.' })
+  @IsNotEmpty({ message: MESSAGES_CONSTANT.CARD.COMMON.LIST_ID.REQUIRE })
   @Column({ unsigned: true })
   listId: number;
   /**스웨거 테스트
@@ -33,12 +34,12 @@ export class Card {
    */
 
   @IsString()
-  @IsNotEmpty({ message: '카드 이름을 입력해주세요.' })
+  @IsNotEmpty({ message: MESSAGES_CONSTANT.CARD.COMMON.NAME.REQUIRE })
   @Column()
   name: string;
 
   @IsString()
-  @IsNotEmpty({ message: '카드 설명을 입력해주세요.' })
+  @IsNotEmpty({ message: MESSAGES_CONSTANT.CARD.COMMON.DESCRIPTION.REQUIRE })
   @Column({ type: 'text' })
   description: string;
 

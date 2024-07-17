@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { DeepPartial, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
@@ -10,13 +10,17 @@ import { Activity } from './entities/activity.entity';
 import { Card } from 'src/cards/entities/card.entity';
 import { SseService } from 'src/sse/sse.service';
 import { RedisService } from 'src/redis/redis.service';
-import { BoardMembers } from 'src/board/entities/board-member.entity';
+
+import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
+import { CardAssigness } from 'src/cards/entities/card-assigness.entity';
+
 
 @Injectable()
 export class ActivityService {
   constructor(
     @InjectRepository(Card) private cardRepository: Repository<Card>,
     @InjectRepository(Activity) private activityRepository: Repository<Activity>,
+    @InjectRepository(CardAssigness) private cardAssignessRepository: Repository<CardAssigness>,
     private readonly sseService: SseService,
     private readonly redisService: RedisService
   ) {}
@@ -37,21 +41,26 @@ export class ActivityService {
       content,
       isLog: false,
     });
-    const key = `${userId}`;
-    const existedData = await this.redisService.get(key);
-    const currentData = _.isNil(existedData) ? [] : existedData;
+    const CardAssignees = await this.cardAssignessRepository.find({ where: { cardId }, select: { userId: true } });
+    for (let i = 0; i < CardAssignees.length; i++) {
+      const assigneeId = CardAssignees[i].userId;
+      const key = `${assigneeId}`;
+      const existedData = await this.redisService.get(key);
+      const currentData = _.isNil(existedData) ? [] : existedData;
 
-    currentData.push(data);
-    await this.redisService.set(key, currentData);
-
-    this.sseService.emitCardChangeEvent(userId, { message: 'new activity' });
+      currentData.push(data);
+      await this.redisService.set(key, currentData);
+      this.sseService.emitCardChangeEvent(assigneeId, {
+        message: MESSAGES_CONSTANT.ACTIVITY.CREATE_ACTIVITY.SSE_NEW_ACTIVITY,
+      });
+    }
     return data;
   }
 
   async findAll(cardId: number) {
     const existCard = this.cardRepository.findOneBy({ id: cardId });
     if (_.isNil(existCard)) {
-      throw new NotFoundException('존재하지 않는 카드입니다.');
+      throw new NotFoundException(MESSAGES_CONSTANT.ACTIVITY.READ_ACTIVITY.NOT_FOUND);
     }
 
     const activitys = await this.activityRepository.find({
@@ -64,7 +73,7 @@ export class ActivityService {
   async findOne(id: number) {
     const activity = await this.activityRepository.findOneBy({ id });
     if (_.isNil(activity)) {
-      throw new NotFoundException('존재하지 않는 activity입니다.');
+      throw new NotFoundException(MESSAGES_CONSTANT.ACTIVITY.READ_ACTIVITY.NOT_FOUND_DETAIL);
     }
     return activity;
   }
@@ -72,10 +81,10 @@ export class ActivityService {
   async update(id: number, updateActivityDto: UpdateActivityDto, userId: number) {
     const activity = await this.activityRepository.findOneBy({ id });
     if (_.isNil(activity)) {
-      throw new NotFoundException('존재하지 않는 activity입니다.');
+      throw new NotFoundException(MESSAGES_CONSTANT.ACTIVITY.UPDATE_ACTIVITY.NOT_FOUND);
     }
     if (activity.userId !== userId) {
-      throw new BadRequestException('수정 권한이 없습니다.');
+      throw new BadRequestException(MESSAGES_CONSTANT.ACTIVITY.UPDATE_ACTIVITY.BAD_REQUEST);
     }
 
     return await this.activityRepository.update({ id }, updateActivityDto);
@@ -84,10 +93,10 @@ export class ActivityService {
   async remove(id: number, userId: number) {
     const activity = await this.activityRepository.findOneBy({ id });
     if (_.isNil(activity)) {
-      throw new NotFoundException('존재하지 않는 activity입니다.');
+      throw new NotFoundException(MESSAGES_CONSTANT.ACTIVITY.DELETE_ACTIVITY.NOT_FOUND);
     }
     if (activity.userId !== userId) {
-      throw new BadRequestException('삭제 권한이 없습니다.');
+      throw new BadRequestException(MESSAGES_CONSTANT.ACTIVITY.DELETE_ACTIVITY.BAD_REQUEST);
     }
     return this.activityRepository.delete({ id });
   }

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpStatus, Patch, Post, Query, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Patch, Request, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -7,13 +7,12 @@ import { AuthService } from 'src/auth/auth.service';
 import { DeleteUserDto } from './dtos/delete-user.dto';
 import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 import { EmailService } from 'src/email/email.service';
-import { SendEmailDto } from './dtos/send-email.dto';
-import { VerifyEmailQueryDto } from './dtos/verify-email.query.dto';
 // import { RolesGuard } from 'src/auth/guards/roles.guard';
 // import { Roles } from 'src/auth/decorators/roles.decorator';
 // import { Role } from './types/roles.type';
 
 @ApiTags('유저')
+@UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UserController {
   constructor(
@@ -23,7 +22,6 @@ export class UserController {
   ) {}
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Get('/me')
   async findUserById(@Request() req) {
     const userId = req.user.id;
@@ -37,7 +35,6 @@ export class UserController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Patch('/me')
   async updatePassword(@Request() req, @Body() updateUserPasswordDto: UpdateUserPasswordDto) {
     const userId = req.user.id;
@@ -49,7 +46,6 @@ export class UserController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Delete('/me')
   async deleteUser(@Request() req, @Body() deleteUserDto: DeleteUserDto) {
     const userId = req.user.id;
@@ -61,47 +57,27 @@ export class UserController {
     };
   }
 
-  // 이메일 인증
-  // @UseGuards(RolesGuard) // 테스트 시 JwtAuthGuard 주석처리
-  // @Roles(Role.VerifiedUser)
   @ApiBearerAuth()
-  @Post('/email')
-  @UseGuards(JwtAuthGuard)
-  async sendEmail(@Request() req, @Body() sendEmailDto: SendEmailDto) {
+  @Get('/notification')
+  async getNotification(@Request() req) {
     const userId = req.user.id;
-    const email = sendEmailDto.email;
-    await this.emailService.sendMemberJoinVerification(email, userId);
+    const data = await this.userService.getNotification(userId);
     return {
       statusCode: HttpStatus.OK,
-      message: MESSAGES_CONSTANT.USER.SEND_EMAIL.SUCCEED,
-    };
-  }
-  // 이메일 인증 링크 확인
-  @Post('/email/email-verify')
-  async verifyEmail(@Query() query: VerifyEmailQueryDto) {
-    await this.emailService.verifyEmail(query);
-    return {
-      statusCode: HttpStatus.OK,
-      message: MESSAGES_CONSTANT.USER.VERIFY_EMAIL.SUCCEED,
-    };
-  }
-  // 알림 테스트
-  @Post('/comment')
-  async createComment(@Body() body: any) {
-    this.userService.createComment(body);
-    return {
-      statusCode: HttpStatus.OK,
-      message: '댓글 작성 테스트 완료 알림',
-    };
-  }
-  // 레디스 get 테스트
-  @Get('/comment')
-  async getComment() {
-    const data = await this.userService.getComment();
-    return {
-      statusCode: HttpStatus.OK,
-      message: '댓글 작성 겟 완료 알림',
+      message: MESSAGES_CONSTANT.USER.CONTROLLER.GET_NOTIFICATION,
       data,
+    };
+  }
+
+  @ApiBearerAuth()
+  @Delete('/notification')
+  async deleteNotification(@Request() req) {
+    const userId = req.user.id;
+    await this.userService.deleteNotification(userId);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: MESSAGES_CONSTANT.USER.CONTROLLER.DELETE_NOTIFICATION,
     };
   }
 }

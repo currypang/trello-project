@@ -13,6 +13,10 @@ import { BoardMembers } from 'src/board/entities/board-member.entity';
 import { SseService } from 'src/sse/sse.service';
 import Decimal from 'decimal.js';
 import { UpdateCardOrderDto } from './dto/update-card-order.dto';
+import { RedisService } from 'src/redis/redis.service';
+import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
+import { CARDS_CONSTANT } from 'src/constants/cards.constant';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class CardsService {
@@ -26,7 +30,8 @@ export class CardsService {
     @InjectRepository(BoardMembers)
     private boardMembersRepository: Repository<BoardMembers>,
     private readonly sseService: SseService,
-    private readonly dataSource: DataSource
+    private readonly dataSource: DataSource,
+    private readonly redisService: RedisService
   ) {}
 
   async create(createCardDto: CreateCardDto, userId: number) {
@@ -37,14 +42,25 @@ export class CardsService {
       where: { id: listId },
     });
     if (!existingList) {
-      throw new BadRequestException('없는 리스트입니다.');
+      throw new BadRequestException(MESSAGES_CONSTANT.CARD.CREATE_CARD.BAD_REQUEST);
+    }
+
+    const listInfo = await this.listRepository.findOneBy({ id: listId });
+    const verifyMemberbyId = await this.boardMembersRepository.find({
+      where: {
+        userId,
+        boardId: listInfo.boardId,
+      },
+    });
+    if (verifyMemberbyId.length === 0) {
+      throw new NotFoundException(MESSAGES_CONSTANT.CARD.CREATE_CARD.NOT_FOUND_MEMBER);
     }
 
     return await this.cardRepository.manager.transaction(async (transactionalEntityManager) => {
       // 리스트 ID에서 마지막 카드 찾음
       const lastCard = await transactionalEntityManager.findOne(Card, {
         where: { listId },
-        order: { position: 'DESC' },
+        order: { position: CARDS_CONSTANT.ORDER.DESC },
       });
 
       // 카드 위치 지정
@@ -85,10 +101,23 @@ export class CardsService {
     await this.verifyCardById(id);
 
     if (!(updateCardDto instanceof UpdateCardDto)) {
-      throw new BadRequestException('Invalid updateCardDto');
+      throw new BadRequestException(MESSAGES_CONSTANT.CARD.UPDATE_CARD.INVALID_TYPE);
     }
-    const data = await this.cardRepository.update({ id }, updateCardDto);
-    this.sseService.emitCardChangeEvent(userId, { message: 'update card' });
+    await this.cardRepository.update({ id }, updateCardDto);
+
+    const data = await this.cardRepository.findOne({ where: { id } });
+    const cardAssignees = await this.cardAssignessRepository.find({ where: { cardId: id }, select: { userId: true } });
+    for (let i = 0; i < cardAssignees.length; i++) {
+      const assigneeId = cardAssignees[i].userId;
+      const key = `${assigneeId}`;
+      const existedData = await this.redisService.get(key);
+      const currentData = _.isNil(existedData) ? [] : existedData;
+
+      currentData.push(data);
+      await this.redisService.set(key, currentData);
+      this.sseService.emitCardChangeEvent(assigneeId, { message: MESSAGES_CONSTANT.CARD.UPDATE_CARD.SSE_UPDATE_CARD });
+    }
+
     return data;
   }
 
@@ -107,8 +136,8 @@ export class CardsService {
         boardId: listInfo.boardId,
       },
     });
-    if (_.isNil(verifyMemberbyId)) {
-      throw new NotFoundException('borad에 존재하지 않는 멤버입니다.');
+    if (verifyMemberbyId.length === 0) {
+      throw new NotFoundException(MESSAGES_CONSTANT.CARD.CREATE_MEMBER_CARD.NOT_FOUND);
     }
 
     const verifyCardMemberbyId = await this.cardAssignessRepository.find({
@@ -118,7 +147,7 @@ export class CardsService {
       },
     });
     if (verifyCardMemberbyId.length !== 0) {
-      throw new NotFoundException('card에 이미 존재하는 멤버입니다.');
+      throw new NotFoundException(MESSAGES_CONSTANT.CARD.CREATE_MEMBER_CARD.EXISTED_MEMBER);
     }
 
     const createMember = await this.cardAssignessRepository.save({
@@ -138,8 +167,8 @@ export class CardsService {
         boardId: listInfo.boardId,
       },
     });
-    if (_.isNil(verifyMemberbyId)) {
-      throw new NotFoundException('borad에 존재하지 않는 멤버입니다.');
+    if (verifyMemberbyId.length === 0) {
+      throw new NotFoundException(MESSAGES_CONSTANT.CARD.DELETE_MEMBER_CARD.NOT_FOUND);
     }
 
     const verifyCardMemberbyId = await this.cardAssignessRepository.find({
@@ -149,7 +178,7 @@ export class CardsService {
       },
     });
     if (verifyCardMemberbyId.length === 0) {
-      throw new NotFoundException('card에 존재하지 않는 멤버입니다.');
+      throw new NotFoundException(MESSAGES_CONSTANT.CARD.DELETE_MEMBER_CARD.NOT_FOUND_IN_CARD);
     }
 
     const deleteMember = await this.cardAssignessRepository.delete({
@@ -166,7 +195,7 @@ export class CardsService {
     await this.verifyCardById(id);
 
     if (!(updateCardDto instanceof UpdateCardDto)) {
-      throw new BadRequestException('Invalid updateCardDto');
+      throw new BadRequestException(MESSAGES_CONSTANT.CARD.UPDATE_DATE_CARD.INVALID_TYPE);
     }
 
     return await this.cardRepository.update(
@@ -186,7 +215,7 @@ export class CardsService {
     if (cardInfo.dueDate) {
       cardDate = new Date(cardInfo.dueDate);
     } else {
-      throw new BadRequestException('일정이 지정되지 않았습니다.');
+      throw new BadRequestException(MESSAGES_CONSTANT.CARD.UPDATE_DATE_EXPIRE_CARD.BAD_REQUEST);
     }
     const today = new Date();
 
@@ -197,6 +226,18 @@ export class CardsService {
     } else {
       return false;
     }
+  }
+  
+  @Cron('0 0 * * * *')
+  async updateDateExpire_ver2(){
+    console.log("-----------마감 확인 작업 시작-----------");
+    const today = new Date();
+    const updateCardQuery = this.cardRepository.createQueryBuilder('card')
+    .update(Card)
+    .set({ isExpired: true })
+    .where('dueDate < :date AND isExpired = false', { date: new Date() });
+
+    return await updateCardQuery.execute();
   }
 
   async updateCardList(id: number, listId: number) {
@@ -211,16 +252,16 @@ export class CardsService {
       where: { id: listId },
     });
     if (!existingList) {
-      throw new BadRequestException('없는 리스트입니다.');
+      throw new NotFoundException(MESSAGES_CONSTANT.CARD.UPDATE_LIST_CARD.NOT_FOUND);
     }
 
     if (existingList.boardId !== listBoardId.boardId) {
-      throw new BadRequestException('서로 다른 보드입니다.');
+      throw new BadRequestException(MESSAGES_CONSTANT.CARD.UPDATE_LIST_CARD.BAD_REQUEST);
     }
     const lastCard = await this.cardRepository.findOne({
       where: { listId },
       select: ['position'],
-      order: { position: 'DESC' },
+      order: { position: CARDS_CONSTANT.ORDER.DESC },
     });
 
     const newPosition = +lastCard
@@ -242,7 +283,7 @@ export class CardsService {
   async verifyCardById(id: number) {
     const card = await this.cardRepository.findOneBy({ id });
     if (_.isNil(card)) {
-      throw new NotFoundException('존재하지 않는 카드입니다.');
+      throw new NotFoundException(MESSAGES_CONSTANT.CARD.VERIFY_CARD_BY_ID.NOT_FOUND);
     }
 
     return card;
@@ -253,12 +294,7 @@ export class CardsService {
     const { position } = updateCardOrderDto;
     return await this.dataSource.transaction(async (transactionalEntityManager: EntityManager) => {
       // 카드id를 받아 카드 정보를 가져오기
-      const cardToUpdateOrder = await transactionalEntityManager.findOne(Card, {
-        where: { id },
-      });
-      if (!cardToUpdateOrder) {
-        throw new NotFoundException('카드를 찾을 수 없습니다.');
-      }
+      const cardToUpdateOrder = await this.verifyCardById(id);
       //카드 리스트 아이디
       const cardListId = cardToUpdateOrder.listId;
       //카드의 리스트 정보
@@ -272,7 +308,7 @@ export class CardsService {
       const userBoardId = boardMember.boardId;
 
       if (listBoardId !== userBoardId) {
-        throw new ForbiddenException('보드에 가입된 유저가 아닙니다.');
+        throw new ForbiddenException(MESSAGES_CONSTANT.CARD.UPDATE_ORDER.FORBIDDEN);
       }
 
       // 카드가 속한 리스트의 정보를 가져오기
@@ -281,7 +317,7 @@ export class CardsService {
         relations: ['cards'],
       });
       if (!list) {
-        throw new NotFoundException('리스트를 찾을 수 없습니다.');
+        throw new NotFoundException(MESSAGES_CONSTANT.CARD.UPDATE_ORDER.NOT_FOUND);
       }
       // 리스트의 모든 카드들을 가져오기
       const cardsInlist = list.cards;
@@ -289,9 +325,8 @@ export class CardsService {
 
       const cardArrayLangth = cardsInlist.length;
       if (position + 1 >= cardArrayLangth) {
-        throw new BadRequestException('옮길 수 있는 위치가 아닙니다.');
+        throw new BadRequestException(MESSAGES_CONSTANT.CARD.UPDATE_ORDER.BAD_REQUEST);
       }
-      console.log('cardArrayLangth', cardArrayLangth);
       // 바꾸려는 위치의 리스트의 position값
       const targetPosition = cardsInlist[position].position;
       // 바꾸는 위치 이전 포지션 값

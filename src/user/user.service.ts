@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import _ from 'lodash';
 import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
-import { SseService } from 'src/sse/sse.service';
 import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
@@ -12,7 +11,6 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly sseService: SseService,
     private readonly redisService: RedisService
   ) {}
 
@@ -25,19 +23,14 @@ export class UserService {
 
     return user;
   }
-  // 알림 테스트
-  async createComment(user) {
-    const key = '1';
-    const existedData = await this.redisService.get(key);
-    const data = _.isNil(existedData) ? [] : existedData;
 
-    data.push(user);
-    await this.redisService.set(key, data);
-    this.sseService.emitCardChangeEvent(user.id, user.data);
-  }
-  async getComment() {
-    const data = await this.redisService.get('1');
-
+  async getNotification(userId: number) {
+    const data = await this.redisService.get(`${userId}`);
     return data;
+  }
+
+  async deleteNotification(userId: number) {
+    await this.redisService.set(`${userId}`, []);
+    return;
   }
 }

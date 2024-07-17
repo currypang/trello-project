@@ -10,14 +10,12 @@ export class SseService {
   // 이벤트 발생 함수
   emitCardChangeEvent(userId: number, data) {
     // next를 통해 이벤트를 생성
-    console.log('emitCardChangeEvent', userId);
     this.users$.next({ id: userId, data });
   }
 
   // 이벤트 연결
   sendClientAlarm(userId: number): Observable<any> {
     // 이벤트 발생시 처리 로직
-    console.log('sendClientAlarm');
     return this.observer.pipe(
       // 유저 필터링
       filter((user) => user.id === userId),

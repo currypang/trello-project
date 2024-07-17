@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import nodemailer from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
+import { MESSAGES_CONSTANT } from 'src/constants/messages.constants';
 import { User } from 'src/user/entities/user.entity';
 import { Role } from 'src/user/types/roles.type';
 import { Repository } from 'typeorm';
@@ -40,7 +41,7 @@ export class EmailService {
   async sendMemberJoinVerification(emailAddress: string, userId: number) {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (user.email !== emailAddress) {
-      throw new BadRequestException('가입하신 이메일이 아닙니다.');
+      throw new BadRequestException(MESSAGES_CONSTANT.AUTH.SEND_EMAIL.BAD_REQUEST);
     }
 
     const baseUrl = this.configService.get('MAIL_BASE_URL');

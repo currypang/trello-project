@@ -15,6 +15,7 @@ import { EmailModule } from './email/email.module';
 import { InvitationModule } from './invitation/invitation.module';
 import { SseModule } from './sse/sse.module';
 import { RedisModule } from './redis/redis.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { RedisModule } from './redis/redis.module';
     InvitationModule,
     SseModule,
     RedisModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],
