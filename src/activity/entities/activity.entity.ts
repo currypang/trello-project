@@ -8,7 +8,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Card } from '../../cards/entities/card.entity';
 import { BoardMembers } from '../../board/entities/board-member.entity';
 
@@ -17,9 +17,11 @@ export class Activity {
   @PrimaryGeneratedColumn({ unsigned: true })
   id: number;
 
+  @IsOptional()
   @Column({ unsigned: true })
   userId: number;
 
+  @IsOptional()
   @Column({ unsigned: true })
   cardId: number;
 
@@ -37,6 +39,7 @@ export class Activity {
   @DeleteDateColumn()
   deletedAt?: Date;
 
+  @IsOptional()
   @Column({ type: 'boolean' })
   isLog: boolean;
 

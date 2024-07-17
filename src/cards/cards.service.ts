@@ -12,7 +12,6 @@ import { List } from '../lists/entities/list.entity';
 import { BoardMembers } from 'src/board/entities/board-member.entity';
 import { SseService } from 'src/sse/sse.service';
 import Decimal from 'decimal.js';
-import { idText } from 'typescript';
 import { UpdateCardOrderDto } from './dto/update-card-order.dto';
 
 @Injectable()
