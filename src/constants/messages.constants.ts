@@ -104,11 +104,11 @@ export const MESSAGES_CONSTANT = {
     },
     UPDATE_BOARD: {
       SUCCEED: '보드 수정에 성공했습니다',
-      NOT_FOUND: '존재하지 않는 보드입니다.',
+      NOT_FOUND: '존재하지 않거나 권한이 없는 보드입니다.',
     },
     DELETE_BOARD: {
       SUCCEED: '보드 삭제에 성공했습니다',
-      NOT_FOUND: '존재하지 않는 보드입니다.',
+      NOT_FOUND: '존재하지 않거나 권한이 없는 보드입니다.',
     },
     SEND_EMAIL: {
       SUCCEED: '이메일로 인증링크를 보냈습니다.',
@@ -184,10 +184,12 @@ export const MESSAGES_CONSTANT = {
       SUCCEED: '카드가 (리스트)이동 되었습니다',
       NOT_FOUND: '없는 리스트입니다.',
       BAD_REQUEST: '서로 다른 보드입니다.',
+      BAD_LOCATION: '옮길 수 있는 위치가 아닙니다.',
     },
     UPDATE_ORDER: {
-      FORBIDDEN: '보드에 가입된 유저가 아닙니다.',
+      NOT_FOUND_USER: '보드에 가입된 유저가 아닙니다.',
       NOT_FOUND: '리스트를 찾을 수 없습니다.',
+      NOT_FOUND_CARD: '카드를 찾을 수 없습니다.',
       BAD_REQUEST: '옮길 수 있는 위치가 아닙니다.',
     },
     VERIFY_CARD_BY_ID: {
