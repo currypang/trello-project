@@ -2,7 +2,7 @@ import { DataSource, DeepPartial, EntityManager, Repository } from 'typeorm';
 import _ from 'lodash';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 
@@ -292,7 +292,7 @@ export class CardsService {
       console.log('targetArrayLangth', targetArrayLangth);
 
       if (position + 1 >= targetArrayLangth) {
-        throw new BadRequestException('옮길 수 있는 위치가 아닙니다.');
+        throw new BadRequestException(MESSAGES_CONSTANT.CARD.UPDATE_LIST_CARD.BAD_LOCATION);
       }
       // 바꾸려는 위치의 리스트의 position값
       const targetPosition = targetInCards[position].position;
@@ -341,7 +341,7 @@ export class CardsService {
         where: { id },
       });
       if (!cardToUpdateOrder) {
-        throw new NotFoundException('카드를 찾을 수 없습니다.');
+        throw new NotFoundException(MESSAGES_CONSTANT.CARD.UPDATE_ORDER.NOT_FOUND_CARD);
       }
       //카드 리스트 아이디
       const cardListId = cardToUpdateOrder.listId;
@@ -353,11 +353,13 @@ export class CardsService {
 
       //카드 보드 아이디
       const listBoardId = listInfo.boardId;
+      console.log(listBoardId);
+      const validMember = await transactionalEntityManager.findOne(BoardMembers, {
+        where: { boardId: listBoardId, userId },
+      });
 
-      const boardMember = await transactionalEntityManager.findOne(BoardMembers, { where: { userId } });
-      const userBoardId = boardMember.boardId;
-      if (listBoardId !== userBoardId) {
-        throw new ForbiddenException('보드에 가입된 유저가 아닙니다.');
+      if (_.isNil(validMember)) {
+        throw new NotFoundException(MESSAGES_CONSTANT.CARD.UPDATE_ORDER.NOT_FOUND_USER);
       }
       // 카드가 속한 리스트의 정보를 가져오기
       const list = await transactionalEntityManager.findOne(List, {
@@ -365,14 +367,14 @@ export class CardsService {
         relations: ['cards'],
       });
       if (!list) {
-        throw new NotFoundException('리스트를 찾을 수 없습니다.');
+        throw new NotFoundException(MESSAGES_CONSTANT.CARD.UPDATE_ORDER.NOT_FOUND);
       }
       // 리스트의 모든 카드들을 가져오기
       const cardsInlist = list.cards;
       cardsInlist.sort((a: Card, b: Card): number => a.position - b.position);
       const cardArrayLangth = cardsInlist.length;
       if (position + 1 >= cardArrayLangth) {
-        throw new BadRequestException('옮길 수 있는 위치가 아닙니다.');
+        throw new BadRequestException(MESSAGES_CONSTANT.CARD.UPDATE_ORDER.BAD_REQUEST);
       }
       console.log('cardArrayLangth', cardArrayLangth);
       // 바꾸려는 위치의 리스트의 position값
